@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Root CSS Variables ─────────────────────────────────────────────────── */
+:root {
+  --theme-accent: #10b981;
+  --theme-accent-border: rgba(16, 185, 129, 0.4);
+  --theme-accent-dim: rgba(16, 185, 129, 0.15);
+  --theme-violet: #8b5cf6;
+  --theme-violet-border: rgba(139, 92, 246, 0.4);
+  --theme-violet-dim: rgba(139, 92, 246, 0.15);
+  --theme-bg: #050505;
+  --theme-surface: #121212;
+  --theme-border: #2a2a2a;
+  --theme-text: #f5f5f5;
+  --theme-muted: #6b7280;
+  --theme-danger: #ef4444;
+  --theme-success: #00e676;
+  --theme-fee: #ff4d4d;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+body {
+  background-color: #050505;
+  color: #f5f5f5;
+  font-family: var(--font-space-grotesk, 'Inter'), 'Inter', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
+}
+
+/* ── Custom Scrollbar ───────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* ── Utility Classes ────────────────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(18, 18, 18, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+  background: rgba(18, 18, 18, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+.glow-accent {
+  box-shadow: 0 0 20px var(--theme-accent-dim);
+}
+
+.glow-violet {
+  box-shadow: 0 0 20px var(--theme-violet-dim);
+}
+
+/* ── Modal Backdrop ─────────────────────────────────────────────────────── */
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-enter {
+  animation: popupEnter 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── Keyframe Animations ────────────────────────────────────────────────── */
+@keyframes popupEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px var(--theme-accent-dim); }
+  50% { box-shadow: 0 0 24px var(--theme-accent-border); }
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.5s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Skeleton Loading ───────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+/* HeroUI-style dApp tiles — logo-only, no chrome box */
+.dapp-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 6px 10px;
+  border-radius: 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.dapp-tile:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+.dapp-tile img {
+  transition: transform 0.2s ease;
+}
+.dapp-tile:hover img {
+  transform: scale(1.12);
+}

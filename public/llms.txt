@@ -1,0 +1,14 @@
+# ABD Wallet
+
+> ABD Wallet is a free, anonymous, temporary crypto wallet (temp wallet) for all EVM-compatible blockchains. No signup, no KYC, no tracking. Your private keys never leave your browser.
+## Privacy & Security
+
+- Keys generated entirely in-browser using ethers.js
+- Private keys are never transmitted to any server
+- All encryption happens locally (AES-256 via CryptoJS)
+- Automatic key rotation every 60 seconds
+- Wipes all data on tab close (unless persistence enabled)
+
+## URL
+
+https://abdwallet.app

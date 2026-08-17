@@ -6,6 +6,7 @@ import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import * as bitcoin from 'bitcoinjs-lib';
 import ECPairFactory from 'ecpair';
+import { zeroFill } from './crypto';
 
 let bip32: ReturnType<typeof BIP32Factory>;
 let ECPair: ReturnType<typeof ECPairFactory>;
@@ -61,6 +62,7 @@ export function deriveLTCWallet(mnemonic: string): LTCWallet {
   const seed = bip39.mnemonicToSeedSync(mnemonic.trim());
   const root = bip32.fromSeed(seed, LITECOIN);
   const child = root.derivePath("m/44'/2'/0'/0/0");
+  zeroFill(seed);
   if (!child.privateKey) throw new Error('LTC derivation failed');
 
   const pubKey = child.publicKey;
@@ -81,21 +83,21 @@ export function deriveLTCWallet(mnemonic: string): LTCWallet {
 }
 
 export async function getLTCBalance(address: string): Promise<LTCBalance> {
-  const res = await fetch(`${BITCORE}/address/${address}/balance`);
-  if (!res.ok) throw new Error(`bitcore.io error: ${res.status}`);
+  const res = await fetch(`https://litecoinspace.org/api/address/${address}`);
+  if (!res.ok) throw new Error(`litecoinspace error: ${res.status}`);
   const json = await res.json();
-  const confirmed = (json.confirmed ?? 0) / SATOSHI;
-  const unconfirmed = (json.unconfirmed ?? 0) / SATOSHI;
-  return { confirmed, unconfirmed, total: (json.balance ?? 0) / SATOSHI };
+  const confirmed = (json.chain_stats.funded_txo_sum - json.chain_stats.spent_txo_sum) / SATOSHI;
+  const unconfirmed = (json.mempool_stats.funded_txo_sum - json.mempool_stats.spent_txo_sum) / SATOSHI;
+  return { confirmed, unconfirmed, total: confirmed + unconfirmed };
 }
 
 export async function getLTCUTXOs(address: string): Promise<LTCUTXO[]> {
-  const res = await fetch(`${BITCORE}/address/${address}?unspent=true&limit=100`);
-  if (!res.ok) throw new Error(`bitcore.io UTXO error: ${res.status}`);
+  const res = await fetch(`https://litecoinspace.org/api/address/${address}/utxo`);
+  if (!res.ok) throw new Error(`litecoinspace UTXO error: ${res.status}`);
   const utxos = await res.json() as Array<Record<string, unknown>>;
   return utxos.map((u) => ({
-    txid: u.mintTxid as string,
-    vout: u.mintIndex as number,
+    txid: u.txid as string,
+    vout: u.vout as number,
     value: u.value as number,
   }));
 }
@@ -104,15 +106,27 @@ export async function getLTCTransactions(
   address: string,
   limit = 20
 ): Promise<LTCTransaction[]> {
-  const res = await fetch(`${BITCORE}/address/${address}/txs?limit=${limit}`);
-  if (!res.ok) throw new Error(`bitcore.io tx error: ${res.status}`);
+  const res = await fetch(`https://litecoinspace.org/api/address/${address}/txs`);
+  if (!res.ok) throw new Error(`litecoinspace tx error: ${res.status}`);
   const txs = await res.json() as Array<Record<string, unknown>>;
-  return txs.slice(0, limit).map((tx) => ({
-    txid: tx.txid as string,
-    amount: ((tx.value as number) ?? 0) / SATOSHI,
-    confirmations: (tx.confirmations as number) ?? 0,
-    timestamp: tx.blockTimeNormalized ? new Date(tx.blockTimeNormalized as string).getTime() / 1000 : 0,
-  }));
+  return txs.slice(0, limit).map((tx) => {
+    let value = 0;
+    // Calculate net value for this address
+    const vin = (tx.vin as any[]) || [];
+    const vout = (tx.vout as any[]) || [];
+    for (const i of vin) {
+      if (i.prevout && i.prevout.scriptpubkey_address === address) value -= i.prevout.value;
+    }
+    for (const o of vout) {
+      if (o.scriptpubkey_address === address) value += o.value;
+    }
+    return {
+      txid: tx.txid as string,
+      amount: value / SATOSHI,
+      confirmations: (tx.status as any)?.confirmed ? 1 : 0,
+      timestamp: ((tx.status as any)?.block_time ?? 0),
+    };
+  });
 }
 
 export async function estimateLTCFee(): Promise<{ slow: number; medium: number; fast: number }> {
@@ -174,13 +188,21 @@ export async function buildLTCTransaction(opts: {
     psbt.addOutput({ address: from.address, value: change });
   }
 
-  const keyPair = ECPair.fromWIF(from.privateKeyWIF, LITECOIN);
-  for (let i = 0; i < usedUtxos.length; i++) {
-    psbt.signInput(i, keyPair as unknown as bitcoin.Signer);
-  }
-  psbt.finalizeAllInputs();
+  let keyPair: bitcoin.Signer | null = null;
+  try {
+    keyPair = ECPair.fromWIF(from.privateKeyWIF, LITECOIN) as unknown as bitcoin.Signer;
+    for (let i = 0; i < usedUtxos.length; i++) {
+      psbt.signInput(i, keyPair);
+    }
+    psbt.finalizeAllInputs();
 
-  return { hex: psbt.extractTransaction().toHex(), fee: feeSats / SATOSHI };
+    return { hex: psbt.extractTransaction().toHex(), fee: feeSats / SATOSHI };
+  } finally {
+    if (keyPair && (keyPair as any).privateKey) {
+      zeroFill((keyPair as any).privateKey);
+    }
+    keyPair = null;
+  }
 }
 
 export async function broadcastLTC(hex: string): Promise<string> {

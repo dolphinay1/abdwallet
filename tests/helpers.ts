@@ -38,27 +38,38 @@ export const SEL = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-export async function waitForWallet(page: Page, timeout = 12000) {
-  await page.waitForFunction(
-    () => {
-      const raw = localStorage.getItem('__cw_wallet_history__');
+export async function waitForWallet(page: Page, timeout = 20000) {
+  // Fresh contexts start on the Auth screen — create an ephemeral wallet first.
+  // Retry the click: the first one can land before React hydration attaches handlers.
+  const deadline = Date.now() + timeout;
+  for (;;) {
+    const ready = await page.evaluate(() => {
+      const raw = localStorage.getItem('__gw_wallet_history__');
       const h = raw ? JSON.parse(raw) : [];
-      return h.length > 0 && h[0].address;
-    },
-    { timeout }
-  );
+      return h.length > 0 && !!h[0].address;
+    }).catch(() => false);
+    if (ready) return;
+    if (Date.now() > deadline) break;
+
+    const createBtn = page.getByRole('button', { name: /create new wallet/i });
+    if (await createBtn.isVisible().catch(() => false)) {
+      await createBtn.click({ force: true }).catch(() => {});
+    }
+    await page.waitForTimeout(2000);
+  }
+  throw new Error('Ephemeral wallet was not created within timeout');
 }
 
 export async function getHistory(page: Page) {
   return page.evaluate(() => {
-    const raw = localStorage.getItem('__cw_wallet_history__');
+    const raw = localStorage.getItem('__gw_wallet_history__');
     return raw ? JSON.parse(raw) : [];
   });
 }
 
 export async function getVaultKeys(page: Page): Promise<string[]> {
   return page.evaluate(() =>
-    Object.keys(localStorage).filter(k => k.startsWith('__cw_vault_'))
+    Object.keys(localStorage).filter(k => k.startsWith('__gw_vault_'))
   );
 }
 

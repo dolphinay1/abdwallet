@@ -1,8 +1,7 @@
 'use client';
-// Adapted from TempWallets/temp-wallets-website
+// Adapted from TempWallets/temp-wallets-website — light neumorphic ambience
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface AuroraBackgroundProps {
   children: React.ReactNode;
@@ -14,7 +13,7 @@ export function AuroraBackground({ children, showRadialGradient = true, classNam
   return (
     <div
       className={className}
-      style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#000', color: '#fff', overflow: 'hidden' }}
+      style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#e4e6ee', color: '#23262b', overflow: 'hidden' }}
     >
       <div
         style={{
@@ -28,36 +27,23 @@ export function AuroraBackground({ children, showRadialGradient = true, classNam
         <div
           style={{
             backgroundImage: [
-              'repeating-linear-gradient(100deg, #000 0%, #000 7%, transparent 10%, transparent 12%, #000 16%)',
-              'repeating-linear-gradient(100deg, #1a0533 10%, #2d1b4e 15%, #0d1b3e 20%, #1a0533 25%, #2d1b4e 30%)',
+              'radial-gradient(ellipse at 15% 0%, rgba(255, 255, 255, 0.85) 0%, transparent 55%)',
+              'radial-gradient(ellipse at 90% 100%, rgba(166, 177, 198, 0.35) 0%, transparent 60%)',
             ].join(', '),
-            backgroundSize: '300% 200%',
-            backgroundPosition: '50% 50%, 50% 50%',
-            filter: 'blur(8px) invert(0)',
             maskImage: showRadialGradient
-              ? 'radial-gradient(ellipse at 100% 0%, black 40%, transparent 70%)'
+              ? 'radial-gradient(ellipse at 50% 50%, black 55%, transparent 100%)'
               : undefined,
             WebkitMaskImage: showRadialGradient
-              ? 'radial-gradient(ellipse at 100% 0%, black 40%, transparent 70%)'
+              ? 'radial-gradient(ellipse at 50% 50%, black 55%, transparent 100%)'
               : undefined,
-            opacity: 0.5,
             position: 'absolute',
-            inset: '-10px',
-            willChange: 'transform',
-            animation: 'aurora 60s linear infinite',
+            inset: 0,
           }}
         />
       </div>
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
         {children}
       </div>
-      <style>{`
-        @keyframes aurora {
-          0%   { background-position: 50% 50%, 50% 50%; }
-          50%  { background-position: 350% 50%, 350% 50%; }
-          100% { background-position: 50% 50%, 50% 50%; }
-        }
-      `}</style>
     </div>
   );
 }

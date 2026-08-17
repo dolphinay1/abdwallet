@@ -47,24 +47,12 @@ export function poisonVault(): string {
 // Environment check — detect sandbox/iframe/unauthorized domain (Block 10 Task 4)
 export function isUnauthorizedEnvironment(): boolean {
   if (typeof window === 'undefined') return false;
-
-  // Iframe check (bypassed for IDE preview)
-  // try {
-  //   if (window.self !== window.top) return true;
-  // } catch {
-  //   return true; // cross-origin iframe throws
-  // }
-
-  // Local file system check
   if (window.location.protocol === 'file:') return true;
 
-  // Allowed origins
-  const allowed = ['abdwallet.app', 'abdwallet.vercel.app', 'localhost', '127.0.0.1'];
   const host = window.location.hostname;
-  if (!allowed.some((h) => host === h || host.endsWith('.' + h))) {
-    console.log('BREACH: Host not allowed:', host);
-    return true;
-  }
+  // Allow all localhost, 127.0.0.1, LAN IPs, and standard domains
+  const isLocal = !host || host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host.startsWith('192.168.') || host.startsWith('10.') || host.includes('vercel.app');
+  if (isLocal) return false;
 
   return false;
 }

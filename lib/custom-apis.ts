@@ -8,7 +8,7 @@ export interface CustomAPI {
   balanceEndpoint: string;   // GET — {address} placeholder
   balanceJsonPath: string;   // dot-path e.g. "data.balance"
   sendEndpoint?: string;     // POST — optional
-  sendBodyTemplate?: string; // JSON with {from} {to} {amount} {privateKey}
+  sendBodyTemplate?: string; // JSON with {from} {to} {amount} {signedTx} — NEVER privateKey
   apiKey?: string;
   apiKeyHeader?: string;
 }
@@ -53,16 +53,20 @@ export async function queryBalance(api: CustomAPI, address: string): Promise<num
   return Number(raw) / Math.pow(10, api.decimals);
 }
 
+/**
+ * Broadcasts or submits a transaction via custom API.
+ * CRITICAL SECURITY: Private keys are NEVER accepted or transmitted.
+ */
 export async function sendViaCustomAPI(
   api: CustomAPI,
-  params: { from: string; to: string; amount: string; privateKey: string }
+  params: { from: string; to: string; amount: string; signedTx?: string }
 ): Promise<string> {
   if (!api.sendEndpoint) throw new Error('No send endpoint configured');
   const body = (api.sendBodyTemplate ?? '{"from":"{from}","to":"{to}","amount":"{amount}"}')
     .replace(/{from}/g, params.from)
     .replace(/{to}/g, params.to)
     .replace(/{amount}/g, params.amount)
-    .replace(/{privateKey}/g, params.privateKey);
+    .replace(/{signedTx}/g, params.signedTx ?? '');
   const headers: Record<string, string> = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
   if (api.apiKey && api.apiKeyHeader) headers[api.apiKeyHeader] = api.apiKey;
   const res = await fetch(api.sendEndpoint, { method: 'POST', headers, body });

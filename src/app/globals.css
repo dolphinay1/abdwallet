@@ -2,36 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Root CSS Variables ─────────────────────────────────────────────────── */
+/* ── Root CSS Variables — Light Neumorphism (monochrome) ────────────────── */
 :root {
-  --theme-accent: #10b981;
-  --theme-accent-border: rgba(16, 185, 129, 0.4);
-  --theme-accent-dim: rgba(16, 185, 129, 0.15);
-  --theme-violet: #8b5cf6;
-  --theme-violet-border: rgba(139, 92, 246, 0.4);
-  --theme-violet-dim: rgba(139, 92, 246, 0.15);
-  --theme-bg: #050505;
-  --theme-surface: #121212;
-  --theme-border: #2a2a2a;
-  --theme-text: #f5f5f5;
-  --theme-muted: #6b7280;
-  --theme-danger: #ef4444;
-  --theme-success: #00e676;
-  --theme-fee: #ff4d4d;
+  --neu-bg: #e4e6ee;
+  --neu-text: #23262b;
+  --neu-muted: #8a8f98;
+  --neu-charcoal: #2b2d33;
+  --neu-danger: #b91c1c;
+  --neu-shadow-dark: rgba(166, 177, 198, 0.55);
+  --neu-shadow-light: rgba(255, 255, 255, 0.9);
+
+  /* Legacy aliases remapped to the monochrome light palette */
+  --theme-accent: #2b2d33;
+  --theme-accent-border: rgba(43, 45, 51, 0.4);
+  --theme-accent-dim: rgba(43, 45, 51, 0.12);
+  --theme-violet: #8a8f98;
+  --theme-violet-border: rgba(138, 143, 152, 0.4);
+  --theme-violet-dim: rgba(138, 143, 152, 0.15);
+  --theme-bg: #e4e6ee;
+  --theme-surface: #e4e6ee;
+  --theme-border: #c9ced9;
+  --theme-text: #23262b;
+  --theme-muted: #8a8f98;
+  --theme-danger: #b91c1c;
+  --theme-success: #23262b;
+  --theme-fee: #b91c1c;
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────── */
 body {
-  background-color: #050505;
-  color: #f5f5f5;
+  background-color: #e4e6ee;
+  color: #23262b;
   font-family: var(--font-space-grotesk, 'Inter'), 'Inter', sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.011em;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
-/* ── Custom Scrollbar ───────────────────────────────────────────────────── */
+button, a, input, select {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ── Custom Scrollbar (light) ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -39,44 +55,189 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #c3c8d4;
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #aab1c0;
 }
 
-/* ── Utility Classes ────────────────────────────────────────────────────── */
+/* ── Neumorphic Utilities ───────────────────────────────────────────────── */
+.neu-card {
+  background: var(--neu-bg);
+  border-radius: 28px;
+  box-shadow: 9px 9px 18px var(--neu-shadow-dark), -9px -9px 18px var(--neu-shadow-light);
+}
+
+.neu-card-sm {
+  background: var(--neu-bg);
+  border-radius: 20px;
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
+}
+
+.neu-inset {
+  background: var(--neu-bg);
+  border-radius: 16px;
+  box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+}
+
+.neu-pill-inset {
+  background: var(--neu-bg);
+  border-radius: 9999px;
+  box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+}
+
+.neu-btn {
+  background: var(--neu-bg);
+  border-radius: 9999px;
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.neu-btn:active {
+  box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+  transform: scale(0.98);
+}
+
+.neu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neu-bg);
+  border-radius: 9999px;
+  box-shadow: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light);
+}
+
+.neu-icon-inset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--neu-bg);
+  border-radius: 9999px;
+  box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light);
+}
+
+/* ── Desktop Hero Neumorphic Elements ────────────────────────────────────── */
+.neu-btn-dark {
+  background: linear-gradient(145deg, #28303f, #1f2532);
+  box-shadow: 
+    0 8px 20px rgba(26, 32, 44, 0.35),
+    -3px -3px 8px rgba(255, 255, 255, 0.5),
+    3px 3px 8px rgba(180, 192, 212, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+.neu-btn-dark:hover {
+  background: linear-gradient(145deg, #2e3748, #222937);
+  box-shadow: 
+    0 10px 24px rgba(26, 32, 44, 0.45),
+    -4px -4px 10px rgba(255, 255, 255, 0.55),
+    4px 4px 10px rgba(180, 192, 212, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+.neu-btn-dark:active {
+  background: linear-gradient(145deg, #1b202c, #232936);
+  box-shadow: 
+    inset 2px 2px 6px rgba(0, 0, 0, 0.6),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.05);
+}
+
+.neu-btn-light {
+  background: linear-gradient(145deg, #f5f8fd, #eaf0f7);
+  box-shadow: 
+    -5px -5px 12px rgba(255, 255, 255, 0.95),
+    6px 6px 14px rgba(184, 195, 214, 0.65),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+.neu-btn-light:hover {
+  background: linear-gradient(145deg, #ffffff, #edf2f9);
+  box-shadow: 
+    -6px -6px 14px rgba(255, 255, 255, 1),
+    7px 7px 16px rgba(180, 192, 212, 0.7);
+}
+.neu-btn-light:active {
+  background: #e9eff7;
+  box-shadow: 
+    inset 3px 3px 6px rgba(180, 192, 212, 0.6),
+    inset -3px -3px 6px rgba(255, 255, 255, 0.85);
+}
+
+.neu-well {
+  background: #ebf0f7;
+  box-shadow: 
+    inset 4px 4px 9px rgba(175, 187, 206, 0.7),
+    inset -4px -4px 9px rgba(255, 255, 255, 0.95);
+}
+
+.neu-disc-outer {
+  background: linear-gradient(145deg, #f7faff, #eaf0f8);
+  box-shadow: 
+    -8px -8px 18px rgba(255, 255, 255, 0.95),
+    9px 9px 20px rgba(178, 191, 212, 0.7),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.neu-disc-inner {
+  background: linear-gradient(145deg, #f2f5fb, #ebf0f7);
+  box-shadow: 
+    inset 2px 2px 4px rgba(255, 255, 255, 0.9),
+    inset -2px -2px 4px rgba(180, 192, 212, 0.4);
+}
+
+@keyframes scan-line {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-scan-line {
+  animation: scan-line 1.8s ease-in-out infinite;
+}
+
+/* ── Display / Label Fonts (Google Fonts, loaded in layout.tsx) ───────────── */
+.russo-one-regular {
+  font-family: "Russo One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Legacy classes remapped to neumorphic surfaces */
 .glass-panel {
-  background: rgba(18, 18, 18, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--neu-bg);
+  border-radius: 24px;
+  box-shadow: 9px 9px 18px var(--neu-shadow-dark), -9px -9px 18px var(--neu-shadow-light);
 }
 
 .glass-card {
-  background: rgba(18, 18, 18, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
+  background: var(--neu-bg);
+  border-radius: 20px;
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
 }
 
 .glow-accent {
-  box-shadow: 0 0 20px var(--theme-accent-dim);
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
 }
 
 .glow-violet {
-  box-shadow: 0 0 20px var(--theme-violet-dim);
+  box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light);
 }
 
-/* ── Modal Backdrop ─────────────────────────────────────────────────────── */
+/* ── Modal Backdrop (light) ─────────────────────────────────────────────── */
 .popup-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  background: rgba(228, 230, 238, 0.65);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
   z-index: 50;
   display: flex;
   align-items: center;
@@ -127,8 +288,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px var(--theme-accent-dim); }
-  50% { box-shadow: 0 0 24px var(--theme-accent-border); }
+  0%, 100% { box-shadow: 6px 6px 12px var(--neu-shadow-dark), -6px -6px 12px var(--neu-shadow-light); }
+  50% { box-shadow: 9px 9px 18px var(--neu-shadow-dark), -9px -9px 18px var(--neu-shadow-light); }
 }
 
 .animate-fade-in-down {
@@ -140,7 +301,7 @@ body {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.05) 50%, transparent 75%);
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.6) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -149,9 +310,9 @@ body {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* ── Skeleton Loading ───────────────────────────────────────────────────── */
+/* ── Skeleton Loading (light) ───────────────────────────────────────────── */
 .skeleton {
-  background: linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%);
+  background: linear-gradient(90deg, #d8dbe4 25%, #eef0f6 50%, #d8dbe4 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 6px;
@@ -169,7 +330,7 @@ body {
   transition: background 0.2s ease, transform 0.2s ease;
 }
 .dapp-tile:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(166, 177, 198, 0.18);
   transform: translateY(-2px);
 }
 .dapp-tile img {

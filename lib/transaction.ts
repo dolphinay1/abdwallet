@@ -133,13 +133,33 @@ export async function buildMaskedTransaction(
 ): Promise<ethers.TransactionRequest> {
   const provider = getProvider(chainId);
   const { maxFeePerGas, maxPriorityFeePerGas } = await getMaskedGasPrice(chainId);
-  const nonce = await provider.getTransactionCount(fromAddress, 'latest');
+  let nonce = 0;
+  try {
+    nonce = await provider.getTransactionCount(fromAddress, 'latest');
+  } catch {
+    nonce = 0;
+  }
   const jitter = BigInt(Math.floor(Math.random() * 100));
 
   if (tokenContract && tokenContract !== 'native') {
     // ERC-20 transfer
     const amountRaw = ethers.parseUnits(valueStr, tokenDecimals);
     const data = encodeErc20Transfer(to, amountRaw);
+    let gasLimit = 100000n;
+    try {
+      const estimated = await provider.send('eth_estimateGas', [{
+        from: fromAddress,
+        to: tokenContract,
+        value: '0x0',
+        data,
+      }]) as string;
+      const parsed = BigInt(estimated);
+      gasLimit = (parsed * 12n) / 10n;
+      if (gasLimit < 65000n) gasLimit = 65000n;
+    } catch {
+      gasLimit = 100000n;
+    }
+
     return {
       to: tokenContract,
       value: 0n,
@@ -147,7 +167,7 @@ export async function buildMaskedTransaction(
       maxFeePerGas: maxFeePerGas + jitter,
       maxPriorityFeePerGas: maxPriorityFeePerGas + jitter,
       nonce,
-      gasLimit: 100000n,  // ERC-20 needs more gas than native
+      gasLimit,
       type: 2,
       chainId,
       accessList: [],
@@ -155,13 +175,30 @@ export async function buildMaskedTransaction(
   }
 
   // Native transfer
+  let gasLimit = 21000n;
+  try {
+    const valHex = '0x' + (ethers.parseEther(valueStr || '0').toString(16) || '0');
+    const estimated = await provider.send('eth_estimateGas', [{
+      from: fromAddress,
+      to,
+      value: valHex,
+      data: '0x',
+    }]) as string;
+    const parsed = BigInt(estimated);
+    if (parsed > 21000n) {
+      gasLimit = (parsed * 12n) / 10n;
+    }
+  } catch {
+    gasLimit = 21000n;
+  }
+
   return {
     to,
-    value: ethers.parseEther(valueStr),
+    value: ethers.parseEther(valueStr || '0'),
     maxFeePerGas: maxFeePerGas + jitter,
     maxPriorityFeePerGas: maxPriorityFeePerGas + jitter,
     nonce,
-    gasLimit: 21000n,
+    gasLimit,
     type: 2,
     chainId,
     accessList: [],

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 import { ethers } from 'ethers';
+
+export const dynamic = 'force-dynamic';
 
 const ERC20_ABI = [
   'function allowance(address owner, address spender) view returns (uint256)',
@@ -11,6 +14,9 @@ const ERC20_ABI = [
  * Fetches ERC-20 token approvals for a given address.
  */
 export async function POST(req: Request) {
+  const limit = checkRateLimit(req, 60, 60_000);
+  if (!limit.allowed) return limit.response!;
+
   try {
     const body = await req.json();
     const { address, rpcUrl, tokenList = [] } = body;

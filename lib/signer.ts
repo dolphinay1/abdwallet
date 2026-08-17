@@ -18,7 +18,7 @@ export async function ephemeralSign(
     keyBytes = new Uint8Array(Buffer.from(hexKey.slice(2), 'hex'));
 
     // Strip 'from' — ethers v6 calls populateTransaction if 'from' is present
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     const { from: _from, ...cleanTx } = transaction as ethers.TransactionRequest & { from?: string };
 
     // Use Wallet without provider — signTransaction works offline for type-2 tx

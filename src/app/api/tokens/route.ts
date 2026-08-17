@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { ethers, Network } from 'ethers';
 import { resolveRpcUrl } from '@/lib/rpc-registry';
 import { getChainById } from '@/lib/chains';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+export const dynamic = 'force-dynamic';
 
 const ERC20_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
@@ -27,6 +30,8 @@ interface TokenEntry {
  * { address, rpcUrl, tokens } format. Returns TokenBalance[] directly.
  */
 export async function POST(req: Request) {
+  const limit = checkRateLimit(req, 120, 60_000);
+  if (!limit.allowed) return limit.response!;
   try {
     const body = await req.json();
     const { address, chainId, rpcUrl: explicitRpc, tokens = [] } = body;
@@ -41,13 +46,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unsupported chain / missing RPC' }, { status: 400 });
     }
 
-    // staticNetwork skips network detection — prevents infinite retry loops
-    // (which can kill the dev server) if the endpoint misbehaves.
-    const provider = new ethers.JsonRpcProvider(
-      rpcUrl,
-      chain ? Network.from(chain.id) : undefined,
-      { staticNetwork: true }
-    );
+    const net = ethers.Network.from(Number(chainId) || 1);
+    const provider = new ethers.JsonRpcProvider(rpcUrl, net, { staticNetwork: net, batchMaxCount: 1 });
     const result: TokenEntry[] = [];
 
     // Native balance

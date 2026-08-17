@@ -221,7 +221,8 @@ async function handleMessage(msg, _sender) {
     const { address } = await deriveWallet(mnemonic);
     vault.address = address;
     await saveVault(vault);
-    await setSession({ mnemonic, address, unlockedAt: Date.now() });
+    // Store only address + timestamp in session — mnemonic is decrypted per-request
+    await setSession({ address, unlockedAt: Date.now() });
     return { ok: true, address };
   }
 
@@ -233,7 +234,8 @@ async function handleMessage(msg, _sender) {
     try {
       const mnemonic = await decryptMnemonic(vault, passphrase);
       const { address } = await deriveWallet(mnemonic);
-      await setSession({ mnemonic, address, unlockedAt: Date.now() });
+      // Store only address + timestamp — mnemonic stays out of session storage
+      await setSession({ address, unlockedAt: Date.now() });
       return { ok: true, address };
     } catch {
       return { error: 'Wrong passphrase' };
@@ -269,7 +271,7 @@ async function handleMessage(msg, _sender) {
   if (type === 'CW_ETH_REQUEST_ACCOUNTS') {
     const session = await getSession();
     if (!session) {
-      chrome.action.setBadgeText({ text: '🔒' });
+      chrome.action.setBadgeText({ text: '●' });
       return { error: 'Locked — click the ABD Wallet icon to unlock' };
     }
     chrome.action.setBadgeText({ text: '' });

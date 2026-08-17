@@ -2,6 +2,7 @@
 // BIP44 m/44'/144'/0'/0/0 derivation from BIP39 mnemonic.
 
 import { Client, Wallet, dropsToXrp, xrpToDrops } from 'xrpl';
+import { zeroFill } from './crypto';
 
 const SERVER = 'wss://xrplcluster.com';
 
@@ -55,9 +56,10 @@ export async function getXRPBalance(address: string): Promise<XRPBalance> {
 
 export async function sendXRP(from: XRPWalletData, to: string, amountXRP: number): Promise<string> {
   const client = new Client(SERVER);
+  let wallet: Wallet | null = null;
   try {
     await client.connect();
-    const wallet = Wallet.fromSeed(from.seed);
+    wallet = Wallet.fromSeed(from.seed);
     const prepared = await client.autofill({
       TransactionType: 'Payment',
       Account: from.address,
@@ -69,6 +71,9 @@ export async function sendXRP(from: XRPWalletData, to: string, amountXRP: number
     return (result.result.hash as string) ?? '';
   } finally {
     await client.disconnect();
+    if (wallet) {
+      wallet = null;
+    }
   }
 }
 

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Kill-switch endpoint — signals a breach or panic condition.
  * Returns a redirect target so the client can navigate away immediately.

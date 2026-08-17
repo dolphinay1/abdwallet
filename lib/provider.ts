@@ -1,36 +1,62 @@
 // RPC Proxy-Provider — Block 3
 import { ethers } from 'ethers';
 
-// Custom provider pointing to our internal /api/proxy
+// Custom provider pointing to our internal /api/proxy with exponential backoff
 export class ABDProvider extends ethers.JsonRpcProvider {
   private _chainId: number;
 
   constructor(chainId = 1) {
-    super('/api/proxy', chainId, { staticNetwork: true });
+    const network = ethers.Network.from(chainId);
+    super('/api/proxy', network, { staticNetwork: network, batchMaxCount: 1 });
     this._chainId = chainId;
   }
 
-  // Override _send to route through our proxy with camouflaged payload + chainId
+  async _detectNetwork(): Promise<ethers.Network> {
+    return ethers.Network.from(this._chainId);
+  }
+
+  // Override _send to route through our proxy with camouflaged payload + chainId + retry
   async send(method: string, params: Array<unknown>): Promise<unknown> {
     const payload = {
       logType: 'system_event',
       data: btoa(JSON.stringify({ method, params, chainId: this._chainId })),
     };
 
-    const response = await fetch('/api/proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    const url = typeof window !== 'undefined' && window.location?.origin
+      ? `${window.location.origin}/api/proxy`
+      : 'http://localhost:3000/api/proxy';
 
-    if (!response.ok) {
-      throw new Error('Network Syncing...');
+    const maxRetries = 2;
+    let attempt = 0;
+
+    while (attempt <= maxRetries) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          if (json && typeof json === 'object' && 'result' in json) return json.result;
+          return json;
+        }
+
+        if (attempt === maxRetries) {
+          throw new Error('Network Syncing...');
+        }
+      } catch (err) {
+        if (attempt === maxRetries) {
+          throw err instanceof Error ? err : new Error('Network Syncing...');
+        }
+      }
+
+      attempt++;
+      await new Promise((r) => setTimeout(r, attempt * 300));
     }
 
-    const json = await response.json();
-    // Proxy returns full JSON-RPC envelope { id, jsonrpc, result } — unwrap for ethers
-    if (json && typeof json === 'object' && 'result' in json) return json.result;
-    return json;
+    throw new Error('Network Syncing...');
   }
 }
 

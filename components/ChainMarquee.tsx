@@ -19,15 +19,15 @@ function ChainPill({ color, shortName, name }: ChainPillProps) {
         gap: 7,
         padding: '5px 12px',
         borderRadius: 20,
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: 'rgba(255,255,255,0.03)',
+        background: '#e4e6ee',
+        boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)',
         flexShrink: 0,
         whiteSpace: 'nowrap',
       }}
     >
-      <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
-      <span style={{ color: '#9ca3af', fontSize: 10, fontWeight: 600 }}>{shortName}</span>
-      <span style={{ color: '#4b5563', fontSize: 9 }}>{name}</span>
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2b2d33', flexShrink: 0 }} />
+      <span style={{ color: '#23262b', fontSize: 10, fontWeight: 600 }}>{shortName}</span>
+      <span style={{ color: '#8a8f98', fontSize: 9 }}>{name}</span>
     </div>
   );
 }
@@ -80,7 +80,7 @@ export function ChainMarquee() {
       {/* Fade edges */}
       <div style={{
         position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none',
-        background: 'linear-gradient(to right, #141414 0%, transparent 12%, transparent 88%, #141414 100%)',
+        background: 'linear-gradient(to right, #e4e6ee 0%, transparent 12%, transparent 88%, #e4e6ee 100%)',
       }} />
       <MarqueeRow chains={row1} speed={28} />
       <MarqueeRow chains={row2} reverse speed={32} />

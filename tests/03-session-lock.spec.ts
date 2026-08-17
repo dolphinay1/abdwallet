@@ -34,7 +34,7 @@ test.describe('Session Lock', () => {
 
     const after = await getHistory(page);
     expect(after[0].address).toBe(address);
-    console.log('✅ Wallet survived refresh:', address.slice(0, 10));
+    console.log('[ok] Wallet survived refresh:', address.slice(0, 10));
   });
 
   test('Persist button is always enabled when wallet unlocked', async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe('Session Lock', () => {
     await expect(persistBtn).toBeVisible({ timeout: 8000 });
     await expect(persistBtn).toBeEnabled();
 
-    console.log('✅ Persist button enabled after login');
+    console.log('[ok] Persist button enabled after login');
   });
 
   test('wipeABDWallet clears state but keeps localStorage history', async ({ page }) => {
@@ -68,7 +68,7 @@ test.describe('Session Lock', () => {
     const after = await getHistory(page);
     // History in localStorage should still be there
     expect(after.length).toBeGreaterThanOrEqual(1);
-    console.log('✅ History preserved after session wipe');
+    console.log('[ok] History preserved after session wipe');
   });
 
 });

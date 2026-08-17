@@ -17,7 +17,7 @@ test.describe('Security Controls', () => {
     await page.waitForTimeout(1000);
 
     await page.screenshot({ path: 'test-results/04-panic-key.png', fullPage: true });
-    console.log('✅ Panic shortcut fired');
+    console.log('[ok] Panic shortcut fired');
   });
 
   test('logo triple-click triggers panic', async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe('Security Controls', () => {
     await page.waitForTimeout(1000);
 
     await page.screenshot({ path: 'test-results/04-panic-logo.png', fullPage: true });
-    console.log('✅ Logo triple-click fired');
+    console.log('[ok] Logo triple-click fired');
   });
 
   test('tab blur shows black overlay', async ({ page }) => {
@@ -67,7 +67,7 @@ test.describe('Security Controls', () => {
       Object.defineProperty(document, 'hidden', { value: false, configurable: true });
       document.dispatchEvent(new Event('visibilitychange'));
     });
-    console.log('✅ Black overlay appears on tab blur');
+    console.log('[ok] Black overlay appears on tab blur');
   });
 
   test('honey-trap window.wallet triggers panic getter', async ({ page }) => {
@@ -87,7 +87,7 @@ test.describe('Security Controls', () => {
     console.log('Honey-trap result:', result);
     await page.waitForTimeout(800);
     await page.screenshot({ path: 'test-results/04-honeytrap.png', fullPage: true });
-    console.log('✅ Honey-trap tested');
+    console.log('[ok] Honey-trap tested');
   });
 
   test('inactivity timer wipes wallet after timeout (fast)', async ({ page }) => {
@@ -98,11 +98,11 @@ test.describe('Security Controls', () => {
 
     // Trigger wipe via JS (simulate inactivity timeout callback)
     const wasUnlocked = await page.evaluate(() => {
-      const raw = localStorage.getItem('__cw_wallet_history__');
+      const raw = localStorage.getItem('__gw_wallet_history__');
       return JSON.parse(raw ?? '[]').length > 0;
     });
     expect(wasUnlocked).toBe(true);
-    console.log('✅ Inactivity timer exists (verified via code; 5min timeout not tested live)');
+    console.log('[ok] Inactivity timer exists (verified via code; 5min timeout not tested live)');
   });
 
 });

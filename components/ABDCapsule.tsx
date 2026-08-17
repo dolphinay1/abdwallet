@@ -19,46 +19,37 @@ export function ABDCapsule({
   className,
   theme = 'dark',
 }: ABDCapsuleProps) {
-  const isLight = theme === 'light';
+  // App is light-neumorphic only; both theme variants render the inset pill.
+  void theme;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onValue) onValue(e.target.value);
   };
 
   return (
-    <div
-      className={className}
-      style={{
-        borderLeft: `0.5px solid ${isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)'}`,
-        paddingLeft: '4px',
-      }}
-    >
+    <div className={`${className ?? ''} neu-pill-inset px-4 py-1`}>
       <input
         type={type}
         placeholder={placeholder}
         onChange={handleChange}
         autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
         spellCheck={false}
+        data-lpignore="true"
+        data-form-type="other"
         style={{
           background: 'transparent',
           border: 'none',
-          borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)'}`,
-          color: isLight ? '#111827' : '#ffffff',
+          color: '#23262b',
           fontSize: '13px',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          fontWeight: 400,
+          fontFamily: 'inherit',
+          fontWeight: 500,
           letterSpacing: '0.02em',
           outline: 'none',
-          padding: '6px 0',
+          padding: '8px 0',
           width: '100%',
-          caretColor: isLight ? '#111827' : 'white',
-          transition: 'border-color 0.15s',
-        }}
-        onFocus={(e) => {
-          e.currentTarget.style.borderBottomColor = isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.35)';
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.borderBottomColor = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)';
+          caretColor: '#2b2d33',
         }}
       />
     </div>

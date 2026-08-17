@@ -31,13 +31,13 @@ export function AdvancedDashboard({ onExit }: Props) {
   }, []);
 
   const addBtn = (label: string, onClick: () => void) => (
-    <button onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#52ffac', border: 'none', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#000', fontSize: 11, fontWeight: 900, textTransform: 'uppercase' as const }}>
+    <button className="russo-one-regular" onClick={onClick} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#2b2d33', border: 'none', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', color: '#e4e6ee', fontSize: 11, fontWeight: 400, textTransform: 'uppercase' as const }}>
       <Plus size={13} /> {label}
     </button>
   );
 
   const deleteBtn = (onClick: () => void) => (
-    <button onClick={onClick} style={{ background: 'rgba(255,100,100,0.08)', border: '1px solid rgba(255,100,100,0.15)', borderRadius: 7, padding: '5px 7px', cursor: 'pointer', color: '#ff8888', display: 'flex', alignItems: 'center' }}>
+    <button onClick={onClick} style={{ background: 'rgba(255,100,100,0.08)', border: '1px solid rgba(255,100,100,0.15)', borderRadius: 7, padding: '5px 7px', cursor: 'pointer', color: '#b91c1c', display: 'flex', alignItems: 'center' }}>
       <Trash2 size={13} />
     </button>
   );
@@ -50,17 +50,17 @@ export function AdvancedDashboard({ onExit }: Props) {
       {/* Top bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={onExit} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1.5rem', padding: '6px 14px', cursor: 'pointer', color: '#ccc', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <button className="russo-one-regular" onClick={onExit} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '1.5rem', padding: '6px 14px', cursor: 'pointer', color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             <ChevronLeft size={14} /> Simple
           </button>
           <div>
-            <p style={{ color: '#fff', fontSize: 18, fontWeight: 900, margin: 0, letterSpacing: '-0.01em' }}>Advanced Mode</p>
-            <p style={{ color: '#555', fontSize: 10, margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <p className="russo-one-regular" style={{ color: '#23262b', fontSize: 18, fontWeight: 400, margin: 0, letterSpacing: '0.02em' }}>Advanced Mode</p>
+            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 10, margin: 0, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Custom EVM Chains · Tokens · APIs
             </p>
           </div>
         </div>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#52ffac', boxShadow: '0 0 8px rgba(82,255,172,0.5)', opacity: wallet.isUnlocked ? 1 : 0.2 }} />
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2b2d33', boxShadow: '0 0 8px rgba(43,45,51,0.5)', opacity: wallet.isUnlocked ? 1 : 0.2 }} />
       </div>
 
       <motion.div key="evm" variants={variants.fadeUp} initial="hidden" animate="visible" transition={springs.smooth}
@@ -69,26 +69,26 @@ export function AdvancedDashboard({ onExit }: Props) {
         {/* Custom Chains */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ color: '#888', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
               {customChains.length} Custom Chain{customChains.length !== 1 ? 's' : ''}
             </p>
             {addBtn('Add Chain', () => setShowChainModal(true))}
           </div>
           {customChains.length === 0 ? (
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '1rem', padding: '28px', textAlign: 'center' }}>
-              <p style={{ color: '#555', fontSize: 13, margin: 0 }}>No custom chains yet.</p>
-              <p style={{ color: '#444', fontSize: 11, margin: '4px 0 0' }}>Add any EVM-compatible chain using its RPC URL and Chain ID.</p>
+            <div style={{ background: 'rgba(166,177,198,0.02)', border: '1px dashed rgba(166,177,198,0.08)', borderRadius: '1rem', padding: '28px', textAlign: 'center' }}>
+              <p style={{ color: '#8a8f98', fontSize: 13, margin: 0 }}>No custom chains yet.</p>
+              <p style={{ color: '#8a8f98', fontSize: 11, margin: '4px 0 0' }}>Add any EVM-compatible chain using its RPC URL and Chain ID.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {customChains.map(c => (
-                <div key={c.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '1rem', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${c.color}18`, border: `1.5px solid ${c.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ color: c.color, fontSize: 9, fontWeight: 900 }}>{c.shortName.slice(0, 3)}</span>
+                <div key={c.id} style={{ background: 'rgba(166,177,198,0.03)', border: '1px solid rgba(166,177,198,0.07)', borderRadius: '1rem', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(43,45,51,0.08)', border: '1.5px solid rgba(43,45,51,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#2b2d33', fontSize: 9, fontWeight: 900 }}>{c.shortName.slice(0, 3)}</span>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, margin: 0 }}>{c.name}</p>
-                    <p style={{ color: '#555', fontSize: 10, margin: '2px 0 0', fontFamily: 'monospace' }}>ID: {c.id} · {c.symbol}</p>
+                    <p style={{ color: '#23262b', fontSize: 13, fontWeight: 700, margin: 0 }}>{c.name}</p>
+                    <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0', fontFamily: 'monospace' }}>ID: {c.id} · {c.symbol}</p>
                   </div>
                   {deleteBtn(() => { deleteCustomChain(c.id); setCustomChains(loadCustomChains()); })}
                 </div>
@@ -100,26 +100,26 @@ export function AdvancedDashboard({ onExit }: Props) {
         {/* Custom Tokens */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ color: '#888', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
               {customTokens.length} Custom Token{customTokens.length !== 1 ? 's' : ''}
             </p>
             {addBtn('Add Token', () => setShowTokenModal(true))}
           </div>
           {customTokens.length === 0 ? (
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '1rem', padding: '28px', textAlign: 'center' }}>
-              <p style={{ color: '#555', fontSize: 13, margin: 0 }}>No custom tokens yet.</p>
-              <p style={{ color: '#444', fontSize: 11, margin: '4px 0 0' }}>Add any ERC-20 token by contract address.</p>
+            <div style={{ background: 'rgba(166,177,198,0.02)', border: '1px dashed rgba(166,177,198,0.08)', borderRadius: '1rem', padding: '28px', textAlign: 'center' }}>
+              <p style={{ color: '#8a8f98', fontSize: 13, margin: 0 }}>No custom tokens yet.</p>
+              <p style={{ color: '#8a8f98', fontSize: 11, margin: '4px 0 0' }}>Add any ERC-20 token by contract address.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {customTokens.map(t => (
-                <div key={`${t.chainId}-${t.contractAddress}`} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '1rem', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ color: '#ccc', fontSize: 9, fontWeight: 900 }}>{t.symbol.slice(0, 3)}</span>
+                <div key={`${t.chainId}-${t.contractAddress}`} style={{ background: 'rgba(166,177,198,0.03)', border: '1px solid rgba(166,177,198,0.07)', borderRadius: '1rem', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(166,177,198,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#8a8f98', fontSize: 9, fontWeight: 900 }}>{t.symbol.slice(0, 3)}</span>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, margin: 0 }}>{t.symbol} <span style={{ color: '#555', fontWeight: 400 }}>— {t.name}</span></p>
-                    <p style={{ color: '#555', fontSize: 9, margin: '2px 0 0', fontFamily: 'monospace' }}>Chain {t.chainId} · {t.contractAddress.slice(0, 12)}…{t.contractAddress.slice(-6)}</p>
+                    <p style={{ color: '#23262b', fontSize: 13, fontWeight: 700, margin: 0 }}>{t.symbol} <span style={{ color: '#8a8f98', fontWeight: 400 }}>— {t.name}</span></p>
+                    <p style={{ color: '#8a8f98', fontSize: 9, margin: '2px 0 0', fontFamily: 'monospace' }}>Chain {t.chainId} · {t.contractAddress.slice(0, 12)}…{t.contractAddress.slice(-6)}</p>
                   </div>
                   {deleteBtn(() => { deleteCustomToken(t.chainId, t.contractAddress); setCustomTokens(loadCustomTokens()); })}
                 </div>
@@ -131,26 +131,26 @@ export function AdvancedDashboard({ onExit }: Props) {
         {/* Custom APIs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <p style={{ color: '#888', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
               {customAPIs.length} Custom API{customAPIs.length !== 1 ? 's' : ''}
             </p>
             {addBtn('Add API', () => setShowAPIModal(true))}
           </div>
           {customAPIs.length === 0 ? (
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: '1rem', padding: '28px', textAlign: 'center' }}>
-              <p style={{ color: '#555', fontSize: 13, margin: 0 }}>No custom APIs yet.</p>
-              <p style={{ color: '#444', fontSize: 11, margin: '4px 0 0' }}>Connect any blockchain via REST API.</p>
+            <div style={{ background: 'rgba(166,177,198,0.02)', border: '1px dashed rgba(166,177,198,0.08)', borderRadius: '1rem', padding: '28px', textAlign: 'center' }}>
+              <p style={{ color: '#8a8f98', fontSize: 13, margin: 0 }}>No custom APIs yet.</p>
+              <p style={{ color: '#8a8f98', fontSize: 11, margin: '4px 0 0' }}>Connect any blockchain via REST API.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {customAPIs.map(a => (
-                <div key={a.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '1rem', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ color: '#ccc', fontSize: 9, fontWeight: 900 }}>{a.symbol.slice(0, 3)}</span>
+                <div key={a.id} style={{ background: 'rgba(166,177,198,0.03)', border: '1px solid rgba(166,177,198,0.07)', borderRadius: '1rem', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(166,177,198,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#8a8f98', fontSize: 9, fontWeight: 900 }}>{a.symbol.slice(0, 3)}</span>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, margin: 0 }}>{a.name} <span style={{ color: '#555', fontWeight: 400 }}>({a.symbol})</span></p>
-                    <p style={{ color: '#555', fontSize: 9, margin: '2px 0 0' }}>
+                    <p style={{ color: '#23262b', fontSize: 13, fontWeight: 700, margin: 0 }}>{a.name} <span style={{ color: '#8a8f98', fontWeight: 400 }}>({a.symbol})</span></p>
+                    <p style={{ color: '#8a8f98', fontSize: 9, margin: '2px 0 0' }}>
                       {a.sendEndpoint ? 'Read & Send' : 'Read-only'} · {a.balanceEndpoint.slice(0, 30)}…
                     </p>
                   </div>

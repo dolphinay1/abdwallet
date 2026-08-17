@@ -6,6 +6,7 @@ import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import * as bitcoin from 'bitcoinjs-lib';
 import ECPairFactory from 'ecpair';
+import { zeroFill } from './crypto';
 
 // Lazy-init: tiny-secp256k1 is WASM and may not be ready at module parse time
 let bip32: ReturnType<typeof BIP32Factory>;
@@ -54,6 +55,7 @@ export function deriveBTCWallet(mnemonic: string): BTCWallet {
   const seed = bip39.mnemonicToSeedSync(mnemonic.trim());
   const root = bip32.fromSeed(seed, NETWORK);
   const child = root.derivePath("m/44'/0'/0'/0/0");
+  zeroFill(seed);
   if (!child.privateKey) throw new Error('BTC derivation failed');
 
   const pubKey = child.publicKey;
@@ -165,13 +167,21 @@ export async function buildBTCTransaction(opts: {
     psbt.addOutput({ address: from.address, value: change });
   }
 
-  const keyPair = ECPair.fromWIF(from.privateKeyWIF, NETWORK);
-  for (let i = 0; i < usedUtxos.length; i++) {
-    psbt.signInput(i, keyPair as unknown as bitcoin.Signer);
-  }
-  psbt.finalizeAllInputs();
+  let keyPair: bitcoin.Signer | null = null;
+  try {
+    keyPair = ECPair.fromWIF(from.privateKeyWIF, NETWORK) as unknown as bitcoin.Signer;
+    for (let i = 0; i < usedUtxos.length; i++) {
+      psbt.signInput(i, keyPair);
+    }
+    psbt.finalizeAllInputs();
 
-  return { hex: psbt.extractTransaction().toHex(), fee: feeSats / SATOSHI };
+    return { hex: psbt.extractTransaction().toHex(), fee: feeSats / SATOSHI };
+  } finally {
+    if (keyPair && (keyPair as any).privateKey) {
+      zeroFill((keyPair as any).privateKey);
+    }
+    keyPair = null;
+  }
 }
 
 export async function broadcastBTC(hex: string): Promise<string> {

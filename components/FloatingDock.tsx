@@ -50,14 +50,13 @@ function DockIcon({ item, mouseX }: { item: DockItem; mouseX: ReturnType<typeof 
             style={{
               position: 'absolute',
               bottom: 'calc(100% + 8px)',
-              background: '#1f2937',
-              color: '#e5e7eb',
+              background: '#2b2d33',
+              color: '#f5f6fa',
               fontSize: 10,
               padding: '3px 8px',
               borderRadius: 6,
               whiteSpace: 'nowrap',
               pointerEvents: 'none',
-              border: '1px solid rgba(255,255,255,0.1)',
             }}
           >
             {item.label}
@@ -72,22 +71,17 @@ function DockIcon({ item, mouseX }: { item: DockItem; mouseX: ReturnType<typeof 
           width: '100%',
           aspectRatio: '1',
           borderRadius: '50%',
-          background: item.color
-            ? `${item.color}22`
-            : item.active
-              ? 'rgba(255,255,255,0.14)'
-              : 'rgba(255,255,255,0.07)',
-          border: item.color
-            ? `1px solid ${item.color}44`
-            : item.active
-              ? '1px solid rgba(255,255,255,0.3)'
-              : '1px solid rgba(255,255,255,0.1)',
+          background: '#e4e6ee',
+          boxShadow: item.active
+            ? 'inset 3px 3px 6px rgba(166,177,198,0.55), inset -3px -3px 6px rgba(255,255,255,0.9)'
+            : '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)',
+          border: 'none',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          color: item.color ?? (item.active ? '#fff' : '#e5e7eb'),
-          transition: 'background 0.15s, border-color 0.15s',
+          color: item.active ? '#23262b' : '#8a8f98',
+          transition: 'box-shadow 0.15s',
         }}
         whileTap={{ scale: 0.92 }}
       >
@@ -95,7 +89,7 @@ function DockIcon({ item, mouseX }: { item: DockItem; mouseX: ReturnType<typeof 
       </motion.button>
 
       {/* Label */}
-      <span style={{ color: '#6b7280', fontSize: 9, marginTop: 4, whiteSpace: 'nowrap' }}>
+      <span style={{ color: '#8a8f98', fontSize: 9, marginTop: 4, whiteSpace: 'nowrap' }}>
         {item.label}
       </span>
     </motion.div>
@@ -115,9 +109,9 @@ export function FloatingDock({ items }: FloatingDockProps) {
         justifyContent: 'center',
         gap: 10,
         padding: '10px 14px',
-        borderRadius: 20,
-        background: '#141414',
-        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 24,
+        background: '#e4e6ee',
+        boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)',
         width: 'fit-content',
         margin: '0 auto',
       }}

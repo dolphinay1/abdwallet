@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Check, ArrowDownUp } from 'lucide-react';
+import { X, Check, ArrowDownUp, Zap, AlertTriangle } from 'lucide-react';
 import { Button, Input } from '@heroui/react';
 import { upperEn } from '@/lib/text';
 import { useWallet } from '@/context/WalletContext';
@@ -88,38 +88,38 @@ function TokenPicker({ chainId, value, onChange, label }: {
     : tokens.slice(0, 40);
 
   const box: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.05)', borderRadius: '1rem',
-    padding: '10px 14px', border: '1px solid rgba(255,255,255,0.08)',
+    background: '#e4e6ee', borderRadius: '1rem',
+    padding: '10px 14px', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)',
     display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
     width: '100%',
   };
 
   return (
     <div style={{ position: 'relative' }}>
-      <p style={{ color: '#888', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>{label}</p>
+      <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>{label}</p>
       <button onClick={() => setOpen(o => !o)} style={box}>
         {value ? (
           <>
             {value.logoURI && (
               <img src={value.logoURI} alt={value.symbol} width={24} height={24} style={{ borderRadius: '50%', flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             )}
-            <span style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>{value.symbol}</span>
-            <span style={{ color: '#555', fontSize: 11, flex: 1, textAlign: 'left' }}>{value.name}</span>
+            <span style={{ color: '#23262b', fontSize: 14, fontWeight: 700 }}>{value.symbol}</span>
+            <span style={{ color: '#8a8f98', fontSize: 11, flex: 1, textAlign: 'left' }}>{value.name}</span>
           </>
         ) : (
-          <span style={{ color: '#555', fontSize: 13 }}>{loading ? 'Loading tokens…' : 'Select token'}</span>
+          <span style={{ color: '#8a8f98', fontSize: 13 }}>{loading ? 'Loading tokens…' : 'Select token'}</span>
         )}
-        <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#555', marginLeft: 'auto' }}>expand_more</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#8a8f98', marginLeft: 'auto' }}>expand_more</span>
       </button>
 
       {open && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 300,
-          background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: '1rem', marginTop: 4, maxHeight: 280, overflow: 'hidden',
+          background: '#e4e6ee', boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)',
+          borderRadius: '1rem', marginTop: 8, maxHeight: 280, overflow: 'hidden',
           display: 'flex', flexDirection: 'column',
         }}>
-          <div style={{ padding: '8px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '8px 10px', borderBottom: '1px solid rgba(166,177,198,0.06)' }}>
             <Input
               autoFocus
               size="sm"
@@ -133,21 +133,21 @@ function TokenPicker({ chainId, value, onChange, label }: {
           </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {filtered.length === 0 && (
-              <p style={{ color: '#555', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>{loading ? 'Loading…' : 'No results'}</p>
+              <p style={{ color: '#8a8f98', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>{loading ? 'Loading…' : 'No results'}</p>
             )}
             {filtered.map(t => (
               <button
                 key={`${t.chainId}-${t.address}`}
                 onClick={() => { onChange(t); setOpen(false); setSearch(''); }}
                 style={{ width: '100%', background: 'none', border: 'none', padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', textAlign: 'left' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(166,177,198,0.04)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
               >
                 {t.logoURI && (
                   <img src={t.logoURI} alt={t.symbol} width={22} height={22} style={{ borderRadius: '50%', flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 )}
-                <span style={{ color: '#fff', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{t.symbol}</span>
-                <span style={{ color: '#555', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                <span style={{ color: '#23262b', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{t.symbol}</span>
+                <span style={{ color: '#8a8f98', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
               </button>
             ))}
           </div>
@@ -301,21 +301,21 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
   const isBusy = status === 'quoting' || status === 'approving' || status === 'signing' || status === 'sending';
 
-  const box: React.CSSProperties = { background: 'rgba(255,255,255,0.05)', borderRadius: '1rem', padding: '14px 16px', border: '1px solid rgba(255,255,255,0.08)' };
+  const box: React.CSSProperties = { background: '#e4e6ee', borderRadius: '1rem', padding: '14px 16px', boxShadow: 'inset 4px 4px 8px rgba(166,177,198,0.5), inset -4px -4px 8px rgba(255,255,255,0.9)' };
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget && !isBusy) onClose(); }}
       className="popup-backdrop"
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 440, maxWidth: '94vw', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(228,230,238,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="popup-enter" style={{ background: '#e4e6ee', boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)', borderRadius: '2rem', width: 440, maxWidth: '94vw', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '22px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '22px 24px 16px', borderBottom: '1px solid rgba(166,177,198,0.07)', flexShrink: 0 }}>
           <div>
-            <span style={{ color: '#fff', fontSize: 22, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Swap</span>
-            <span style={{ color: '#555', fontSize: 10, fontWeight: 700, marginLeft: 10, letterSpacing: '0.06em' }}>via LiFi</span>
+            <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 22, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Swap</span>
+            <span style={{ color: '#8a8f98', fontSize: 10, fontWeight: 700, marginLeft: 10, letterSpacing: '0.06em' }}>via LiFi</span>
           </div>
-          <Button isIconOnly size="sm" variant="flat" radius="lg" isDisabled={isBusy} onPress={onClose} className="text-[#c6c6c6]">
+          <Button isIconOnly size="sm" variant="flat" radius="lg" isDisabled={isBusy} onPress={onClose} className="text-[#23262b]">
             <X size={18} />
           </Button>
         </div>
@@ -325,19 +325,19 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
           {/* ── Done ── */}
           {status === 'done' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '24px 0' }}>
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(82,255,172,0.1)', border: '2px solid rgba(82,255,172,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Check size={28} style={{ color: '#52ffac' }} />
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(43,45,51,0.1)', border: '2px solid rgba(43,45,51,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Check size={28} style={{ color: '#2b2d33' }} />
               </div>
-              <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, textTransform: 'uppercase' }}>Swap Sent!</span>
-              <span style={{ color: '#c6c6c6', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>{txHash}</span>
+              <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 20, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Swap Sent!</span>
+              <span style={{ color: '#23262b', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>{txHash}</span>
               <a href={`${fromChain.explorerUrl}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-                style={{ color: '#52ffac', fontSize: 12, fontWeight: 700 }}>
+                style={{ color: '#2b2d33', fontSize: 12, fontWeight: 700 }}>
                 View on Explorer ↗
               </a>
               {approveTxHash && (
-                <p style={{ color: '#666', fontSize: 10, textAlign: 'center' }}>Approve TX: {approveTxHash.slice(0, 20)}…</p>
+                <p style={{ color: '#8a8f98', fontSize: 10, textAlign: 'center' }}>Approve TX: {approveTxHash.slice(0, 20)}…</p>
               )}
-              <Button variant="bordered" radius="lg" onPress={onClose} className="mt-2 px-7 font-bold text-[#888]">
+              <Button variant="bordered" radius="lg" onPress={onClose} className="mt-2 px-7 russo-one-regular text-[#8a8f98]">
                 {upperEn('Close')}
               </Button>
             </div>
@@ -346,8 +346,8 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
           {/* ── Busy spinner ── */}
           {(status === 'quoting' || status === 'approving' || status === 'signing' || status === 'sending') && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '32px 0' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid rgba(82,255,172,0.15)', borderTopColor: '#52ffac', animation: 'spin 0.9s linear infinite' }} />
-              <span style={{ color: '#c6c6c6', fontSize: 13, fontWeight: 700 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid rgba(43,45,51,0.15)', borderTopColor: '#2b2d33', animation: 'spin 0.9s linear infinite' }} />
+              <span style={{ color: '#23262b', fontSize: 13, fontWeight: 700 }}>
                 {status === 'quoting' ? 'Getting best route…'
                   : status === 'approving' ? 'Approving token spend…'
                   : status === 'signing' ? (activeLedger ? 'Check your Ledger and confirm…' : 'Signing transaction…')
@@ -361,11 +361,11 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* From chain */}
               <div style={box}>
-                <p style={{ color: '#888', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>From chain</p>
+                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>From chain</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {SWAP_CHAINS.map(c => (
                     <button key={c.id} onClick={() => setFromChain(c)}
-                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === fromChain.id ? `1.5px solid ${c.color}` : '1px solid rgba(255,255,255,0.08)', background: c.id === fromChain.id ? `${c.color}18` : 'transparent', color: c.id === fromChain.id ? c.color : '#888', transition: 'all 0.15s' }}>
+                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === fromChain.id ? '1.5px solid #2b2d33' : '1px solid rgba(166,177,198,0.08)', background: c.id === fromChain.id ? '#2b2d33' : 'transparent', color: c.id === fromChain.id ? '#f5f6fa' : '#8a8f98', transition: 'all 0.15s' }}>
                       {c.shortName}
                     </button>
                   ))}
@@ -377,7 +377,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
               {/* Amount */}
               <div style={box}>
-                <p style={{ color: '#888', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>Amount</p>
+                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>Amount</p>
                 <Input
                   type="number"
                   variant="flat"
@@ -387,7 +387,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                   classNames={{
                     base: 'bg-transparent',
                     inputWrapper: 'bg-transparent shadow-none border-0 px-0 h-auto min-w-0',
-                    input: 'text-[20px] font-black text-white',
+                    input: 'text-[20px] font-black text-[#23262b]',
                   }}
                 />
               </div>
@@ -402,7 +402,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                     const tmpChain = fromChain; setFromChain(toChain); setToChain(tmpChain);
                     const tmpToken = fromToken; setFromToken(toToken); setToToken(tmpToken);
                   }}
-                  className="h-9 w-9 min-w-0 border-[rgba(82,255,172,0.18)] bg-[rgba(82,255,172,0.07)] text-[#52ffac]"
+                  className="h-9 w-9 min-w-0 border-[rgba(43,45,51,0.18)] bg-[rgba(43,45,51,0.07)] text-[#2b2d33]"
                 >
                   <ArrowDownUp size={16} />
                 </Button>
@@ -410,11 +410,11 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
               {/* To chain */}
               <div style={box}>
-                <p style={{ color: '#888', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>To chain</p>
+                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>To chain</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {SWAP_CHAINS.map(c => (
                     <button key={c.id} onClick={() => setToChain(c)}
-                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === toChain.id ? `1.5px solid ${c.color}` : '1px solid rgba(255,255,255,0.08)', background: c.id === toChain.id ? `${c.color}18` : 'transparent', color: c.id === toChain.id ? c.color : '#888', transition: 'all 0.15s' }}>
+                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === toChain.id ? '1.5px solid #2b2d33' : '1px solid rgba(166,177,198,0.08)', background: c.id === toChain.id ? '#2b2d33' : 'transparent', color: c.id === toChain.id ? '#f5f6fa' : '#8a8f98', transition: 'all 0.15s' }}>
                       {c.shortName}
                     </button>
                   ))}
@@ -424,7 +424,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
               {/* To token */}
               <TokenPicker chainId={toChain.id} value={toToken} onChange={setToToken} label="You Receive" />
 
-              {errMsg && <p style={{ color: '#ff8888', fontSize: 12, margin: 0 }}>{errMsg}</p>}
+              {errMsg && <p style={{ color: '#b91c1c', fontSize: 12, margin: 0 }}>{errMsg}</p>}
 
               {/* Token security risk warnings */}
               {!riskDismissed && (() => {
@@ -440,21 +440,22 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                 return (
                   <div style={{ background: riskBg(topLevel), border: `1px solid ${riskColor(topLevel)}44`, borderRadius: '1rem', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: riskColor(topLevel) }}>
-                        {topLevel === 'danger' ? '⚠ Token Risk Detected' : '⚡ Caution'}
+                      <span className="russo-one-regular" style={{ fontSize: 10, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', color: riskColor(topLevel), display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                        {topLevel === 'danger' ? <AlertTriangle size={12} /> : <Zap size={12} />}
+                        {topLevel === 'danger' ? 'Token Risk Detected' : 'Caution'}
                       </span>
                       <button onClick={() => setRiskDismissed(true)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
                     </div>
                     {risks.map((r, ri) => (
                       <div key={ri}>
-                        <p style={{ fontSize: 9, color: '#888', fontWeight: 900, textTransform: 'uppercase', margin: '0 0 2px' }}>{r.label}</p>
+                        <p className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', margin: '0 0 2px' }}>{r.label}</p>
                         {r.flags.map((f, fi) => (
                           <p key={fi} style={{ fontSize: 11, color: riskColor(r.level), margin: '1px 0', fontWeight: 600 }}>• {f}</p>
                         ))}
                       </div>
                     ))}
-                    <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0', fontStyle: 'italic' }}>
+                    <p style={{ fontSize: 9, color: '#8a8f98', margin: '4px 0 0', fontStyle: 'italic' }}>
                       Powered by GoPlus Security · dismiss to proceed anyway
                     </p>
                   </div>
@@ -474,7 +475,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                     variant={hasBlockingRisk ? 'flat' : 'solid'}
                     isDisabled={!fromToken || !toToken || !amount || hasBlockingRisk}
                     onPress={getQuote}
-                    className={`h-14 font-black tracking-wider ${hasBlockingRisk ? 'text-[11px]' : 'text-[14px]'}`}
+                    className={`h-14 russo-one-regular tracking-wider ${hasBlockingRisk ? 'text-[11px]' : 'text-[14px]'}`}
                   >
                     {upperEn(hasBlockingRisk ? 'Dismiss Risk Warning First' : 'Get Quote')}
                   </Button>
@@ -487,49 +488,49 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
           {status === 'confirm' && quote && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <p style={{ color: '#888', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0 }}>Swap Preview</p>
+                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>Swap Preview</p>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#c6c6c6', fontSize: 10, margin: '0 0 3px' }}>You pay</p>
-                    <p style={{ color: '#fff', fontWeight: 900, fontSize: 18, margin: 0 }}>{amount} {fromToken?.symbol}</p>
-                    <p style={{ color: '#555', fontSize: 10, margin: '2px 0 0' }}>{fromChain.name}</p>
+                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>You pay</p>
+                    <p style={{ color: '#23262b', fontWeight: 900, fontSize: 18, margin: 0 }}>{amount} {fromToken?.symbol}</p>
+                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, margin: '2px 0 0' }}>{fromChain.name}</p>
                   </div>
-                  <ArrowDownUp size={18} style={{ color: '#52ffac', flexShrink: 0 }} />
+                  <ArrowDownUp size={18} style={{ color: '#2b2d33', flexShrink: 0 }} />
                   <div style={{ flex: 1, textAlign: 'right' }}>
-                    <p style={{ color: '#c6c6c6', fontSize: 10, margin: '0 0 3px' }}>You receive ~</p>
-                    <p style={{ color: '#52ffac', fontWeight: 900, fontSize: 18, margin: 0 }}>{toAmountDisplay} {toToken?.symbol}</p>
-                    <p style={{ color: '#555', fontSize: 10, margin: '2px 0 0' }}>{toChain.name}</p>
+                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>You receive ~</p>
+                    <p style={{ color: '#2b2d33', fontWeight: 900, fontSize: 18, margin: 0 }}>{toAmountDisplay} {toToken?.symbol}</p>
+                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, margin: '2px 0 0' }}>{toChain.name}</p>
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10, display: 'flex', justifyContent: 'space-between' }}>
-                  {gasCostUSD && <span style={{ color: '#555', fontSize: 11 }}>Gas ~${gasCostUSD}</span>}
-                  <span style={{ color: '#555', fontSize: 11 }}>~{Math.ceil(durationSec / 60)} min</span>
-                  <span style={{ color: '#555', fontSize: 11 }}>0.5% slippage</span>
+                <div style={{ borderTop: '1px solid rgba(166,177,198,0.06)', paddingTop: 10, display: 'flex', justifyContent: 'space-between' }}>
+                  {gasCostUSD && <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400 }}>Gas ~${gasCostUSD}</span>}
+                  <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400 }}>~{Math.ceil(durationSec / 60)} min</span>
+                  <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400 }}>0.5% slippage</span>
                 </div>
               </div>
 
               {!fromToken || fromToken.address !== '0x0000000000000000000000000000000000000000' && quote.estimate.approvalAddress && (
-                <p style={{ color: '#aaa', fontSize: 11, background: 'rgba(255,200,0,0.06)', border: '1px solid rgba(255,200,0,0.15)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
+                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, background: 'rgba(43,45,51,0.06)', border: '1px solid rgba(43,45,51,0.15)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
                   Token approval will be sent first (~12s wait), then the swap.
                 </p>
               )}
               {activeLedger && (
-                <p style={{ color: '#c7d2fe', fontSize: 11, background: 'rgba(79,70,229,0.08)', border: '1px solid rgba(79,70,229,0.2)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
+                <p style={{ color: '#8a8f98', fontSize: 11, background: 'rgba(138,143,152,0.08)', border: '1px solid rgba(138,143,152,0.2)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
                   <strong>Ledger:</strong> Your device will show contract call data. Enable &ldquo;Blind signing&rdquo; in the Ethereum app settings if prompted.
                 </p>
               )}
 
-              {errMsg && <p style={{ color: '#ff8888', fontSize: 12, margin: 0 }}>{errMsg}</p>}
+              {errMsg && <p style={{ color: '#b91c1c', fontSize: 12, margin: 0 }}>{errMsg}</p>}
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <Button variant="bordered" radius="lg" onPress={() => { setStatus('idle'); setQuote(null); setErrMsg(''); }}
-                  className="h-12 flex-1 font-bold text-[#888]">
+                  className="h-12 flex-1 russo-one-regular text-[#8a8f98]">
                   {upperEn('Back')}
                 </Button>
                 <Button color="primary" radius="lg" onPress={executeSwap}
-                  className="h-12 flex-[2] font-black tracking-wider text-[13px]">
+                  className="h-12 flex-[2] russo-one-regular tracking-wider text-[13px]">
                   {upperEn('Confirm Swap')}
                 </Button>
               </div>
@@ -539,12 +540,12 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
           {/* Error with retry */}
           {status === 'error' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '16px 0' }}>
-              <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,80,80,0.1)', border: '2px solid rgba(255,80,80,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <X size={22} style={{ color: '#ff5555' }} />
+              <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(185,28,28,0.1)', border: '2px solid rgba(185,28,28,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={22} style={{ color: '#b91c1c' }} />
               </div>
-              <span style={{ color: '#ff8888', fontSize: 13, fontWeight: 700, textAlign: 'center' }}>{errMsg}</span>
+              <span style={{ color: '#b91c1c', fontSize: 13, fontWeight: 700, textAlign: 'center' }}>{errMsg}</span>
               <Button variant="bordered" radius="lg" onPress={() => { setStatus('idle'); setErrMsg(''); setQuote(null); }}
-                className="px-7 font-bold text-[#888]">
+                className="px-7 russo-one-regular text-[#8a8f98]">
                 {upperEn('Try Again')}
               </Button>
             </div>
@@ -553,8 +554,8 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '12px 24px', borderTop: '1px solid rgba(255,255,255,0.05)', flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
-          <span style={{ color: '#333', fontSize: 10 }}>Powered by LiFi · Best-route aggregation across 30+ chains</span>
+        <div style={{ padding: '12px 24px', borderTop: '1px solid rgba(166,177,198,0.05)', flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
+          <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, letterSpacing: '0.04em' }}>Powered by LiFi · Best-route aggregation across 30+ chains</span>
         </div>
       </div>
     </div>

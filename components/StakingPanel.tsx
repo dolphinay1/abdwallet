@@ -18,8 +18,8 @@ import { formatUSD } from '@/lib/prices';
 const MAINNET_ID = 1;
 
 const inp: React.CSSProperties = {
-  width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 10, padding: '10px 14px', color: '#fff', fontSize: 14, fontWeight: 700,
+  width: '100%', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)',
+  borderRadius: 10, padding: '10px 14px', color: '#23262b', fontSize: 14, fontWeight: 700,
   outline: 'none', boxSizing: 'border-box',
 };
 
@@ -118,29 +118,29 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
       {/* ── Positions summary ── */}
       {loadingPositions ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
-          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid rgba(82,255,172,0.2)', borderTopColor: '#52ffac', animation: 'spin 1s linear infinite' }} />
+          <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid rgba(43,45,51,0.2)', borderTopColor: '#2b2d33', animation: 'spin 1s linear infinite' }} />
         </div>
       ) : positions.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <p style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Your Staked Positions</p>
+          <p className="russo-one-regular" style={{ fontSize: 11, fontWeight: 400, color: 'rgba(166,177,198,0.5)', textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>Your Staked Positions</p>
           {positions.map(pos => {
             const p = STAKING_PROTOCOLS.find(x => x.id === pos.protocol)!;
             return (
-              <div key={pos.protocol} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: `${p.color}10`, border: `1px solid ${p.color}33`, borderRadius: 12 }}>
+              <div key={pos.protocol} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'rgba(43,45,51,0.06)', border: '1px solid rgba(43,45,51,0.18)', borderRadius: 12 }}>
                 <div>
-                  <p style={{ fontWeight: 900, color: '#fff', fontSize: 14, margin: 0 }}>{p.name}</p>
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>{parseFloat(pos.balance).toFixed(6)} {p.token}</p>
+                  <p style={{ fontWeight: 900, color: '#23262b', fontSize: 14, margin: 0 }}>{p.name}</p>
+                  <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.4)', margin: '2px 0 0' }}>{parseFloat(pos.balance).toFixed(6)} {p.token}</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontWeight: 900, color: p.color, fontSize: 14, margin: 0 }}>{parseFloat(pos.balanceETH).toFixed(6)} ETH</p>
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', margin: '2px 0 0' }}>{formatUSD(pos.balanceUSD)}</p>
+                  <p style={{ fontWeight: 900, color: '#2b2d33', fontSize: 14, margin: 0 }}>{parseFloat(pos.balanceETH).toFixed(6)} ETH</p>
+                  <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.3)', margin: '2px 0 0' }}>{formatUSD(pos.balanceUSD)}</p>
                 </div>
               </div>
             );
           })}
           {totalStakedUSD > 0 && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 4px 0' }}>
-              <p style={{ fontSize: 10, fontWeight: 900, color: '#52ffac' }}>Total staked: {formatUSD(totalStakedUSD)}</p>
+              <p style={{ fontSize: 10, fontWeight: 900, color: '#2b2d33' }}>Total staked: {formatUSD(totalStakedUSD)}</p>
             </div>
           )}
         </div>
@@ -151,25 +151,25 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
         {STAKING_PROTOCOLS.map(p => (
           <button key={p.id} onClick={() => { setSelectedProtocol(p.id); setStakeStatus('idle'); setStakeError(''); }}
             style={{
-              flex: 1, padding: '12px 10px', borderRadius: 12, border: `2px solid ${selectedProtocol === p.id ? p.color : 'rgba(255,255,255,0.08)'}`,
-              background: selectedProtocol === p.id ? `${p.color}15` : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.15s',
+              flex: 1, padding: '12px 10px', borderRadius: 12, border: `2px solid ${selectedProtocol === p.id ? '#2b2d33' : 'rgba(166,177,198,0.08)'}`,
+              background: selectedProtocol === p.id ? 'rgba(43,45,51,0.08)' : 'rgba(166,177,198,0.03)', cursor: 'pointer', transition: 'all 0.15s',
             }}>
-            <p style={{ fontWeight: 900, color: selectedProtocol === p.id ? p.color : '#aaa', fontSize: 13, margin: 0 }}>{p.name}</p>
-            <p style={{ fontSize: 10, color: selectedProtocol === p.id ? `${p.color}cc` : 'rgba(255,255,255,0.3)', margin: '2px 0 0' }}>{p.token}</p>
+            <p style={{ fontWeight: 900, color: selectedProtocol === p.id ? '#2b2d33' : '#8a8f98', fontSize: 13, margin: 0 }}>{p.name}</p>
+            <p style={{ fontSize: 10, color: selectedProtocol === p.id ? 'rgba(43,45,51,0.7)' : 'rgba(166,177,198,0.3)', margin: '2px 0 0' }}>{p.token}</p>
             {apys[p.id] ? (
-              <p style={{ fontSize: 11, fontWeight: 900, color: '#4ade80', margin: '4px 0 0' }}>{apys[p.id].toFixed(2)}% APY</p>
+              <p style={{ fontSize: 11, fontWeight: 900, color: '#23262b', margin: '4px 0 0' }}>{apys[p.id].toFixed(2)}% APY</p>
             ) : (
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', margin: '4px 0 0' }}>Loading APY…</p>
+              <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.2)', margin: '4px 0 0' }}>Loading APY…</p>
             )}
           </button>
         ))}
       </div>
 
       {/* ── Protocol info ── */}
-      <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: 0, lineHeight: 1.5 }}>{proto.description}</p>
+      <div style={{ padding: '12px 14px', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 10 }}>
+        <p style={{ fontSize: 11, color: 'rgba(166,177,198,0.45)', margin: 0, lineHeight: 1.5 }}>{proto.description}</p>
         {apy && (
-          <p style={{ fontSize: 10, color: '#4ade80', fontWeight: 700, margin: '6px 0 0' }}>
+          <p style={{ fontSize: 10, color: '#23262b', fontWeight: 700, margin: '6px 0 0' }}>
             Staking 1 ETH → ~{(apy / 100).toFixed(4)} ETH/year
           </p>
         )}
@@ -177,27 +177,27 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
 
       {/* ── Stake form ── */}
       {stakeStatus === 'done' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '24px 16px', background: 'rgba(74,222,128,0.05)', border: '1px solid rgba(74,222,128,0.2)', borderRadius: 12 }}>
-          <p style={{ fontSize: 13, fontWeight: 900, color: '#4ade80', margin: 0 }}>Staking Transaction Sent</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '24px 16px', background: 'rgba(43,45,51,0.05)', border: '1px solid rgba(43,45,51,0.2)', borderRadius: 12 }}>
+          <p style={{ fontSize: 13, fontWeight: 900, color: '#23262b', margin: 0 }}>Staking Transaction Sent</p>
           {stakeTxHash && (
             <a href={`https://etherscan.io/tx/${stakeTxHash}`} target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
+              style={{ fontSize: 10, color: 'rgba(166,177,198,0.4)', fontFamily: 'monospace' }}>
               {stakeTxHash.slice(0, 16)}…{stakeTxHash.slice(-8)} ↗
             </a>
           )}
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', margin: 0 }}>You will receive {proto.token} tokens representing your staked ETH.</p>
-          <button onClick={() => setStakeStatus('idle')}
-            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', fontSize: 11, fontWeight: 700, padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.3)', margin: 0 }}>You will receive {proto.token} tokens representing your staked ETH.</p>
+          <button className="russo-one-regular" onClick={() => setStakeStatus('idle')}
+            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 8, color: '#23262b', fontSize: 11, fontWeight: 400, padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Stake More
           </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-            <p style={{ fontSize: 10, fontWeight: 900, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Amount to Stake</p>
+            <p className="russo-one-regular" style={{ fontSize: 10, fontWeight: 400, color: 'rgba(166,177,198,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Amount to Stake</p>
             {ethBalance && (
-              <button onClick={() => setStakeAmount((ethBal * 0.999).toFixed(6))}
-                style={{ fontSize: 9, fontWeight: 700, color: '#52ffac', background: 'transparent', border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <button className="russo-one-regular" onClick={() => setStakeAmount((ethBal * 0.999).toFixed(6))}
+                style={{ fontSize: 9, fontWeight: 400, color: '#2b2d33', background: 'transparent', border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 MAX ({parseFloat(ethBalance).toFixed(4)} ETH)
               </button>
             )}
@@ -210,27 +210,28 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
               onChange={e => { setStakeAmount(e.target.value); setStakeError(''); }}
               style={{ ...inp, paddingRight: 48 }}
             />
-            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.4)' }}>ETH</span>
+            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 900, color: 'rgba(166,177,198,0.4)' }}>ETH</span>
           </div>
           {stakeAmount && parseFloat(stakeAmount) > 0 && apy && (
-            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', margin: 0 }}>
+            <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.3)', margin: 0 }}>
               Est. annual yield: ~{(parseFloat(stakeAmount) * apy / 100).toFixed(6)} ETH ({formatUSD(parseFloat(stakeAmount) * apy / 100 * ethPrice)})
             </p>
           )}
-          {stakeError && <p style={{ fontSize: 11, color: '#f87171', margin: 0 }}>{stakeError}</p>}
+          {stakeError && <p style={{ fontSize: 11, color: '#b91c1c', margin: 0 }}>{stakeError}</p>}
           <button
+            className="russo-one-regular"
             onClick={handleStake}
             disabled={stakeStatus === 'signing' || stakeStatus === 'sending' || !stakeAmount || parseFloat(stakeAmount) <= 0}
             style={{
-              background: stakeStatus === 'idle' || stakeStatus === 'error' ? proto.color : 'rgba(255,255,255,0.06)',
-              color: stakeStatus === 'idle' || stakeStatus === 'error' ? '#000' : '#aaa',
-              border: 'none', borderRadius: 12, padding: '14px 20px', fontWeight: 900, fontSize: 13,
+              background: stakeStatus === 'idle' || stakeStatus === 'error' ? '#2b2d33' : 'rgba(166,177,198,0.06)',
+              color: stakeStatus === 'idle' || stakeStatus === 'error' ? '#e4e6ee' : '#8a8f98',
+              border: 'none', borderRadius: 12, padding: '14px 20px', fontWeight: 400, fontSize: 13,
               textTransform: 'uppercase', letterSpacing: '0.08em', cursor: stakeStatus === 'idle' || stakeStatus === 'error' ? 'pointer' : 'not-allowed',
               opacity: !stakeAmount || parseFloat(stakeAmount) <= 0 ? 0.4 : 1, transition: 'all 0.15s',
             }}>
             {stakeStatus === 'signing' ? 'Signing…' : stakeStatus === 'sending' ? 'Broadcasting…' : `Stake ETH via ${proto.name}`}
           </button>
-          <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', textAlign: 'center', margin: 0 }}>
+          <p style={{ fontSize: 9, color: 'rgba(166,177,198,0.2)', textAlign: 'center', margin: 0 }}>
             Only available on Ethereum Mainnet · Smart contract interaction
           </p>
         </div>

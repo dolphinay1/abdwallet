@@ -16,7 +16,7 @@ test.describe('Ledger + Security Scan', () => {
     const ledgerBtn = page.locator('button').filter({ hasText: /^usb\s*LEDGER$/i })
       .or(page.locator('button').filter({ hasText: /LEDGER/i })).first();
     await expect(ledgerBtn).toBeVisible({ timeout: 8000 });
-    console.log('✅ Ledger button visible');
+    console.log('[ok] Ledger button visible');
   });
 
   test('Ledger connect modal opens and shows instructions', async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe('Ledger + Security Scan', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);
     await expect(connectText).not.toBeVisible({ timeout: 4000 });
-    console.log('✅ Ledger modal opens/closes');
+    console.log('[ok] Ledger modal opens/closes');
   });
 
   test('WebHID unsupported warning shown in non-Chrome browsers', async ({ browser }) => {
@@ -84,8 +84,8 @@ test.describe('Ledger + Security Scan', () => {
     const warn = page.locator('text=WebHID').or(page.locator('text=Chrome').or(page.locator('text=not supported'))).first();
     const warnVisible = await warn.isVisible({ timeout: 4000 }).catch(() => false);
     await page.screenshot({ path: 'test-results/07-ledger-unsupported.png', fullPage: true });
-    if (warnVisible) console.log('✅ WebHID unsupported warning shown');
-    else console.log('ℹ️  WebHID warning not visible (live site may differ from local)');
+    if (warnVisible) console.log('[ok] WebHID unsupported warning shown');
+    else console.log('[info] WebHID warning not visible (live site may differ from local)');
 
     await ctx.close();
   });
@@ -158,13 +158,13 @@ test.describe('Ledger + Security Scan', () => {
       .first();
     const visible = await warning.isVisible({ timeout: 6000 }).catch(() => false);
     if (visible) {
-      console.log('✅ Risk warning shown in Send modal');
+      console.log('[ok] Risk warning shown in Send modal');
       // Send button should be blocked
       const sendSubmit = page.locator('button').filter({ hasText: /Send ETH|Dismiss Risk/i }).first();
       const label = await sendSubmit.textContent();
       console.log('Send button label:', label?.trim());
     } else {
-      console.log('ℹ️  Risk warning not visible (may need live deployment)');
+      console.log('[info] Risk warning not visible (may need live deployment)');
     }
 
     await page.keyboard.press('Escape');
@@ -222,8 +222,8 @@ test.describe('Ledger + Security Scan', () => {
     // Check the swap modal is open
     const swapTitle = page.locator('text=Swap').filter({ visible: true }).first();
     const isOpen = await swapTitle.isVisible({ timeout: 4000 }).catch(() => false);
-    if (isOpen) console.log('✅ Swap modal opened');
-    else console.log('ℹ️  Swap modal not found');
+    if (isOpen) console.log('[ok] Swap modal opened');
+    else console.log('[info] Swap modal not found');
 
     await page.keyboard.press('Escape');
   });
@@ -257,7 +257,7 @@ test.describe('Ledger + Security Scan', () => {
     });
     expect(stored.length).toBe(1);
     expect(stored[0].address).toBe('0xAbCdEf1234567890AbCdEf1234567890AbCdEf12');
-    console.log('✅ Ledger device localStorage key verified');
+    console.log('[ok] Ledger device localStorage key verified');
   });
 
 });

@@ -1,13 +1,13 @@
-// Wallet history — session-based auto-tracking + optional encrypted persist.
-// When isSaved=true the mnemonic is stored encrypted via AES-GCM / PBKDF2
-// in a separate localStorage key (__gw_vault_<id>__). The passphrase never
-// leaves the browser; IndexedDB is NOT used here so the vault survives
-// cross-origin storage partitioning that affects IDB on some browsers.
+// Wallet history — session-based auto-tracking + encrypted persist.
+// Uses session-derived ephemeral keying without plaintext key storage in localStorage.
+
+import { getTabKey } from './session-lock';
 
 const HISTORY_KEY = '__gw_wallet_history__';
 const MAX_HISTORY = 5;
 const NON_EVM_WARNED_KEY = '__gw_non_evm_warned__';
 const VAULT_PREFIX = '__gw_vault_';
+const LEGACY_KEY_MATERIAL = '__gw_hs_key__';
 
 export interface WalletSnapshot {
   id: string;
@@ -25,17 +25,14 @@ export interface WalletSnapshot {
   isNonEvm?: boolean;
 }
 
-// ── AES-GCM helpers (app-level key, convenience storage — not passphrase-gated) ─
-// This is a convenience feature: mnemonic is obfuscated in localStorage so it
-// isn't visible in plain text, but anyone with DevTools access could read it.
-// Users are warned via the UI that this device stores wallet data.
-
-const APP_KEY_SEED = 'abd-wallet-history-v1';
-
+// ── AES-GCM helpers using session-derived ephemeral key ─────────────────────────
 async function getAppKey(): Promise<CryptoKey> {
-  const enc = new TextEncoder();
-  const raw = await crypto.subtle.digest('SHA-256', enc.encode(APP_KEY_SEED));
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  // Wipe any legacy plaintext key material from localStorage
+  try { localStorage.removeItem(LEGACY_KEY_MATERIAL); } catch {}
+
+  const keyHex = getTabKey();
+  const rawBytes = new Uint8Array(keyHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+  return crypto.subtle.importKey('raw', rawBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
 async function encryptMnemonic(mnemonic: string): Promise<string> {
@@ -58,24 +55,19 @@ async function decryptMnemonic(blob: string): Promise<string> {
 }
 
 // ── Saved vault storage ───────────────────────────────────────────────────────
-
 function vaultKey(id: string): string { return `${VAULT_PREFIX}${id}__`; }
 
-// Auto-store mnemonic blob for a history entry (not marked as saved).
-// Called when a wallet is added to history.
 export async function storeVaultBlob(id: string, mnemonic: string): Promise<void> {
   const blob = await encryptMnemonic(mnemonic);
   try { localStorage.setItem(vaultKey(id), blob); } catch {}
 }
 
-// Mark an entry as saved (moves it to Saved Vaults). Blob must already exist.
 export function markWalletSaved(id: string): void {
   const history = load();
   const updated = history.map(s => s.id === id ? { ...s, isSaved: true } : s);
   save(updated);
 }
 
-// Persist + mark saved in one step (for Save button).
 export async function persistWallet(id: string, mnemonic: string): Promise<void> {
   await storeVaultBlob(id, mnemonic);
   markWalletSaved(id);
@@ -91,20 +83,25 @@ export function deleteSavedVault(id: string): void {
   try { localStorage.removeItem(vaultKey(id)); } catch {}
 }
 
+export function getSavedVaults(): WalletSnapshot[] {
+  return load().filter(s => s.isSaved && !!localStorage.getItem(vaultKey(s.id)));
+}
+
+// ── History CRUD ──────────────────────────────────────────────────────────────
 function load(): WalletSnapshot[] {
-  if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(HISTORY_KEY);
-    return raw ? (JSON.parse(raw) as WalletSnapshot[]) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
-function save(history: WalletSnapshot[]): void {
-  if (typeof window === 'undefined') return;
+function save(list: WalletSnapshot[]): void {
   try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
   } catch {}
 }
 
@@ -112,90 +109,85 @@ export function getHistory(): WalletSnapshot[] {
   return load();
 }
 
-export function addToHistory(snapshot: WalletSnapshot): void {
+export function addToHistory(snapshot: Omit<WalletSnapshot, 'createdAt'>): WalletSnapshot[] {
   const history = load();
-  const filtered = history.filter((s) => s.address !== snapshot.address);
+  const filtered = history.filter(s => s.id !== snapshot.id);
+  const full: WalletSnapshot = {
+    ...snapshot,
+    createdAt: Date.now(),
+  };
+  const updated = [full, ...filtered].slice(0, MAX_HISTORY);
+  save(updated);
+  return updated;
+}
 
-  // Saved wallets are never dropped — only unsaved entries are capped at MAX_HISTORY
-  const saved   = filtered.filter(s => s.isSaved);
-  const unsaved = filtered.filter(s => !s.isSaved);
-
-  // Keep at most MAX_HISTORY-1 unsaved entries so the new snapshot fits
-  const keptUnsaved  = unsaved.slice(0, MAX_HISTORY - 1);
-  const droppedUnsaved = unsaved.slice(MAX_HISTORY - 1);
-
-  // Delete vault blobs only for dropped unsaved entries
-  for (const s of droppedUnsaved) {
-    try { localStorage.removeItem(vaultKey(s.id)); } catch {}
-  }
-
-  // New snapshot goes first, then saved wallets, then remaining unsaved
-  const updated = [snapshot, ...saved, ...keptUnsaved];
+export function updateSnapshotLabel(id: string, label: string): void {
+  const history = load();
+  const updated = history.map(s => s.id === id ? { ...s, label: label.trim() || undefined } : s);
   save(updated);
 }
 
-export function saveWallet(id: string): void {
+export function updateSnapshotChain(id: string, chainData: {
+  chainId?: number;
+  chainName?: string;
+  chainColor?: string;
+  chainLogo?: string;
+  coinSymbol?: string;
+  isNonEvm?: boolean;
+}): void {
   const history = load();
-  const updated = history.map((s) => s.id === id ? { ...s, isSaved: true } : s);
+  const updated = history.map(s => s.id === id ? { ...s, ...chainData } : s);
   save(updated);
 }
 
-export function unsaveWallet(id: string): void {
+export function removeFromHistory(id: string): WalletSnapshot[] {
   const history = load();
-  const updated = history.map((s) => s.id === id ? { ...s, isSaved: false } : s);
+  const updated = history.filter(s => s.id !== id);
   save(updated);
-}
-
-export function removeFromHistory(id: string): void {
-  const history = load();
-  save(history.filter((s) => s.id !== id));
-}
-
-export function updateLabel(id: string, label: string): void {
-  const history = load();
-  const updated = history.map((s) => s.id === id ? { ...s, label } : s);
-  save(updated);
-}
-
-export function updateSnapshotChain(id: string, chain: { chainId?: number; chainName?: string; chainColor?: string; chainLogo?: string; coinSymbol?: string; isNonEvm?: boolean }): void {
-  const history = load();
-  const updated = history.map((s) => s.id === id ? { ...s, ...chain } : s);
-  save(updated);
+  deleteSavedVault(id);
+  return updated;
 }
 
 export function clearHistory(): void {
-  if (typeof window === 'undefined') return;
+  const history = load();
+  history.forEach(s => deleteSavedVault(s.id));
   try { localStorage.removeItem(HISTORY_KEY); } catch {}
+}
+
+export function findSnapshot(id: string): WalletSnapshot | undefined {
+  return load().find(s => s.id === id);
 }
 
 export function makeSnapshot(
   address: string,
-  mode: 'EPHEMERAL' | 'PERSISTENT',
-  chain?: { chainId?: number; chainName?: string; chainColor?: string; chainLogo?: string; coinSymbol?: string; isNonEvm?: boolean }
-): WalletSnapshot {
+  vaultMode: 'EPHEMERAL' | 'PERSISTENT' = 'EPHEMERAL',
+  chainData?: {
+    chainId?: number;
+    chainName?: string;
+    chainColor?: string;
+    chainLogo?: string;
+    coinSymbol?: string;
+    isNonEvm?: boolean;
+  }
+): Omit<WalletSnapshot, 'createdAt'> {
+  const shortAddress = address.length > 10
+    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+    : address;
+  const id = `${address.toLowerCase()}_${Date.now()}`;
   return {
-    id: crypto.randomUUID(),
+    id,
     address,
-    shortAddress: `${address.slice(0, 6)}...${address.slice(-4)}`,
-    createdAt: Date.now(),
+    shortAddress,
     isSaved: false,
-    vaultMode: mode,
-    chainId: chain?.chainId,
-    chainName: chain?.chainName,
-    chainColor: chain?.chainColor,
-    chainLogo: chain?.chainLogo,
-    coinSymbol: chain?.coinSymbol,
-    isNonEvm: chain?.isNonEvm,
+    vaultMode,
+    ...chainData,
   };
 }
 
-// Non-EVM first-use warning flag
-export function hasSeenNonEVMWarning(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem(NON_EVM_WARNED_KEY) === '1';
+export function hasNonEvmWarned(): boolean {
+  try { return !!localStorage.getItem(NON_EVM_WARNED_KEY); } catch { return false; }
 }
 
-export function markNonEVMWarningSeen(): void {
-  if (typeof window === 'undefined') return;
+export function setNonEvmWarned(): void {
   try { localStorage.setItem(NON_EVM_WARNED_KEY, '1'); } catch {}
 }

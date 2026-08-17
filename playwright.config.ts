@@ -12,7 +12,7 @@ export default defineConfig({
   outputDir: 'test-results',
 
   use: {
-    baseURL: 'https://abdwallet.app',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     headless: false,
     viewport: null,
     screenshot: 'only-on-failure',

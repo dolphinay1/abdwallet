@@ -1,1928 +1,43 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import {
-  Copy, Check, X, ExternalLink, Trash2,
-  ArrowUpRight, ArrowDownLeft, Zap, Wifi, WifiOff, AlertCircle, Link,
-} from 'lucide-react';
-import CountUp from '@/components/CountUp';
-import { useWallet } from '@/context/WalletContext';
-import { clearShadow } from '@/lib/session-lock';
-import { CHAINS, Chain } from '@/lib/chains';
-import { fetchTokenBalances, fetchTxHistory, TokenBalance, TxRecord } from '@/lib/tokens';
-import { getPrices, getPriceData, formatUSD, type PriceData } from '@/lib/prices';
-import { buildMaskedTransaction, stealthDelay, fireDummyEchoes, estimateFee } from '@/lib/transaction';
-import { ephemeralSign } from '@/lib/signer';
-import { getProvider } from '@/lib/provider';
-import { ethers } from 'ethers';
-import { ABDCapsule } from '@/components/ABDCapsule';
-import { WalletConnectModal } from '@/components/WalletConnectModal';
-import { SwapModal } from '@/components/SwapModal';
-import type { ChainTx } from '@/components/ChainPanel';
-import { deriveBTCWallet, getBTCBalance, getBTCTransactions, estimateBTCFee, buildBTCTransaction, broadcastBTC } from '@/lib/btc';
-import { deriveDOGEWallet, getDOGEBalance, getDOGETransactions, estimateDOGEFee, buildDOGETransaction, broadcastDOGE } from '@/lib/doge';
-import { deriveBCHWallet, getBCHBalance, getBCHTransactions, estimateBCHFee, buildBCHTransaction, broadcastBCH } from '@/lib/bch';
-import { deriveSOLWallet, getSOLBalance, getSOLTransactions, sendSOL, estimateSOLFee } from '@/lib/sol';
-import { deriveXRPWallet, getXRPBalance, getXRPTransactions, sendXRP } from '@/lib/xrp';
-import { deriveXLMWallet, getXLMBalance, getXLMTransactions, sendXLM } from '@/lib/xlm';
-import { deriveNANOWallet, getNANOBalance, getNANOTransactions, sendNANO } from '@/lib/nano';
-import { deriveHBARWallet, getHBARBalance, getHBARTransactions, sendHBAR } from '@/lib/hedera';
-import { deriveSUIWallet, getSUIBalance, getSUITransactions, sendSUI } from '@/lib/sui';
-import { deriveAPTOSWallet, getAPTOSBalance, getAPTOSTransactions, sendAPTOS } from '@/lib/aptos';
-import { deriveLTCWallet, getLTCBalance, getLTCTransactions, buildLTCTransaction, broadcastLTC, estimateLTCFee } from '@/lib/ltc';
-import { deriveTronWallet, getTronBalance, getTetherBalanceOnTron } from '@/lib/tron';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { springs, variants } from '@/lib/animations';
-import { getHistory, addToHistory, makeSnapshot, removeFromHistory, deleteSavedVault, updateSnapshotChain, storeVaultBlob, WalletSnapshot } from '@/lib/wallet-history';
-import { WarningBanner } from '@/components/WarningBanner';
-import { TransferModal } from '@/components/TransferModal';
-import { loadContacts, addContact, deleteContact, Contact } from '@/lib/address-book';
-import { fetchNFTs, NFTItem } from '@/lib/nfts';
-import { LedgerConnectModal } from '@/components/LedgerConnectModal';
-import { ledgerSign, LedgerEntry } from '@/lib/ledger';
-import { scanAddress, scanToken, type AddressRisk, type TokenRisk, riskColor, riskBg } from '@/lib/security-scan';
-import { getGasPrices, type GasPrices } from '@/lib/gas';
-import { upperEn } from '@/lib/text';
-import { fetchApprovals, type TokenApproval } from '@/lib/approvals';
+import { Zap } from 'lucide-react';
+import { addContact, deleteContact } from '@/lib/address-book';
+import { updateSnapshotChain, deleteSavedVault, removeFromHistory, getHistory } from '@/lib/wallet-history';
+import { NON_EVM_META } from './dashboard/types';
+
+import { DashboardModals } from './dashboard/DashboardModals';
+import { DashboardHeader } from './dashboard/DashboardHeader';
+import { DashboardActionGrid } from './dashboard/DashboardActionGrid';
 import { StakingPanel } from '@/components/StakingPanel';
-import { CustomChainModal } from '@/components/CustomChainModal';
-import { CustomTokenModal } from '@/components/CustomTokenModal';
-import { CustomAPIModal } from '@/components/CustomAPIModal';
-import { loadCustomChains, deleteCustomChain, CustomChain } from '@/lib/custom-chains';
-import { loadCustomTokens, deleteCustomToken, CustomToken } from '@/lib/custom-tokens';
-import { loadCustomAPIs, deleteCustomAPI, CustomAPI } from '@/lib/custom-apis';
+import { LightningTab } from './dashboard/tabs/LightningTab';
+import { BalanceTab } from './dashboard/tabs/BalanceTab';
+import { TransactionsTab } from './dashboard/tabs/TransactionsTab';
+import { NFTsTab } from './dashboard/tabs/NFTsTab';
+import { ApprovalsTab } from './dashboard/tabs/ApprovalsTab';
+import { WalletHistorySection } from './dashboard/tabs/WalletHistorySection';
+
+import { NetworkOfflineBanner } from './dashboard/ui/NetworkOfflineBanner';
+import { useDashboardState } from '@/hooks/useDashboardState';
 
-type Tab = 'balance' | 'transactions' | 'nfts' | 'lightning' | 'approvals' | 'staking';
-
-// ─── Non-EVM chain metadata ───────────────────────────────────────────────────
-interface NonEvmMeta {
-  coin: string; name: string; color: string;
-  explorerBase: string; symbol: string; coingeckoId: string; feeUnit?: string;
-  logoUrl?: string;
-}
-const CG_IMG = 'https://assets.coingecko.com/coins/images';
-// Number of DEX/bridge spenders scanned in the Approvals tab (kept in sync with api/approvals/route.ts)
-const KNOWN_SPENDERS_COUNT = 7;
-const NON_EVM_META: Record<string, NonEvmMeta> = {
-  BTC:   { coin: 'BTC',   name: 'Bitcoin',      color: '#F7931A', explorerBase: 'https://blockchair.com/bitcoin/transaction',      symbol: 'BTC',   coingeckoId: 'bitcoin',          feeUnit: 'sat/vByte', logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_bitcoin' },
-  DOGE:  { coin: 'DOGE',  name: 'Dogecoin',     color: '#C2A633', explorerBase: 'https://blockchair.com/dogecoin/transaction',     symbol: 'DOGE',  coingeckoId: 'dogecoin',         feeUnit: 'sat/vByte', logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_dogecoin' },
-  BCH:   { coin: 'BCH',   name: 'Bitcoin Cash', color: '#8DC351', explorerBase: 'https://blockchair.com/bitcoin-cash/transaction', symbol: 'BCH',   coingeckoId: 'bitcoin-cash',     feeUnit: 'sat/vByte', logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_bitcoin-cash' },
-  SOL:   { coin: 'SOL',   name: 'Solana',       color: '#9945FF', explorerBase: 'https://solscan.io/tx',                          symbol: 'SOL',   coingeckoId: 'solana',           feeUnit: 'lamports',  logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_solana' },
-  XRP:   { coin: 'XRP',   name: 'XRP',          color: '#346AA9', explorerBase: 'https://xrpscan.com/tx',                        symbol: 'XRP',   coingeckoId: 'ripple',                                 logoUrl: 'https://cryptologos.cc/logos/xrp-xrp-logo.png' },
-  XLM:   { coin: 'XLM',   name: 'Stellar',      color: '#7D00FF', explorerBase: 'https://stellarchain.io/transactions',          symbol: 'XLM',   coingeckoId: 'stellar',                                logoUrl: 'https://cryptologos.cc/logos/stellar-xlm-logo.png' },
-  NANO:  { coin: 'NANO',  name: 'Nano',         color: '#4A90D9', explorerBase: 'https://nanolooker.com/block',                  symbol: 'NANO',  coingeckoId: 'nano',                                   logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_nano' },
-  HBAR:  { coin: 'HBAR',  name: 'Hedera',       color: '#5d8fbc', explorerBase: 'https://hashscan.io/mainnet/transaction',       symbol: 'HBAR',  coingeckoId: 'hedera-hashgraph',                       logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_hedera' },
-  SUI:   { coin: 'SUI',   name: 'Sui',          color: '#6FBCF0', explorerBase: 'https://suiscan.xyz/mainnet/tx',                symbol: 'SUI',   coingeckoId: 'sui',                                    logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_sui' },
-  APTOS: { coin: 'APTOS', name: 'Aptos',        color: '#00BFAE', explorerBase: 'https://explorer.aptoslabs.com/txn',            symbol: 'APT',   coingeckoId: 'aptos',                                  logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_aptos' },
-  LTC:   { coin: 'LTC',   name: 'Litecoin',     color: '#A5A9B1', explorerBase: 'https://blockchair.com/litecoin/transaction',   symbol: 'LTC',   coingeckoId: 'litecoin',         feeUnit: 'sat/vByte', logoUrl: 'https://cryptologos.cc/logos/litecoin-ltc-logo.png' },
-  TRON:  { coin: 'TRON',  name: 'Tron',         color: '#EB0029', explorerBase: 'https://tronscan.org/#/transaction',            symbol: 'TRX',   coingeckoId: 'tron',                                   logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_tron' },
-  USDT:  { coin: 'USDT',  name: 'Tether',       color: '#26A17B', explorerBase: 'https://etherscan.io/tx',                       symbol: 'USDT',  coingeckoId: 'tether',                                 logoUrl: 'https://icons.llamao.fi/icons/chains/rsz_tether' },
-};
-
-// ─── Unified coin icon — tries logoUrl first, then jsdelivr CDN, then letter ─
-function CoinIcon({ symbol, color, logoUrl, size = 34, label }: {
-  symbol: string; color: string; logoUrl?: string; size?: number; label?: string;
-}) {
-  const [err1, setErr1] = useState(false);
-  const [err2, setErr2] = useState(false);
-  const cdn = `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${symbol.toLowerCase()}.png`;
-  const src = (!err1 && logoUrl) ? logoUrl : (!err2 ? cdn : null);
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-      {src ? (
-        <img src={src} alt={symbol} width={size} height={size}
-          style={{ borderRadius: '50%', objectFit: 'cover' }}
-          onError={() => { if (!err1 && logoUrl) { setErr1(true); } else { setErr2(true); } }} />
-      ) : (
-        <div style={{ width: '100%', height: '100%', background: `${color}18`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-          <span style={{ color, fontSize: size * 0.28, fontWeight: 800, lineHeight: 1 }}>{(label ?? symbol).slice(0, 3)}</span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ChainIcon({ chain, size = 40 }: { chain: Chain; size?: number }) {
-  return <CoinIcon symbol={chain.shortName} color={chain.color} logoUrl={chain.logoUrl} size={size} label={chain.shortName} />;
-}
-
-// ─── All Networks Modal ───────────────────────────────────────────────────────
-function AllNetworksModal({ selected, onSelect, selectedNonEvm, onSelectNonEvm, onClose }: {
-  selected: Chain; onSelect: (c: Chain) => void;
-  selectedNonEvm: string | null; onSelectNonEvm: (coin: string) => void;
-  onClose: () => void;
-}) {
-  const smart = CHAINS.filter(c => c.isAlchemy && !c.isTestnet);
-  const eoa = CHAINS.filter(c => !c.isAlchemy && !c.isTestnet);
-  const testnets = CHAINS.filter(c => c.isTestnet);
-
-  const ChainCard = ({ c }: { c: Chain }) => {
-    const isActive = !selectedNonEvm && selected.id === c.id;
-    return (
-    <button onClick={() => { onSelect(c); onClose(); }} style={{
-      background: isActive ? 'rgba(82,255,172,0.07)' : 'rgba(255,255,255,0.03)',
-      border: isActive ? '1.5px solid rgba(82,255,172,0.4)' : '1px solid rgba(255,255,255,0.04)',
-      borderRadius: '1.5rem', padding: '12px 8px',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-      cursor: 'pointer', position: 'relative', transition: 'all 0.15s', width: '100%'
-    }}>
-      {isActive && (
-        <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: '#52ffac', boxShadow: '0 0 10px #52ffac' }} />
-      )}
-      <ChainIcon chain={c} size={40} />
-      <span style={{ color: '#e5e7eb', fontSize: 12, fontWeight: 700 }}>{c.symbol}</span>
-      <span style={{ color: '#a3a3a3', fontSize: 10 }}>{c.name}</span>
-      {c.isTestnet
-        ? <span style={{ background: '#4c1d9522', color: '#a78bfa', fontSize: 9, padding: '3px 8px', borderRadius: '8px', fontWeight: 800, letterSpacing: '0.05em', boxShadow: '0 0 10px rgba(167,139,250,0.15)' }}>TESTNET</span>
-        : c.isAlchemy
-          ? <span style={{ background: 'rgba(82,255,172,0.12)', color: '#52ffac', fontSize: 9, padding: '3px 8px', borderRadius: '8px', fontWeight: 800, letterSpacing: '0.05em', boxShadow: '0 0 10px rgba(82,255,172,0.2)' }}>GASLESS</span>
-          : <span style={{ background: 'rgba(255,255,255,0.06)', color: '#d1d5db', fontSize: 9, padding: '3px 8px', borderRadius: '8px', fontWeight: 800, letterSpacing: '0.05em' }}>EOA</span>
-      }
-    </button>
-    );
-  };
-
-  return (
-    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      className="popup-backdrop"
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 380, maxWidth: '92vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, fontStyle: 'normal', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>All Networks</span>
-          <button onClick={onClose} style={{ color: '#c6c6c6', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}>
-            <X size={16} />
-          </button>
-        </div>
-        <div style={{ overflowY: 'auto', padding: '16px 24px', flex: 1 }}>
-          <p style={{ color: '#c6c6c6', fontSize: 9, letterSpacing: '0.15em', fontWeight: 900, marginBottom: 12, textTransform: 'uppercase' }}>Smart Wallets (Gasless)</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
-            {smart.map(c => <ChainCard key={c.id} c={c} />)}
-          </div>
-          <p style={{ color: '#c6c6c6', fontSize: 9, letterSpacing: '0.15em', fontWeight: 900, marginBottom: 12, textTransform: 'uppercase' }}>EOA Wallets</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
-            {eoa.map(c => <ChainCard key={c.id} c={c} />)}
-          </div>
-          <p style={{ color: '#c6c6c6', fontSize: 9, letterSpacing: '0.15em', fontWeight: 900, marginBottom: 12, textTransform: 'uppercase' }}>Testnets (Free)</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-            {testnets.map(c => <ChainCard key={c.id} c={c} />)}
-          </div>
-          <p style={{ color: '#c6c6c6', fontSize: 9, letterSpacing: '0.15em', fontWeight: 900, marginBottom: 12, textTransform: 'uppercase' }}>Non-EVM Chains</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
-            {Object.values(NON_EVM_META).map(m => (
-              <button key={m.coin} onClick={() => { onSelectNonEvm(m.coin); onClose(); }} style={{
-                background: selectedNonEvm === m.coin ? `${m.color}18` : 'rgba(255,255,255,0.03)',
-                border: selectedNonEvm === m.coin ? `1.5px solid ${m.color}66` : '1px solid rgba(255,255,255,0.04)',
-                borderRadius: '1.5rem', padding: '12px 8px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                cursor: 'pointer', position: 'relative', transition: 'all 0.15s', width: '100%'
-              }}>
-                {selectedNonEvm === m.coin && (
-                  <div style={{ position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: '50%', background: m.color, boxShadow: `0 0 10px ${m.color}` }} />
-                )}
-                <CoinIcon symbol={m.symbol} color={m.color} logoUrl={m.logoUrl} size={40} />
-                <span style={{ color: '#e5e7eb', fontSize: 12, fontWeight: 700 }}>{m.symbol}</span>
-                <span style={{ color: '#a3a3a3', fontSize: 10 }}>{m.name}</span>
-                <span style={{ background: 'rgba(255,255,255,0.06)', color: '#d1d5db', fontSize: 9, padding: '3px 8px', borderRadius: '8px', fontWeight: 800, letterSpacing: '0.05em' }}>NON-EVM</span>
-              </button>
-            ))}
-          </div>
-          <p style={{ color: '#353535', fontSize: 9, textAlign: 'center' }}>{CHAINS.length} EVM + {Object.keys(NON_EVM_META).length} non-EVM networks</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Send Modal ───────────────────────────────────────────────────────────────
-function SendModal({ tokens, prices, defaultChain, onClose, activeLedger }: {
-  tokens: TokenBalance[];
-  prices: Record<string, number>;
-  defaultChain: Chain;
-  onClose: () => void;
-  activeLedger?: LedgerEntry | null;
-}) {
-  const wallet = useWallet();
-  const [to, setTo] = useState('');
-  const [whole, setWhole] = useState('');
-  const [dec, setDec] = useState('');
-  const [selectedChain, setSelectedChain] = useState<Chain>(defaultChain);
-  const [networkOpen, setNetworkOpen] = useState(false);
-  const [tokenOpen, setTokenOpen] = useState(false);
-  const [contactOpen, setContactOpen] = useState(false);
-  const [contacts, setContacts] = useState(() => loadContacts());
-  const [chainTokens, setChainTokens] = useState<TokenBalance[]>(tokens);
-  const [selectedToken, setSelectedToken] = useState<TokenBalance | null>(null);
-  const [status, setStatus] = useState<'idle' | 'simulating' | 'confirm' | 'signing' | 'sending' | 'done' | 'error'>('idle');
-  const [txHash, setTxHash] = useState('');
-  const [errMsg, setErrMsg] = useState('');
-  const [simResult, setSimResult] = useState<{ changes: Array<{ changeType: string; from: string; to: string; amount?: string; symbol?: string }>; gas: number } | null>(null);
-  const [addrRisk, setAddrRisk] = useState<AddressRisk | null>(null);
-  const [tokenRisk, setTokenRisk] = useState<TokenRisk | null>(null);
-  const [riskDismissed, setRiskDismissed] = useState(false);
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-  const [feeEth, setFeeEth] = useState<string | null>(null);
-  const [feeUsd, setFeeUsd] = useState<number | null>(null);
-  const [feeLoading, setFeeLoading] = useState(false);
-  const feeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const nativePriceRef = useRef<number>(0);
-  const qrInputRef = useRef<HTMLInputElement>(null);
-
-  const handleQRScan = async (file: File) => {
-    const parseQRAddress = (raw: string): string =>
-      raw.startsWith('ethereum:') ? raw.replace(/^ethereum:/i, '').split('?')[0].split('@')[0] : raw;
-
-    try {
-      const bitmap = await createImageBitmap(file);
-      // @ts-expect-error BarcodeDetector not in all TS libs yet
-      if (typeof BarcodeDetector !== 'undefined') {
-        // @ts-expect-error BarcodeDetector
-        const codes = await new BarcodeDetector({ formats: ['qr_code'] }).detect(bitmap);
-        if (codes.length > 0) {
-          const addr = parseQRAddress(codes[0].rawValue);
-          if (ethers.isAddress(addr)) { setTo(addr); return; }
-        }
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = bitmap.width; canvas.height = bitmap.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.drawImage(bitmap, 0, 0);
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const { default: jsQR } = await import('jsqr');
-      const code = jsQR(imgData.data, imgData.width, imgData.height);
-      if (code) {
-        const addr = parseQRAddress(code.data);
-        if (ethers.isAddress(addr)) setTo(addr);
-      }
-    } catch {}
-  };
-
-  // Re-fetch tokens whenever selected chain changes
-  useEffect(() => {
-    if (!wallet.activeAddress) return;
-    fetchTokenBalances(wallet.activeAddress, selectedChain.id)
-      .then(toks => {
-        setChainTokens(toks);
-        const withBal = toks.filter(t => parseFloat(t.balance || '0') > 0);
-        setSelectedToken(withBal[0] ?? toks.find(t => t.contractAddress === 'native') ?? toks[0] ?? null);
-      })
-      .catch(() => { setChainTokens([]); setSelectedToken(null); });
-  }, [selectedChain.id, wallet.activeAddress]);
-
-  // Cache native token price for fee USD conversion
-  useEffect(() => {
-    getPrices([selectedChain.coingeckoId]).then(p => {
-      nativePriceRef.current = p[selectedChain.coingeckoId] ?? 0;
-    }).catch(() => {});
-  }, [selectedChain.id]);
-
-  // Real-time fee estimation — debounced 500ms, uses eth_estimateGas when params known
-  const refreshFee = useCallback((
-    toAddr: string, amtStr: string, token: TokenBalance | null, chain: Chain, fromAddr: string
-  ) => {
-    if (feeTimerRef.current) clearTimeout(feeTimerRef.current);
-    const isErc20 = !!(token && token.contractAddress !== 'native');
-
-    // Build txParams if we have enough info for eth_estimateGas
-    let txParams: Parameters<typeof estimateFee>[2];
-    const validTo = ethers.isAddress(toAddr);
-    const amt = parseFloat(amtStr);
-    if (validTo && amt > 0 && fromAddr) {
-      try {
-        if (isErc20 && token && token.contractAddress !== 'native') {
-          const amountRaw = ethers.parseUnits(amtStr, token.decimals ?? 18);
-          const addr = toAddr.toLowerCase().replace('0x', '').padStart(64, '0');
-          const amtHex = amountRaw.toString(16).padStart(64, '0');
-          txParams = {
-            from: fromAddr,
-            to: token.contractAddress as string,
-            value: 0n,
-            data: '0xa9059cbb' + addr + amtHex,
-          };
-        } else {
-          txParams = {
-            from: fromAddr,
-            to: toAddr,
-            value: ethers.parseEther(amtStr),
-          };
-        }
-      } catch { txParams = undefined; }
-    }
-
-    setFeeLoading(true);
-    feeTimerRef.current = setTimeout(async () => {
-      try {
-        const { eth } = await estimateFee(chain.id, isErc20, txParams);
-        const ethNum = parseFloat(eth);
-        const formatted = ethNum < 0.000001 ? ethNum.toExponential(2) : ethNum.toFixed(8).replace(/\.?0+$/, '');
-        setFeeEth(formatted);
-        setFeeUsd(ethNum * nativePriceRef.current);
-      } catch {
-        setFeeEth(null); setFeeUsd(null);
-      } finally {
-        setFeeLoading(false);
-      }
-    }, 500);
-  }, []);
-
-  // Trigger fee refresh on any relevant change
-  useEffect(() => {
-    if (!wallet.activeAddress) return;
-    const amtStr = `${whole || '0'}.${dec || '0'}`;
-    refreshFee(to, amtStr, selectedToken, selectedChain, wallet.activeAddress);
-    return () => { if (feeTimerRef.current) clearTimeout(feeTimerRef.current); };
-  }, [to, whole, dec, selectedToken?.contractAddress, selectedChain.id, wallet.activeAddress]);
-
-  // Scan recipient address and token for security risks (debounced)
-  useEffect(() => {
-    setAddrRisk(null); setRiskDismissed(false);
-    if (!ethers.isAddress(to)) return;
-    const timer = setTimeout(() => { scanAddress(to).then(setAddrRisk).catch(() => {}); }, 700);
-    return () => clearTimeout(timer);
-  }, [to]);
-
-  useEffect(() => {
-    setTokenRisk(null);
-    const addr = selectedToken?.contractAddress;
-    if (!addr || addr === 'native') return;
-    const timer = setTimeout(() => { scanToken(selectedChain.id, addr).then(setTokenRisk).catch(() => {}); }, 700);
-    return () => clearTimeout(timer);
-  }, [selectedToken?.contractAddress, selectedChain.id]);
-
-  const isNative = !selectedToken || selectedToken.contractAddress === 'native';
-  const amountStr = `${whole || '0'}.${dec || '0'}`;
-  const amountNum = parseFloat(amountStr);
-  const selectedBal = parseFloat(selectedToken?.balance ?? '0');
-  const tokenSymbol = selectedToken?.symbol ?? selectedChain.symbol;
-
-  const digitsOnly = (e: React.KeyboardEvent) => {
-    if (!/^\d$/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) {
-      e.preventDefault();
-    }
-  };
-
-  const handleSend = async () => {
-    if (!wallet.activeAddress || !wallet.scatteredKeyStore) { setErrMsg('Wallet not ready'); return; }
-    if (!ethers.isAddress(to)) { setErrMsg('Invalid address'); return; }
-    if (!amountNum || amountNum <= 0 || isNaN(amountNum)) { setErrMsg('Invalid amount'); return; }
-    if (amountNum > selectedBal) { setErrMsg('Secili Networkta Bakiye Yetersiz'); return; }
-
-    const contractAddr = (!isNative && selectedToken) ? selectedToken.contractAddress as string : undefined;
-    const decimals = selectedToken?.decimals ?? 18;
-
-    // Simulate first if Alchemy chain — then show confirm step
-    if (selectedChain.isAlchemy) {
-      setStatus('simulating'); setErrMsg(''); setSimResult(null);
-      try {
-        const txForSim = await buildMaskedTransaction(to, amountStr, wallet.activeAddress, selectedChain.id, contractAddr, decimals);
-        const simRes = await fetch('/api/simulate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tx: { from: wallet.activeAddress, to: txForSim.to, value: txForSim.value ? '0x' + (txForSim.value as bigint).toString(16) : '0x0', data: txForSim.data ?? '0x' }, chainId: selectedChain.id }),
-        });
-        if (simRes.ok) {
-          const simData = await simRes.json();
-          if (!simData.error) {
-            setSimResult({ changes: simData.changes ?? [], gas: parseInt(simData.gasUsed ?? '0x0', 16) });
-          }
-        }
-      } catch {}
-      // Pause here — user must confirm before broadcasting
-      setStatus('confirm');
-      return;
-    }
-
-    await executeSend(contractAddr, decimals);
-  };
-
-  const executeSend = async (contractAddr?: string, decimals = 18) => {
-    if (!wallet.activeAddress || (!wallet.scatteredKeyStore && !activeLedger)) return;
-    setStatus('signing'); setErrMsg('');
-    try {
-      const tx = await buildMaskedTransaction(to, amountStr, wallet.activeAddress, selectedChain.id, contractAddr, decimals);
-      setStatus('sending');
-      await stealthDelay();
-      void fireDummyEchoes();
-      const signed = activeLedger
-        ? await ledgerSign(activeLedger.derivationPath, { ...tx, from: wallet.activeAddress })
-        : await ephemeralSign(wallet.scatteredKeyStore!, tx);
-      const provider = getProvider(selectedChain.id);
-      const result = await provider.send('eth_sendRawTransaction', [signed]);
-      if (result && typeof result === 'object') {
-        const err = (result as Record<string, unknown>).error ?? result;
-        const errMsg_ = (err as Record<string, unknown>).message;
-        throw new Error(typeof errMsg_ === 'string' ? errMsg_ : JSON.stringify(err));
-      }
-      setTxHash(typeof result === 'string' ? result : '');
-      setStatus('done');
-    } catch (e: unknown) {
-      let msg = 'Transaction failed';
-      try {
-        const raw: string = (() => {
-          if (e instanceof Error) return e.message;
-          if (typeof e === 'string') return e;
-          try { return JSON.stringify(e); } catch { return 'Unknown error'; }
-        })();
-        const jsonMatch = raw.match(/\{[\s\S]{0,500}\}/);
-        if (jsonMatch) {
-          try {
-            const p = JSON.parse(jsonMatch[0]);
-            const inner = p?.error?.message ?? p?.message ?? p?.reason;
-            msg = typeof inner === 'string' ? inner.slice(0, 140) : 'Transaction rejected by network';
-          } catch { msg = raw.slice(0, 120) + (raw.length > 120 ? '…' : ''); }
-        } else {
-          const m = raw.match(/reason["\s:]+([^"}{,\n]{3,80})/i) ?? raw.match(/message["\s:]+([^"}{,\n]{3,80})/i);
-          msg = m ? m[1].trim() : (raw.length <= 120 ? raw : raw.slice(0, 120) + '…');
-        }
-      } catch {}
-      setErrMsg(String(msg));
-      setStatus('error');
-    }
-  };
-
-  const box: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.05)', borderRadius: '1rem',
-    padding: '10px 16px', border: '1px solid rgba(255,255,255,0.07)',
-  };
-  const inp: React.CSSProperties = {
-    width: '100%', background: 'transparent', border: 'none', outline: 'none',
-    color: '#fff', fontSize: 13, fontFamily: 'inherit',
-  };
-
-  return (
-    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      className="popup-backdrop"
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 420, maxWidth: '94vw', padding: '28px', border: '1px solid rgba(255,255,255,0.1)' }}>
-
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <span style={{ color: '#fff', fontSize: 22, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Send</span>
-          <button onClick={onClose} style={{ color: '#c6c6c6', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}>
-            <X size={18} />
-          </button>
-        </div>
-
-        {status === 'done' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '24px 0' }}>
-            <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'rgba(82,255,172,0.1)', border: '2px solid rgba(82,255,172,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Check size={26} style={{ color: '#52ffac' }} />
-            </div>
-            <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, textTransform: 'uppercase' }}>Broadcast!</span>
-            <span style={{ color: '#c6c6c6', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>{txHash}</span>
-            <a href={`${selectedChain.explorerUrl}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
-              style={{ color: '#52ffac', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 700 }}>
-              View on Explorer <ExternalLink size={12} />
-            </a>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-            {/* Row: Network + Token selectors side by side */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-
-              {/* Network dropdown */}
-              <div style={{ position: 'relative' }}>
-                <button onClick={() => { setNetworkOpen(o => !o); setTokenOpen(false); }}
-                  style={{ ...box, width: '100%', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <CoinIcon symbol={selectedChain.shortName} color={selectedChain.color} logoUrl={selectedChain.logoUrl} size={22} />
-                  <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#fff', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedChain.name}</span>
-                  <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth={2.5} strokeLinecap="round" style={{ transform: networkOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}>
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </button>
-                {networkOpen && (
-                  <div className="popup-enter" style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 60, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', maxHeight: 200, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
-                    {CHAINS.map(c => {
-                      const active = selectedChain.id === c.id;
-                      return (
-                        <button key={c.id} onClick={() => { setSelectedChain(c); setNetworkOpen(false); }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', width: '100%', border: 'none', background: active ? `${c.color}18` : 'transparent', cursor: 'pointer' }}>
-                          <CoinIcon symbol={c.shortName} color={c.color} logoUrl={c.logoUrl} size={20} />
-                          <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: active ? c.color : '#ccc', textAlign: 'left' }}>{c.name}</span>
-                          {active && <div style={{ width: 5, height: 5, borderRadius: '50%', background: c.color, flexShrink: 0 }} />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Token dropdown */}
-              <div style={{ position: 'relative' }}>
-                <button onClick={() => { setTokenOpen(o => !o); setNetworkOpen(false); }}
-                  style={{ ...box, width: '100%', display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  {selectedToken?.logo
-                    ? <img src={selectedToken.logo} width={22} height={22} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt={selectedToken.symbol} />
-                    : <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 900, color: '#fff', flexShrink: 0 }}>{(selectedToken?.symbol ?? '?').slice(0,2)}</div>
-                  }
-                  <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#fff', textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedToken?.symbol ?? 'Select'}</span>
-                  <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth={2.5} strokeLinecap="round" style={{ transform: tokenOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}>
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </button>
-                {tokenOpen && (
-                  <div className="popup-enter" style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 60, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', maxHeight: 200, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
-                    {chainTokens.length === 0
-                      ? <p style={{ color: '#555', fontSize: 11, padding: '12px 14px', textAlign: 'center' }}>No tokens found</p>
-                      : chainTokens.map((t, i) => {
-                          const active = selectedToken?.contractAddress === t.contractAddress;
-                          const bal = parseFloat(t.balance || '0');
-                          return (
-                            <button key={i} onClick={() => { setSelectedToken(t); setTokenOpen(false); }}
-                              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', width: '100%', border: 'none', background: active ? 'rgba(255,255,255,0.06)' : 'transparent', cursor: 'pointer' }}>
-                              {t.logo
-                                ? <img src={t.logo} width={20} height={20} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt={t.symbol} />
-                                : <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 900, color: '#fff', flexShrink: 0 }}>{t.symbol.slice(0,2)}</div>
-                              }
-                              <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: active ? '#fff' : '#ccc', textAlign: 'left' }}>{t.symbol}</span>
-                              <span style={{ fontSize: 9, color: '#555', fontWeight: 700 }}>{bal > 0 ? (bal < 0.0001 ? '<0.0001' : bal.toFixed(4)) : '0'}</span>
-                              {active && <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#52ffac', flexShrink: 0 }} />}
-                            </button>
-                          );
-                        })
-                    }
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Balance hint */}
-            {selectedToken && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 4px' }}>
-                <span style={{ fontSize: 10, color: '#555', fontWeight: 700 }}>
-                  Balance: {selectedBal < 0.000001 && selectedBal > 0 ? '< 0.000001' : selectedBal.toFixed(6)} {tokenSymbol}
-                </span>
-              </div>
-            )}
-
-            {/* Recipient */}
-            <div style={{ position: 'relative' }}>
-              <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input type="text" placeholder="Recipient address (0x...)" autoComplete="off"
-                  value={to} onChange={e => { setTo(e.target.value); setContactOpen(false); }} style={{ ...inp, flex: 1 }} />
-                {contacts.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setContactOpen(o => !o)}
-                    title="Address book"
-                    style={{ flexShrink: 0, background: contactOpen ? 'rgba(82,255,172,0.15)' : 'rgba(82,255,172,0.08)', border: '1px solid rgba(82,255,172,0.2)', borderRadius: 8, padding: '5px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#52ffac" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => qrInputRef.current?.click()}
-                  title="Scan QR code"
-                  style={{ flexShrink: 0, background: 'rgba(82,255,172,0.08)', border: '1px solid rgba(82,255,172,0.2)', borderRadius: 8, padding: '5px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#52ffac" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                    <line x1="14" y1="14" x2="14" y2="14"/><line x1="17" y1="14" x2="21" y2="14"/><line x1="14" y1="17" x2="14" y2="21"/><line x1="21" y1="17" x2="17" y2="21"/>
-                  </svg>
-                </button>
-                <input
-                  ref={qrInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  style={{ display: 'none' }}
-                  onChange={e => { const f = e.target.files?.[0]; if (f) handleQRScan(f); e.target.value = ''; }}
-                />
-              </div>
-              {contactOpen && contacts.length > 0 && (
-                <div className="popup-enter" style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 60, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', maxHeight: 180, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
-                  {contacts.map(c => (
-                    <button key={c.id} onClick={() => { setTo(c.address); setContactOpen(false); }}
-                      style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 14px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{c.name}</span>
-                      <span style={{ fontSize: 10, color: '#555', fontFamily: 'monospace' }}>{c.address.slice(0,10)}...{c.address.slice(-6)}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Amount */}
-            <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 0 }}>
-              <input type="text" inputMode="numeric" placeholder="0" autoComplete="off"
-                value={whole} onKeyDown={digitsOnly}
-                onChange={e => setWhole(e.target.value.replace(/\D/g, ''))}
-                style={{ ...inp, width: '40%', textAlign: 'right', fontSize: 20, fontWeight: 900 }} />
-              <span style={{ color: '#52ffac', fontSize: 24, fontWeight: 900, padding: '0 4px', flexShrink: 0 }}>.</span>
-              <input type="text" inputMode="numeric" placeholder="00" autoComplete="off"
-                value={dec} onKeyDown={digitsOnly}
-                onChange={e => setDec(e.target.value.replace(/\D/g, '').slice(0, 18))}
-                style={{ ...inp, width: '40%', fontSize: 20, fontWeight: 900 }} />
-              <button
-                onClick={() => { const s = selectedBal.toFixed(18).replace(/\.?0+$/, ''); const [w, d=''] = s.split('.'); setWhole(w); setDec(d); }}
-                style={{ fontSize: 9, fontWeight: 900, color: '#52ffac', background: 'rgba(82,255,172,0.08)', border: '1px solid rgba(82,255,172,0.2)', borderRadius: 6, padding: '3px 7px', cursor: 'pointer', marginLeft: 6, flexShrink: 0, textTransform: 'uppercase' }}>
-                Max
-              </button>
-              <span style={{ color: '#666', fontSize: 10, fontWeight: 900, marginLeft: 6, flexShrink: 0 }}>{tokenSymbol}</span>
-            </div>
-
-            {/* Network fee — live from eth_estimateGas */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 4px' }}>
-              <span style={{ fontSize: 10, color: '#555', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Network Fee</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                {feeLoading && (
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid rgba(82,255,172,0.2)', borderTopColor: '#52ffac', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
-                )}
-                {feeEth !== null ? (
-                  <span style={{ fontSize: 10, fontWeight: 900, color: ethers.isAddress(to) && amountNum > 0 ? '#ccc' : '#666' }}>
-                    ~{feeEth} {selectedChain.symbol}
-                    {feeUsd !== null && feeUsd > 0 && (
-                      <span style={{ color: '#555', marginLeft: 5 }}>({formatUSD(feeUsd)})</span>
-                    )}
-                  </span>
-                ) : (
-                  !feeLoading && <span style={{ fontSize: 10, color: '#444', fontWeight: 700 }}>—</span>
-                )}
-              </span>
-            </div>
-
-            {/* Confirm screen — shown after simulation completes */}
-            {status === 'confirm' && (
-              <div style={{ background: 'rgba(82,255,172,0.04)', border: '1px solid rgba(82,255,172,0.2)', borderRadius: 14, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p style={{ color: '#52ffac', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0 }}>Transaction Preview</p>
-                {/* Summary row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 10 }}>
-                  <span style={{ fontSize: 11, color: '#aaa', fontWeight: 700 }}>Sending</span>
-                  <span style={{ fontSize: 13, color: '#fff', fontWeight: 900, fontFamily: 'monospace' }}>{amountStr} {tokenSymbol}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 10 }}>
-                  <span style={{ fontSize: 11, color: '#aaa', fontWeight: 700 }}>To</span>
-                  <span style={{ fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'monospace' }}>{to.slice(0, 10)}…{to.slice(-6)}</span>
-                </div>
-                {feeEth && (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 10 }}>
-                    <span style={{ fontSize: 11, color: '#aaa', fontWeight: 700 }}>Network Fee</span>
-                    <span style={{ fontSize: 10, color: '#aaa', fontWeight: 700 }}>~{feeEth} {selectedChain.symbol}{feeUsd !== null && feeUsd > 0 ? ` (${formatUSD(feeUsd)})` : ''}</span>
-                  </div>
-                )}
-                {/* Simulation balance changes */}
-                {simResult && simResult.changes.length > 0 && (
-                  <div>
-                    <p style={{ color: '#555', fontSize: 9, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '4px 0' }}>Simulated Balance Changes</p>
-                    {simResult.changes.slice(0, 4).map((c, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
-                        <span style={{ fontSize: 10, color: '#666', fontFamily: 'monospace' }}>
-                          {c.changeType === 'TRANSFER' ? (c.from?.toLowerCase() === wallet.activeAddress?.toLowerCase() ? '↑ Out' : '↓ In') : c.changeType}
-                        </span>
-                        {c.amount && <span style={{ fontSize: 10, color: c.from?.toLowerCase() === wallet.activeAddress?.toLowerCase() ? '#ff8888' : '#52ffac', fontWeight: 900 }}>
-                          {parseFloat(c.amount).toFixed(4)} {c.symbol ?? ''}
-                        </span>}
-                      </div>
-                    ))}
-                    {simResult.gas > 0 && <p style={{ color: '#444', fontSize: 9, margin: '4px 0 0' }}>Gas: {simResult.gas.toLocaleString()}</p>}
-                  </div>
-                )}
-                <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                  <button onClick={() => { setStatus('idle'); setSimResult(null); }}
-                    style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', fontSize: 12, fontWeight: 900, color: '#aaa', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Cancel
-                  </button>
-                  <button onClick={() => { const contractAddr = (!isNative && selectedToken) ? selectedToken.contractAddress as string : undefined; executeSend(contractAddr, selectedToken?.decimals ?? 18); }}
-                    style={{ flex: 2, padding: '12px', background: '#52ffac', border: 'none', borderRadius: '1rem', fontSize: 12, fontWeight: 900, color: '#002111', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Confirm & Send
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {errMsg && <span style={{ color: '#ffdad6', fontSize: 11 }}>{errMsg}</span>}
-
-            {/* Security risk warnings */}
-            {!riskDismissed && (() => {
-              const risks: { label: string; flags: string[]; level: 'danger' | 'warning' }[] = [];
-              if (addrRisk && addrRisk.level !== 'safe' && addrRisk.level !== 'unknown' && addrRisk.flags.length > 0) {
-                risks.push({ label: 'Recipient address risk', flags: addrRisk.flags, level: addrRisk.level as 'danger' | 'warning' });
-              }
-              if (tokenRisk && tokenRisk.level !== 'safe' && tokenRisk.level !== 'unknown' && tokenRisk.flags.length > 0) {
-                risks.push({ label: 'Token risk', flags: tokenRisk.flags, level: tokenRisk.level as 'danger' | 'warning' });
-              }
-              if (risks.length === 0) return null;
-              const topLevel = risks.some(r => r.level === 'danger') ? 'danger' : 'warning';
-              return (
-                <div style={{ background: riskBg(topLevel), border: `1px solid ${riskColor(topLevel)}44`, borderRadius: '1rem', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: riskColor(topLevel) }}>
-                      {topLevel === 'danger' ? '⚠ Security Risk Detected' : '⚡ Caution'}
-                    </span>
-                    <button onClick={() => setRiskDismissed(true)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
-                  </div>
-                  {risks.map((r, ri) => (
-                    <div key={ri}>
-                      <p style={{ fontSize: 9, color: '#888', fontWeight: 900, textTransform: 'uppercase', margin: '0 0 2px' }}>{r.label}</p>
-                      {r.flags.map((f, fi) => (
-                        <p key={fi} style={{ fontSize: 11, color: riskColor(r.level), margin: '1px 0', fontWeight: 600 }}>• {f}</p>
-                      ))}
-                    </div>
-                  ))}
-                  <p style={{ fontSize: 9, color: '#666', margin: '4px 0 0', fontStyle: 'italic' }}>
-                    Powered by GoPlus Security · dismiss to proceed anyway
-                  </p>
-                </div>
-              );
-            })()}
-
-            {status !== 'confirm' && (() => {
-              const isProcessing = status === 'signing' || status === 'sending' || status === 'simulating';
-              const hasBlockingRisk = !riskDismissed && (
-                (addrRisk?.level === 'danger' && addrRisk.flags.length > 0) ||
-                (tokenRisk?.level === 'danger' && tokenRisk.flags.length > 0)
-              );
-              return (
-                <button onClick={handleSend} disabled={isProcessing || hasBlockingRisk}
-                  style={{
-                    background: isProcessing ? '#1a1a1a' : hasBlockingRisk ? '#3a1a1a' : '#52ffac',
-                    color: isProcessing ? '#c6c6c6' : hasBlockingRisk ? '#f87171' : '#002111',
-                    border: hasBlockingRisk ? '1px solid rgba(248,113,113,0.3)' : 'none',
-                    borderRadius: '1rem', padding: '16px',
-                    fontSize: 14, fontWeight: 900, textTransform: 'uppercase',
-                    letterSpacing: '0.05em', cursor: (isProcessing || hasBlockingRisk) ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.15s', marginTop: 4,
-                  }}>
-                  {isProcessing
-                    ? (status === 'simulating' ? 'Simulating...' : status === 'signing' ? 'Signing...' : 'Broadcasting...')
-                    : hasBlockingRisk ? 'Dismiss Risk Warning First'
-                    : `Send ${tokenSymbol}`}
-                </button>
-              );
-            })()}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── QR Modal ─────────────────────────────────────────────────────────────────
-function QRModal({ address, onClose }: { address: string; onClose: () => void }) {
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-  const copy = async () => {
-    await navigator.clipboard.writeText(address).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <div onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-      className="popup-backdrop"
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 320, maxWidth: '92vw', padding: '28px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, border: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, fontStyle: 'normal', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>Receive</span>
-          <button onClick={onClose} style={{ color: '#c6c6c6', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}>
-            <X size={16} />
-          </button>
-        </div>
-        <div style={{ background: '#fff', borderRadius: '1rem', padding: 16 }}>
-          <QRCodeSVG value={address} size={200} level="M" />
-        </div>
-        <p style={{ color: '#c6c6c6', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
-          {address}
-        </p>
-        <button onClick={copy} style={{
-          background: copied ? 'rgba(82,255,172,0.1)' : 'rgba(255,255,255,0.06)',
-          border: `1px solid ${copied ? 'rgba(82,255,172,0.3)' : 'rgba(255,255,255,0.1)'}`,
-          borderRadius: '1rem', padding: '10px 20px', fontSize: 11,
-          color: copied ? '#52ffac' : '#c6c6c6', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: 6, fontWeight: 900,
-          textTransform: 'uppercase', letterSpacing: '0.1em',
-        }}>
-          {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy Address</>}
-        </button>
-        <p style={{ color: '#353535', fontSize: 9, textAlign: 'center', margin: 0 }}>
-          Send only EVM-compatible assets to this address
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// ─── Lightning Tab ────────────────────────────────────────────────────────────
-type LnStatus = 'idle' | 'connecting' | 'connected' | 'error';
-type LnSubTab = 'receive' | 'send';
-interface WebLNNode { alias?: string; pubkey?: string; }
-
-function LightningTab() {
-  const [status, setStatus] = useState<LnStatus>('idle');
-  const [nodeInfo, setNodeInfo] = useState<WebLNNode | null>(null);
-  const [balance, setBalance] = useState<number | null>(null);
-  const [subTab, setSubTab] = useState<LnSubTab>('receive');
-  const [recvAmount, setRecvAmount] = useState('');
-  const [recvMemo, setRecvMemo] = useState('');
-  const [invoice, setInvoice] = useState('');
-  const [invoiceCopied, setInvoiceCopied] = useState(false);
-  const [genLoading, setGenLoading] = useState(false);
-  const [genError, setGenError] = useState('');
-  const [payReq, setPayReq] = useState('');
-  const [payStatus, setPayStatus] = useState<'idle' | 'paying' | 'done' | 'error'>('idle');
-  const [payError, setPayError] = useState('');
-  const [payPreimage, setPayPreimage] = useState('');
-
-  const webln = typeof window !== 'undefined' ? (window as any).webln : null;
-  const hasWebLN = !!webln;
-
-  const connect = async () => {
-    if (!webln) return;
-    setStatus('connecting');
-    try {
-      await webln.enable();
-      const info = await webln.getInfo();
-      setNodeInfo(info?.node ?? {});
-      try { const bal = await webln.getBalance?.(); if (bal?.balance != null) setBalance(bal.balance); } catch {}
-      setStatus('connected');
-    } catch { setStatus('error'); }
-  };
-
-  const makeInvoice = async () => {
-    if (!webln || status !== 'connected') return;
-    const sats = parseInt(recvAmount, 10);
-    if (!sats || sats < 1) { setGenError('Enter a valid amount in sats'); return; }
-    setGenLoading(true); setGenError(''); setInvoice('');
-    try {
-      const result = await webln.makeInvoice({ amount: sats, defaultMemo: recvMemo || 'ABD Wallet' });
-      setInvoice(result.paymentRequest);
-    } catch (e: unknown) { setGenError(e instanceof Error ? e.message : 'Invoice generation failed'); }
-    finally { setGenLoading(false); }
-  };
-
-  const copyInvoice = async () => {
-    if (!invoice) return;
-    await navigator.clipboard.writeText(invoice).catch(() => {});
-    setInvoiceCopied(true);
-    setTimeout(() => setInvoiceCopied(false), 2000);
-  };
-
-  const payInvoice = async () => {
-    if (!webln || status !== 'connected' || !payReq.trim()) return;
-    setPayStatus('paying'); setPayError(''); setPayPreimage('');
-    try {
-      const result = await webln.sendPayment(payReq.trim());
-      setPayPreimage(result?.preimage ?? '');
-      setPayStatus('done');
-    } catch (e: unknown) {
-      setPayError(e instanceof Error ? e.message : 'Payment failed');
-      setPayStatus('error');
-    }
-  };
-
-  if (!hasWebLN) {
-    return (
-      <div className="space-y-3 p-6 bg-surface-container-low rounded-xl border border-white/5">
-        <div className="flex items-start gap-4 p-4 bg-surface-container rounded-xl border border-white/5">
-          <AlertCircle size={16} className="text-yellow-400 mt-0.5 shrink-0" />
-          <div>
-            <p className="font-black text-white text-xs uppercase tracking-widest mb-1">No Lightning Provider</p>
-            <p className="text-on-surface-variant text-xs leading-relaxed">Install a WebLN-compatible browser extension to enable Lightning payments.</p>
-          </div>
-        </div>
-        {[
-          { name: 'Alby', desc: 'Most popular — custodial & self-hosted nodes', badge: 'Recommended' },
-          { name: 'Zeus', desc: 'Connect your own LND / Core Lightning node', badge: 'Self-custody' },
-          { name: 'Mutiny Wallet', desc: 'Browser-native Lightning + on-chain wallet', badge: 'PWA' },
-        ].map(p => (
-          <div key={p.name} className="flex items-center gap-4 p-4 bg-surface-container rounded-xl border border-white/5">
-            <div className="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0">
-              <Zap size={16} className="text-yellow-400" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-black text-white text-sm">{p.name}</span>
-                <span className="bg-tertiary/10 text-tertiary text-[10px] px-2 py-0.5 rounded-full font-black">{p.badge}</span>
-              </div>
-              <p className="text-on-surface-variant text-xs mt-0.5">{p.desc}</p>
-            </div>
-            <Link size={14} className="text-surface-variant shrink-0" />
-          </div>
-        ))}
-        <p className="text-surface-variant text-xs text-center">After installing, reload this page to activate Lightning.</p>
-      </div>
-    );
-  }
-
-  if (status === 'idle' || status === 'error') {
-    return (
-      <div className="flex flex-col items-center gap-6 p-8 bg-surface-container-low rounded-xl border border-white/5">
-        <div className="w-16 h-16 rounded-full bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center">
-          {status === 'error' ? <WifiOff size={24} className="text-yellow-400" /> : <Zap size={24} className="text-yellow-400" />}
-        </div>
-        <div className="text-center">
-          <p className="font-black text-white text-lg uppercase tracking-tighter">Lightning Network</p>
-          <p className="text-on-surface-variant text-xs mt-1 leading-relaxed max-w-xs">
-            {status === 'error' ? 'Connection failed. Make sure your node is online and try again.' : 'Connect your WebLN node to send and receive Lightning payments instantly.'}
-          </p>
-        </div>
-        <button onClick={connect} className="bg-yellow-400 text-black font-black uppercase tracking-widest text-xs px-6 py-3 rounded-xl flex items-center gap-2 active:scale-95 transition-transform">
-          <Wifi size={14} /> Connect Node
-        </button>
-      </div>
-    );
-  }
-
-  if (status === 'connecting') {
-    return (
-      <div className="flex flex-col items-center gap-4 p-8">
-        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid rgba(250,204,21,0.2)', borderTopColor: '#facc15', animation: 'spin 1s linear infinite' }} />
-        <p className="text-on-surface-variant text-xs">Requesting permission...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-4 space-y-4">
-      <div className="flex items-center gap-3 p-4 bg-surface-container rounded-xl border border-yellow-400/20">
-        <div className="w-2 h-2 rounded-full bg-tertiary shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="font-black text-white text-sm">{nodeInfo?.alias || 'Lightning Node'}</p>
-          {nodeInfo?.pubkey && <p className="text-on-surface-variant text-[10px] font-mono truncate">{nodeInfo.pubkey.slice(0, 20)}...{nodeInfo.pubkey.slice(-8)}</p>}
-        </div>
-        {balance != null && (
-          <div className="text-right shrink-0">
-            <p className="font-black text-yellow-400 text-sm">{balance.toLocaleString()}</p>
-            <p className="text-on-surface-variant text-[10px]">sats</p>
-          </div>
-        )}
-      </div>
-
-      <div className="flex gap-1 p-1 bg-surface-container rounded-xl border border-white/5">
-        {(['receive', 'send'] as LnSubTab[]).map(t => (
-          <button key={t} onClick={() => { setSubTab(t); setPayStatus('idle'); setInvoice(''); }}
-            className={`flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-colors ${subTab === t ? 'bg-surface-container-high text-white border border-white/10' : 'text-on-surface-variant hover:text-white'}`}>
-            {t === 'receive' ? '↓ Receive' : '↑ Send'}
-          </button>
-        ))}
-      </div>
-
-      {subTab === 'receive' && (
-        <div className="space-y-3">
-          <div className="bg-white/5 rounded-xl p-3 border border-white/7">
-            <ABDCapsule type="text" placeholder="Amount (sats)" onValue={setRecvAmount} className="w-full" />
-          </div>
-          <div className="bg-white/5 rounded-xl p-3 border border-white/7">
-            <ABDCapsule type="text" placeholder="Memo (optional)" onValue={setRecvMemo} className="w-full" />
-          </div>
-          {genError && <p className="text-on-error-container text-xs">{genError}</p>}
-          <button onClick={makeInvoice} disabled={genLoading}
-            className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all active:scale-[0.98] ${genLoading ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed' : 'bg-yellow-400 text-black'}`}>
-            {genLoading ? 'Generating...' : 'Generate Invoice'}
-          </button>
-          {invoice && (
-            <div className="bg-surface-container rounded-xl p-3 border border-yellow-400/20 space-y-2">
-              <p className="text-on-surface-variant text-[10px] font-mono break-all leading-relaxed">{invoice.slice(0, 60)}...</p>
-              <button onClick={copyInvoice} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black ${invoiceCopied ? 'bg-tertiary/10 text-tertiary border border-tertiary/30' : 'bg-white/5 text-on-surface-variant border border-white/10'}`}>
-                {invoiceCopied ? <><Check size={10} /> Copied!</> : <><Copy size={10} /> Copy Full Invoice</>}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {subTab === 'send' && (
-        <div className="space-y-3">
-          {payStatus === 'done' ? (
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="w-12 h-12 rounded-full bg-tertiary/10 border border-tertiary/30 flex items-center justify-center">
-                <Check size={20} className="text-tertiary" />
-              </div>
-              <p className="font-black text-white uppercase text-base tracking-tighter">Payment Sent!</p>
-              {payPreimage && <p className="text-on-surface-variant text-[10px] font-mono break-all text-center">Preimage: {payPreimage.slice(0, 20)}...</p>}
-              <button onClick={() => { setPayStatus('idle'); setPayReq(''); setPayPreimage(''); }}
-                className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs text-on-surface-variant font-black">
-                Send Another
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="bg-white/5 rounded-xl p-3 border border-white/7">
-                <ABDCapsule type="text" placeholder="Paste BOLT11 invoice (lnbc...)" onValue={setPayReq} className="w-full" />
-              </div>
-              {payError && <p className="text-on-error-container text-xs">{payError}</p>}
-              <button onClick={payInvoice} disabled={payStatus === 'paying' || !payReq.trim()}
-                className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all active:scale-[0.98] ${payStatus === 'paying' || !payReq.trim() ? 'bg-surface-container-high text-on-surface-variant cursor-not-allowed' : 'bg-yellow-400 text-black'}`}>
-                {payStatus === 'paying' ? 'Sending...' : '⚡ Pay Invoice'}
-              </button>
-              <p className="text-surface-variant text-[10px] text-center">Supports BOLT11 invoices · Powered by WebLN</p>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Non-EVM address format validators ───────────────────────────────────────
-const NON_EVM_ADDR_RE: Record<string, RegExp> = {
-  BTC:   /^(bc1[ac-hj-np-z02-9]{6,87}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/,
-  LTC:   /^(ltc1[ac-hj-np-z02-9]{6,87}|[LM3][a-km-zA-HJ-NP-Z1-9]{25,34})$/,
-  DOGE:  /^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/,
-  BCH:   /^(bitcoincash:)?(q|p)[a-z0-9]{41}$|^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
-  SOL:   /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
-  XRP:   /^r[0-9a-zA-Z]{24,34}$/,
-  XLM:   /^G[A-Z2-7]{55}$/,
-  NANO:  /^nano_[13][13456789abcdefghijkmnopqrstuwxyz]{59}$|^xrb_[13][13456789abcdefghijkmnopqrstuwxyz]{59}$/,
-  HBAR:  /^(0\.)?(0\.)?[0-9]+\.[0-9]+\.[0-9]+$|^[0-9a-fA-F]{64}$/,
-  SUI:   /^0x[0-9a-fA-F]{64}$/,
-  APTOS: /^0x[0-9a-fA-F]{64}$/,
-};
-
-function validateNonEvmAddress(coin: string, address: string): string | null {
-  const re = NON_EVM_ADDR_RE[coin];
-  if (!re) return null; // unknown coin — skip validation
-  return re.test(address.trim()) ? null : `Invalid ${coin} address format`;
-}
-
-// ─── Non-EVM Send Modal ───────────────────────────────────────────────────────
-function NonEvmSendModal({ coin, fromAddress, onSend, onClose }: {
-  coin: string;
-  fromAddress: string;
-  onSend: (to: string, amount: number, feeSpeed: 'slow' | 'medium' | 'fast') => Promise<string>;
-  onClose: () => void;
-}) {
-  const meta = NON_EVM_META[coin];
-  const [to, setTo] = useState('');
-  const [amount, setAmount] = useState('');
-  const [feeSpeed, setFeeSpeed] = useState<'slow' | 'medium' | 'fast'>('medium');
-  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
-  const [txid, setTxid] = useState('');
-  const [errMsg, setErrMsg] = useState('');
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const hasFeeSelector = ['BTC', 'DOGE', 'BCH', 'LTC'].includes(coin);
-  const [contactOpen, setContactOpen] = useState(false);
-  const contacts = loadContacts();
-
-  const handleSend = async () => {
-    const amt = parseFloat(amount);
-    if (!to.trim() || isNaN(amt) || amt <= 0) { setErrMsg('Enter a valid address and amount.'); return; }
-    const addrErr = validateNonEvmAddress(coin, to.trim());
-    if (addrErr) { setErrMsg(addrErr); return; }
-    setStatus('sending'); setErrMsg('');
-    try {
-      const id = await onSend(to.trim(), amt, feeSpeed);
-      setTxid(id);
-      setStatus('done');
-    } catch (e: unknown) {
-      setErrMsg(e instanceof Error ? e.message : 'Send failed.');
-      setStatus('error');
-    }
-  };
-
-  const inp: React.CSSProperties = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 14px', color: '#fff', fontSize: 13, width: '100%', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
-
-  return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 400, maxWidth: '92vw', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {meta && <CoinIcon symbol={meta.symbol} color={meta.color} logoUrl={meta.logoUrl} size={30} />}
-            <span style={{ color: '#fff', fontSize: 18, fontWeight: 900, letterSpacing: '-0.02em' }}>Send {meta?.symbol ?? coin}</span>
-          </div>
-          <button onClick={onClose} style={{ color: '#c6c6c6', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}>
-            <X size={16} />
-          </button>
-        </div>
-
-        {status === 'done' ? (
-          <div style={{ padding: '40px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(82,255,172,0.1)', border: '1.5px solid rgba(82,255,172,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Check size={22} style={{ color: '#52ffac' }} />
-            </div>
-            <p style={{ color: '#fff', fontWeight: 900, fontSize: 16, textTransform: 'uppercase', letterSpacing: '-0.01em', margin: 0 }}>Sent!</p>
-            <p style={{ color: '#555', fontSize: 10, fontFamily: 'monospace', margin: 0, wordBreak: 'break-all' }}>{txid}</p>
-            {meta?.explorerBase && (
-              <a href={`${meta.explorerBase}/${txid}`} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'flex', alignItems: 'center', gap: 4, color: meta.color, fontSize: 11, fontWeight: 700, textDecoration: 'none' }}>
-                <ExternalLink size={12} /> View on Explorer
-              </a>
-            )}
-            <button onClick={onClose} style={{ marginTop: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 24px', color: '#ccc', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>Close</button>
-          </div>
-        ) : (
-          <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div>
-              <p style={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6, margin: '0 0 6px' }}>From</p>
-              <p style={{ color: '#555', fontSize: 10, fontFamily: 'monospace', wordBreak: 'break-all', margin: 0 }}>{fromAddress}</p>
-            </div>
-            <div>
-              <p style={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>Recipient Address</p>
-              <div style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <input style={{ ...inp, flex: 1 }} placeholder={`${meta?.name ?? coin} address`} value={to} onChange={e => { setTo(e.target.value); setContactOpen(false); }} />
-                  {contacts.length > 0 && (
-                    <button type="button" onClick={() => setContactOpen(o => !o)} title="Address book"
-                      style={{ flexShrink: 0, background: contactOpen ? 'rgba(82,255,172,0.15)' : 'rgba(82,255,172,0.08)', border: '1px solid rgba(82,255,172,0.2)', borderRadius: 10, padding: '0 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#52ffac" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                      </svg>
-                    </button>
-                  )}
-                </div>
-                {contactOpen && contacts.length > 0 && (
-                  <div className="popup-enter" style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 60, background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem', maxHeight: 180, overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
-                    {contacts.map(c => (
-                      <button key={c.id} onClick={() => { setTo(c.address); setContactOpen(false); }}
-                        style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 14px', width: '100%', border: 'none', background: 'transparent', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{c.name}</span>
-                        <span style={{ fontSize: 10, color: '#555', fontFamily: 'monospace' }}>{c.address.slice(0,10)}...{c.address.slice(-6)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {/* Inline address format hint */}
-              {to.trim().length > 10 && (() => {
-                const err = validateNonEvmAddress(coin, to.trim());
-                return err ? (
-                  <p style={{ fontSize: 10, color: '#f87171', marginTop: 5, fontWeight: 600 }}>✕ {err}</p>
-                ) : (
-                  <p style={{ fontSize: 10, color: '#4ade80', marginTop: 5, fontWeight: 600 }}>✓ Address format valid</p>
-                );
-              })()}
-            </div>
-            <div>
-              <p style={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>Amount ({meta?.symbol ?? coin})</p>
-              <input style={inp} type="number" step="any" min="0" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
-            </div>
-            {hasFeeSelector && (
-              <div>
-                <p style={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}>Fee Speed</p>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {(['slow', 'medium', 'fast'] as const).map(s => (
-                    <button key={s} onClick={() => setFeeSpeed(s)} style={{ flex: 1, padding: '8px 0', borderRadius: 8, background: feeSpeed === s ? (meta?.color ?? '#52ffac') + '22' : 'rgba(255,255,255,0.04)', border: `1px solid ${feeSpeed === s ? (meta?.color ?? '#52ffac') + '66' : 'rgba(255,255,255,0.08)'}`, color: feeSpeed === s ? (meta?.color ?? '#52ffac') : '#666', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', letterSpacing: '0.05em' }}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {errMsg && <p style={{ color: '#ff8888', fontSize: 11, margin: 0 }}>{errMsg}</p>}
-            <button onClick={handleSend} disabled={status === 'sending'}
-              style={{ marginTop: 4, padding: '14px', borderRadius: 12, background: status === 'sending' ? 'rgba(255,255,255,0.06)' : (meta?.color ?? '#52ffac'), color: status === 'sending' ? '#666' : '#000', fontWeight: 900, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', border: 'none', cursor: status === 'sending' ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}>
-              {status === 'sending' ? 'Sending...' : `Send ${meta?.symbol ?? coin}`}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Address Book Modal ───────────────────────────────────────────────────────
-function AddressBookModal({ contacts, onAdd, onDelete, onClose }: {
-  contacts: Contact[];
-  onAdd: (c: Omit<Contact, 'id' | 'addedAt'>) => void;
-  onDelete: (id: string) => void;
-  onClose: () => void;
-}) {
-  const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [note, setNote] = useState('');
-  const [adding, setAdding] = useState(false);
-  const [err, setErr] = useState('');
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const handleAdd = () => {
-    if (!name.trim()) { setErr('Name required'); return; }
-    if (!ethers.isAddress(address.trim())) { setErr('Invalid Ethereum address'); return; }
-    onAdd({ name: name.trim(), address: address.trim(), note: note.trim() || undefined });
-    setName(''); setAddress(''); setNote(''); setAdding(false); setErr('');
-  };
-
-  const inp: React.CSSProperties = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 12px', color: '#fff', fontSize: 13, width: '100%', outline: 'none', fontFamily: 'inherit' };
-
-  return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 400, maxWidth: '92vw', maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>Address Book</span>
-          <button onClick={onClose} style={{ color: '#c6c6c6', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}><X size={16} /></button>
-        </div>
-        <div style={{ overflowY: 'auto', padding: '16px 24px', flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Add contact form */}
-          {!adding ? (
-            <button onClick={() => setAdding(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(82,255,172,0.07)', border: '1px solid rgba(82,255,172,0.18)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', color: '#52ffac', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              + Add Contact
-            </button>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <input style={inp} placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-              <input style={{ ...inp, fontFamily: 'monospace' }} placeholder="0x… address" value={address} onChange={e => setAddress(e.target.value)} />
-              <input style={inp} placeholder="Note (optional)" value={note} onChange={e => setNote(e.target.value)} />
-              {err && <p style={{ color: '#ff8888', fontSize: 11, margin: 0 }}>{err}</p>}
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={handleAdd} style={{ flex: 1, background: '#52ffac', border: 'none', borderRadius: 10, color: '#000', fontWeight: 900, fontSize: 12, padding: '10px', cursor: 'pointer', fontFamily: 'inherit' }}>Save</button>
-                <button onClick={() => { setAdding(false); setErr(''); }} style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#888', fontWeight: 700, fontSize: 12, padding: '10px', cursor: 'pointer', fontFamily: 'inherit' }}>Cancel</button>
-              </div>
-            </div>
-          )}
-          {/* Contact list */}
-          {contacts.length === 0 ? (
-            <p style={{ color: '#444', fontSize: 12, textAlign: 'center', margin: '12px 0' }}>No contacts yet.</p>
-          ) : (
-            contacts.map(c => (
-              <div key={c.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(82,255,172,0.08)', border: '1px solid rgba(82,255,172,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ color: '#52ffac', fontSize: 14, fontWeight: 900 }}>{c.name.slice(0, 1).toUpperCase()}</span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, margin: 0 }}>{c.name}</p>
-                  <p style={{ color: '#555', fontSize: 10, fontFamily: 'monospace', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.address}</p>
-                  {c.note && <p style={{ color: '#444', fontSize: 10, margin: '2px 0 0' }}>{c.note}</p>}
-                </div>
-                <button onClick={() => onDelete(c.id)} style={{ background: 'rgba(255,100,100,0.07)', border: '1px solid rgba(255,100,100,0.15)', borderRadius: 999, padding: '5px 7px', cursor: 'pointer', color: '#ff8888', display: 'flex', flexShrink: 0 }}>
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Saved Vaults Modal ───────────────────────────────────────────────────────
-function SavedVaultsModal({ vaults, currentId, onSwitch, onDelete, onClose, liveNonEvm, liveChain }: {
-  vaults: WalletSnapshot[];
-  currentId: string | null;
-  onSwitch: (snap: WalletSnapshot) => void;
-  onDelete: (id: string) => void;
-  onClose: () => void;
-  liveNonEvm: NonEvmMeta | null;
-  liveChain: Chain;
-}) {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  const saved = vaults.filter(s => s.isSaved);
-
-  return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="popup-enter" style={{ background: '#111', borderRadius: '2rem', width: 400, maxWidth: '92vw', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ color: '#fff', fontSize: 20, fontWeight: 900, letterSpacing: '-0.02em' }}>Saved Vaults</span>
-          <button onClick={onClose} style={{ color: '#c6c6c6', background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}><X size={16} /></button>
-        </div>
-        <div style={{ padding: '12px 16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {saved.length === 0 ? (
-            <p style={{ color: '#555', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>No saved vaults yet.<br/>Use Save on a wallet in the history section.</p>
-          ) : saved.map(snap => {
-            const isCurrent = snap.id === currentId;
-            const dispColor  = isCurrent ? (liveNonEvm?.color ?? liveChain.color ?? snap.chainColor) : snap.chainColor;
-            const dispLogo   = isCurrent ? (liveNonEvm?.logoUrl ?? liveChain.logoUrl ?? snap.chainLogo) : snap.chainLogo;
-            const dispName   = isCurrent ? (liveNonEvm?.name ?? liveChain.name ?? snap.chainName ?? '') : (snap.chainName ?? '');
-            return (
-              <div key={snap.id}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, background: isCurrent ? 'rgba(82,255,172,0.07)' : 'rgba(255,255,255,0.03)', border: isCurrent ? '1.5px solid rgba(82,255,172,0.3)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 24, padding: '12px 14px' }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: dispColor ? `${dispColor}22` : (isCurrent ? 'rgba(82,255,172,0.12)' : 'rgba(255,255,255,0.06)'), border: `1px solid ${dispColor ? `${dispColor}44` : (isCurrent ? 'rgba(82,255,172,0.3)' : 'rgba(255,255,255,0.08)')}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                  {dispLogo
-                    ? <img src={dispLogo} alt={dispName} style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
-                    : <span className="material-symbols-outlined" style={{ fontSize: 16, color: dispColor ?? (isCurrent ? '#52ffac' : '#666') }}>account_balance_wallet</span>
-                  }
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: isCurrent ? '#52ffac' : '#fff', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: 'monospace' }}>{snap.shortAddress}</p>
-                  <p style={{ color: '#555', fontSize: 10, margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {dispName && <span style={{ color: dispColor ?? '#666', fontWeight: 900, textTransform: 'uppercase', fontSize: 8, letterSpacing: '0.08em' }}>{dispName}</span>}
-                    <span>{snap.vaultMode === 'PERSISTENT' ? 'Persistent' : 'Ephemeral'}</span>
-                    {isCurrent && <span style={{ color: '#52ffac', fontWeight: 900, textTransform: 'uppercase', fontSize: 8, letterSpacing: '0.1em' }}>· Active</span>}
-                  </p>
-                </div>
-                {!isCurrent && (
-                  <button onClick={() => onSwitch(snap)}
-                    style={{ flexShrink: 0, background: '#52ffac', border: 'none', borderRadius: 999, padding: '6px 14px', color: '#000', fontSize: 11, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                    Switch
-                  </button>
-                )}
-                <button onClick={() => onDelete(snap.id)}
-                  style={{ flexShrink: 0, background: 'rgba(255,100,100,0.07)', border: '1px solid rgba(255,100,100,0.15)', borderRadius: 999, padding: '6px 8px', cursor: 'pointer', color: '#ff8888', display: 'flex' }}>
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main WalletDashboard ─────────────────────────────────────────────────────
 export function WalletDashboard() {
-  const wallet = useWallet();
-  const [mode, setMode] = useState<'simple' | 'advanced'>('simple');
-  const [activeTab, setActiveTab] = useState<Tab>('balance');
-  const [selectedChain, setSelectedChain] = useState<Chain>(CHAINS[0]);
-  const [tokens, setTokens] = useState<TokenBalance[]>([]);
-  const [txs, setTxs] = useState<TxRecord[]>([]);
-  const [prices, setPrices] = useState<Record<string, number>>({});
-  const [changes24h, setChanges24h] = useState<Record<string, number | null>>({});
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false);
-  const [isLoadingTxs, setIsLoadingTxs] = useState(false);
-  const [nfts, setNfts] = useState<NFTItem[]>([]);
-  const [isLoadingNfts, setIsLoadingNfts] = useState(false);
-  const [gasPrices, setGasPrices] = useState<GasPrices | null>(null);
-  const gasIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [approvals, setApprovals] = useState<TokenApproval[]>([]);
-  const [isLoadingApprovals, setIsLoadingApprovals] = useState(false);
-  const [revokingApproval, setRevokingApproval] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [showSend, setShowSend] = useState(false);
-  const [showNetworks, setShowNetworks] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-  const [showWC, setShowWC] = useState(false);
-  const [showNonEvmSend, setShowNonEvmSend] = useState(false);
-  const [showSwap, setShowSwap] = useState(false);
-  const [showLedger, setShowLedger] = useState(false);
-  const [activeLedger, setActiveLedger] = useState<LedgerEntry | null>(null);
-  const [extPresent, setExtPresent] = useState(false);
-  const [extAttached, setExtAttached] = useState(false);
-  const [extAttaching, setExtAttaching] = useState(false);
-  const [extError, setExtError] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [allChainsTotal, setAllChainsTotal] = useState<number | null>(null);
-  // All chains token data for balance tab display
-  type ChainTokens = { chain: Chain; toks: TokenBalance[]; p: Record<string,number> };
-  const [allChainTokens, setAllChainTokens] = useState<ChainTokens[]>([]);
-  // Whether user has manually selected a chain (null = not yet selected)
-  const [manualChain, setManualChain] = useState<Chain | null>(null);
-  // Track whether wallet was ever unlocked — if yes, never show skeleton again
-  const [everUnlocked, setEverUnlocked] = useState(false);
-  useEffect(() => { if (wallet.isUnlocked) setEverUnlocked(true); }, [wallet.isUnlocked]);
+  const d = useDashboardState();
 
-  // Wallet history
-  const [walletHistory, setWalletHistory] = useState<WalletSnapshot[]>([]);
-  const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
-  const isSwitchingRef = useRef(false);
-  const [chainUpdateTick, setChainUpdateTick] = useState(0);
-  const [showWipeWarning, setShowWipeWarning] = useState(false);
-  const [showNewWalletWarning, setShowNewWalletWarning] = useState(false);
-  const [showTransfer, setShowTransfer] = useState(false);
-
-  // ── Address book ───────────────────────────────────────────────────────────
-  const [showAddressBook, setShowAddressBook] = useState(false);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  useEffect(() => { setContacts(loadContacts()); }, []);
-
-  // Reset advanced-only tabs when switching back to simple
-  useEffect(() => {
-    if (mode === 'simple' && ['nfts', 'approvals', 'staking', 'lightning'].includes(activeTab)) {
-      setActiveTab('balance');
-    }
-  }, [mode]);
-
-  // ── Advanced custom modals ─────────────────────────────────────────────────
-  const [showCustomChainModal, setShowCustomChainModal] = useState(false);
-  const [showCustomTokenModal, setShowCustomTokenModal] = useState(false);
-  const [showCustomAPIModal, setShowCustomAPIModal] = useState(false);
-  const [customChains, setCustomChains] = useState<CustomChain[]>([]);
-  const [customTokens, setCustomTokens] = useState<CustomToken[]>([]);
-  const [customAPIs, setCustomAPIs] = useState<CustomAPI[]>([]);
-  useEffect(() => {
-    setCustomChains(loadCustomChains());
-    setCustomTokens(loadCustomTokens());
-    setCustomAPIs(loadCustomAPIs());
-  }, []);
-
-  // ── Saved Vaults ───────────────────────────────────────────────────────────
-  const [showSavedVaults, setShowSavedVaults] = useState(false);
-  const [isSavingVault, setIsSavingVault] = useState(false);
-
-  // ── Non-EVM state ──────────────────────────────────────────────────────────
-  const [selectedNonEvm, setSelectedNonEvm] = useState<string | null>(null);
-  const [nonEvmAddr, setNonEvmAddr] = useState<string | null>(null);
-  const [nonEvmBal, setNonEvmBal] = useState<number | null>(null);
-  const [nonEvmUsdPrice, setNonEvmUsdPrice] = useState(0);
-  const [nonEvmLoading, setNonEvmLoading] = useState(false);
-
-  const loadNonEvmData = useCallback(async (coin: string) => {
-    if (!wallet.isUnlocked) return;
-    setNonEvmLoading(true);
-    setNonEvmAddr(null);
-    setNonEvmBal(null);
-    try {
-      const mnemonic = await wallet.getMnemonicForExport();
-      if (!mnemonic) return;
-      let addr = '';
-      if (coin === 'BTC')        { addr = deriveBTCWallet(mnemonic).address; }
-      else if (coin === 'DOGE')  { addr = deriveDOGEWallet(mnemonic).address; }
-      else if (coin === 'BCH')   { addr = deriveBCHWallet(mnemonic).address; }
-      else if (coin === 'SOL')   { addr = deriveSOLWallet(mnemonic).address; }
-      else if (coin === 'XRP')   { addr = deriveXRPWallet(mnemonic).address; }
-      else if (coin === 'XLM')   { addr = deriveXLMWallet(mnemonic).address; }
-      else if (coin === 'NANO')  { addr = deriveNANOWallet(mnemonic).address; }
-      else if (coin === 'HBAR')  { addr = deriveHBARWallet(mnemonic).evmAddress; }
-      else if (coin === 'SUI')   { addr = deriveSUIWallet(mnemonic).address; }
-      else if (coin === 'APTOS') { addr = deriveAPTOSWallet(mnemonic).address; }
-      else if (coin === 'LTC')   { addr = deriveLTCWallet(mnemonic).address; }
-      else if (coin === 'TRON' || coin === 'USDT') { addr = deriveTronWallet(mnemonic).address; }
-      // Set address immediately so it displays even if balance fetch fails
-      setNonEvmAddr(addr);
-      let bal = 0;
-      try {
-        if (coin === 'BTC')        { bal = (await getBTCBalance(addr)).total; }
-        else if (coin === 'DOGE')  { bal = (await getDOGEBalance(addr)).total; }
-        else if (coin === 'BCH')   { bal = (await getBCHBalance(addr)).total; }
-        else if (coin === 'SOL')   { bal = (await getSOLBalance(addr)).sol; }
-        else if (coin === 'XRP')   { bal = (await getXRPBalance(addr)).xrp; }
-        else if (coin === 'XLM')   { bal = (await getXLMBalance(addr)).xlm; }
-        else if (coin === 'NANO')  { bal = (await getNANOBalance(addr)).nano; }
-        else if (coin === 'HBAR')  { bal = (await getHBARBalance(addr)).hbar; }
-        else if (coin === 'SUI')   { bal = (await getSUIBalance(addr)).sui; }
-        else if (coin === 'APTOS') { bal = (await getAPTOSBalance(addr)).apt; }
-        else if (coin === 'LTC')   { bal = (await getLTCBalance(addr)).total; }
-      } catch { bal = 0; }
-      setNonEvmBal(bal);
-      const meta = NON_EVM_META[coin];
-      if (meta?.coingeckoId) {
-        const p = await getPrices([meta.coingeckoId]);
-        setNonEvmUsdPrice(p[meta.coingeckoId] ?? 0);
-      }
-    } catch { setNonEvmBal(0); }
-    finally { setNonEvmLoading(false); }
-  }, [wallet]);
-
-  useEffect(() => {
-    if (selectedNonEvm) loadNonEvmData(selectedNonEvm);
-  }, [selectedNonEvm]);
-
-  const handleNonEvmSend = useCallback(async (to: string, amount: number, feeSpeed: 'slow' | 'medium' | 'fast'): Promise<string> => {
-    const mnemonic = await wallet.getMnemonicForExport();
-    if (!mnemonic) throw new Error('Wallet locked');
-    const coin = selectedNonEvm!;
-    if (coin === 'BTC')   { const w = deriveBTCWallet(mnemonic);   const fees = await estimateBTCFee();  const { hex } = await buildBTCTransaction({ from: w, to, amountBTC: amount, feeRate: fees[feeSpeed] });   return broadcastBTC(hex); }
-    if (coin === 'DOGE')  { const w = deriveDOGEWallet(mnemonic);  const fees = await estimateDOGEFee(); const { hex } = await buildDOGETransaction({ from: w, to, amountDOGE: amount, feeRate: fees[feeSpeed] }); return broadcastDOGE(hex); }
-    if (coin === 'BCH')   { const w = deriveBCHWallet(mnemonic);   const fees = await estimateBCHFee();  const { hex } = await buildBCHTransaction({ from: w, to, amountBCH: amount, feeRate: fees[feeSpeed] });   return broadcastBCH(hex); }
-    if (coin === 'SOL')   { const w = deriveSOLWallet(mnemonic);   return sendSOL(w, to, amount); }
-    if (coin === 'XRP')   { const w = deriveXRPWallet(mnemonic);   return sendXRP(w, to, amount); }
-    if (coin === 'XLM')   { const w = deriveXLMWallet(mnemonic);   return sendXLM(w, to, amount); }
-    if (coin === 'NANO')  { const w = deriveNANOWallet(mnemonic);  return sendNANO(w, to, amount); }
-    if (coin === 'HBAR')  { const w = deriveHBARWallet(mnemonic);  return sendHBAR(w, to, amount); }
-    if (coin === 'SUI')   { const w = deriveSUIWallet(mnemonic);   return sendSUI(w, to, amount); }
-    if (coin === 'APTOS') { const w = deriveAPTOSWallet(mnemonic); return sendAPTOS(w, to, amount); }
-    if (coin === 'LTC')   { const w = deriveLTCWallet(mnemonic);   const fees = await estimateLTCFee(); const { hex } = await buildLTCTransaction({ from: w, to, amountLTC: amount, feeRate: fees[feeSpeed] }); return broadcastLTC(hex); }
-    if (coin === 'TRON' || coin === 'USDT') { throw new Error('Send TRON/USDT not implemented yet in this interface.'); }
-    throw new Error('Unknown coin');
-  }, [wallet, selectedNonEvm]);
-
-  const handleNonEvmGetHistory = useCallback(async (): Promise<ChainTx[]> => {
-    if (!nonEvmAddr) return [];
-    const coin = selectedNonEvm!;
-    const toTx = (t: { txid: string; amount: number; timestamp: number }) => t;
-    if (coin === 'BTC')   return (await getBTCTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'DOGE')  return (await getDOGETransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'BCH')   return (await getBCHTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'SOL')   return (await getSOLTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'XRP')   return (await getXRPTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'XLM')   return (await getXLMTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'NANO')  return (await getNANOTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'HBAR')  return (await getHBARTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'SUI')   return (await getSUITransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'APTOS') return (await getAPTOSTransactions(nonEvmAddr)).map(toTx);
-    if (coin === 'LTC')   return (await getLTCTransactions(nonEvmAddr)).map(toTx);
-    return [];
-  }, [nonEvmAddr, selectedNonEvm]);
-
-  const handleNonEvmGetFees = useCallback(async () => {
-    const coin = selectedNonEvm!;
-    if (coin === 'BTC')  return estimateBTCFee();
-    if (coin === 'DOGE') return estimateDOGEFee();
-    if (coin === 'BCH')  return estimateBCHFee();
-    if (coin === 'SOL')  { const f = await estimateSOLFee(); return { slow: f, medium: f, fast: f }; }
-    return { slow: 0, medium: 0, fast: 0 };
-  }, [selectedNonEvm]);
-
-  // Sync theme to document root
-  useEffect(() => {
-    document.documentElement.dataset.theme = mode === 'advanced' ? 'advanced' : '';
-  }, [mode]);
-
-  // Detect ABD Wallet extension presence via postMessage handshake
-  useEffect(() => {
-    const handler = (e: MessageEvent) => {
-      if (e.data?.type === 'CW_EXT_PRESENT') setExtPresent(true);
-      if (e.data?.type === 'CW_STATUS_RESULT') { setExtPresent(true); setExtAttached(!!e.data.hasVault); }
-      if (e.data?.type === 'CW_ATTACH_RESULT') {
-        setExtAttaching(false);
-        if (e.data.ok) { setExtAttached(true); setExtError(null); }
-        else setExtError(e.data.error || 'Unknown error — check extension console.');
-      }
-    };
-    window.addEventListener('message', handler);
-    // Ping extension
-    window.postMessage({ type: 'CW_STATUS_REQUEST' }, '*');
-    return () => window.removeEventListener('message', handler);
-  }, []);
-
-  // Track wallet creation in history
-  useEffect(() => {
-    if (!wallet.isUnlocked || !wallet.activeAddress) return;
-    const history = getHistory();
-    const existing = history.find(s => s.address === wallet.activeAddress);
-    const chainInfo = {
-      chainId: selectedChain.id,
-      chainName: selectedChain.name,
-      chainColor: selectedChain.color,
-      chainLogo: selectedChain.logoUrl,
-      coinSymbol: selectedChain.symbol,
-      isNonEvm: false,
-    };
-    if (existing) {
-      setCurrentHistoryId(existing.id);
-      setWalletHistory(history);
-      // Backfill blob if missing (e.g. older sessions without auto-store)
-      wallet.getMnemonicForExport().then(m => { if (m) storeVaultBlob(existing.id, m); }).catch(() => {});
-    } else {
-      const snap = makeSnapshot(wallet.activeAddress, wallet.mode as 'EPHEMERAL' | 'PERSISTENT', chainInfo);
-      addToHistory(snap);
-      setCurrentHistoryId(snap.id);
-      setWalletHistory(getHistory());
-      // Store mnemonic blob so this wallet can be restored from history
-      wallet.getMnemonicForExport().then(m => { if (m) storeVaultBlob(snap.id, m); }).catch(() => {});
-    }
-  }, [wallet.isUnlocked, wallet.activeAddress]);
-
-  // Re-read history when vault access restores extra saved wallets
-  useEffect(() => {
-    const handler = () => setWalletHistory(getHistory());
-    window.addEventListener('cw:history:updated', handler);
-    return () => window.removeEventListener('cw:history:updated', handler);
-  }, []);
-
-  // Update chain info in history when user switches network (skip during wallet switch to avoid race)
-  useEffect(() => {
-    if (!currentHistoryId) return;
-    if (isSwitchingRef.current) return;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    if (selectedNonEvm) {
-      const m = NON_EVM_META[selectedNonEvm];
-      if (!m) return;
-      updateSnapshotChain(currentHistoryId, {
-        chainName: m.name, chainColor: m.color, chainLogo: m.logoUrl,
-        coinSymbol: m.symbol, isNonEvm: true, chainId: undefined,
-      });
-    } else {
-      updateSnapshotChain(currentHistoryId, {
-        chainId: selectedChain.id, chainName: selectedChain.name,
-        chainColor: selectedChain.color, chainLogo: selectedChain.logoUrl,
-        coinSymbol: selectedChain.symbol, isNonEvm: false,
-      });
-    }
-    setWalletHistory(getHistory());
-  }, [currentHistoryId, selectedChain.id, selectedNonEvm, chainUpdateTick]);
-
-  // Switch to a history snapshot — restores mnemonic AND chain selection
-  const switchToSnap = useCallback(async (snap: WalletSnapshot) => {
-    isSwitchingRef.current = true;
-    try {
-      await wallet.switchToSavedWallet(snap.id);
-      if (snap.isNonEvm && snap.coinSymbol && NON_EVM_META[snap.coinSymbol]) {
-        const m = NON_EVM_META[snap.coinSymbol];
-        // Write snap's own chain info back (in case it was overwritten by a race)
-        updateSnapshotChain(snap.id, { chainName: m.name, chainColor: m.color, chainLogo: m.logoUrl, coinSymbol: m.symbol, isNonEvm: true, chainId: undefined });
-        setSelectedNonEvm(snap.coinSymbol);
-        setManualChain(null);
-      } else {
-        const found = snap.chainId ? CHAINS.find(c => c.id === snap.chainId) : null;
-        const chain = found ?? CHAINS[0];
-        // Write snap's own chain info back
-        updateSnapshotChain(snap.id, { chainId: chain.id, chainName: chain.name, chainColor: chain.color, chainLogo: chain.logoUrl, coinSymbol: chain.symbol, isNonEvm: false });
-        setSelectedNonEvm(null);
-        setSelectedChain(chain);
-        setManualChain(chain);
-      }
-      setWalletHistory(getHistory());
-    } finally {
-      setTimeout(() => { isSwitchingRef.current = false; }, 100);
-    }
-  }, [wallet]);
-
-  // Freeze last known address so UI doesn't blank during transient wipe
-  const [frozenAddress, setFrozenAddress] = useState<string | null>(null);
-  const [frozenMode, setFrozenMode] = useState(wallet.mode);
-  useEffect(() => {
-    if (wallet.isUnlocked && wallet.activeAddress) {
-      setFrozenAddress(wallet.activeAddress);
-    }
-  }, [wallet.isUnlocked, wallet.activeAddress]);
-  // Always track mode changes immediately
-  useEffect(() => {
-    if (wallet.mode === 'PERSISTENT') setFrozenMode('PERSISTENT');
-    else if (wallet.isUnlocked) setFrozenMode('EPHEMERAL');
-  }, [wallet.mode, wallet.isUnlocked]);
-
-  const address = wallet.activeAddress ?? frozenAddress;
-  const displayAddress = (selectedNonEvm && nonEvmAddr) ? nonEvmAddr : address;
-  const shortAddr = displayAddress ? `${displayAddress.slice(0, 6)}...${displayAddress.slice(-4)}` : '—';
-
-  const handleCopyAddress = async () => {
-    const addr = displayAddress;
-    if (!addr) return;
-    try { await navigator.clipboard.writeText(addr); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
-  };
-
-  const loadTokens = useCallback(async () => {
-    if (!address) return;
-    setIsLoadingTokens(true);
-    try {
-      const toks = await fetchTokenBalances(address, selectedChain.id);
-      setTokens(toks);
-      const cgIds = [...new Set([selectedChain.coingeckoId, ...toks.map(t => t.coingeckoId).filter(Boolean) as string[]])];
-      if (cgIds.length > 0) {
-        const pd = await getPriceData(cgIds);
-        setPrices(Object.fromEntries(Object.entries(pd).map(([k, v]) => [k, v.price])));
-        setChanges24h(Object.fromEntries(Object.entries(pd).map(([k, v]) => [k, v.change24h])));
-      }
-    } finally { setIsLoadingTokens(false); }
-  }, [address, selectedChain.id]);
-
-  const loadTxs = useCallback(async () => {
-    if (!address) return;
-    const cacheKey = `${address}:${selectedChain.id}`;
-    const cached = txCacheRef.current.get(cacheKey);
-    if (cached && Date.now() - cached.fetchedAt < TX_CACHE_TTL) {
-      setTxs(cached.data);
-      return;
-    }
-    setIsLoadingTxs(true);
-    try {
-      const history = await fetchTxHistory(address, selectedChain.id);
-      setTxs(history);
-      txCacheRef.current.set(cacheKey, { data: history, fetchedAt: Date.now() });
-    } finally { setIsLoadingTxs(false); }
-  }, [address, selectedChain.id]);
-
-  // ── NFTs (declared here — needs address + selectedNonEvm) ─────────────────
-  const loadNfts = useCallback(async () => {
-    if (!address || selectedNonEvm) return;
-    setIsLoadingNfts(true);
-    try { const items = await fetchNFTs(address, selectedChain.id); setNfts(items); }
-    finally { setIsLoadingNfts(false); }
-  }, [address, selectedChain.id, selectedNonEvm]);
-
-  useEffect(() => { if (activeTab === 'nfts' && wallet.isUnlocked && address) loadNfts(); }, [activeTab, wallet.isUnlocked, address, selectedChain.id, loadNfts]);
-
-  // Approvals loader
-  const loadApprovals = useCallback(async () => {
-    if (!address || selectedNonEvm || !selectedChain.isAlchemy) return;
-    setIsLoadingApprovals(true);
-    try { const items = await fetchApprovals(address, selectedChain.id); setApprovals(items); }
-    finally { setIsLoadingApprovals(false); }
-  }, [address, selectedChain.id, selectedNonEvm, selectedChain.isAlchemy]);
-
-  useEffect(() => { if (activeTab === 'approvals' && wallet.isUnlocked && address) loadApprovals(); }, [activeTab, wallet.isUnlocked, address, selectedChain.id, loadApprovals]);
-
-  // Gas price polling — every 15s while dashboard is open, EVM chains only
-  useEffect(() => {
-    if (!wallet.isUnlocked || selectedNonEvm) { setGasPrices(null); return; }
-    getGasPrices(selectedChain.id).then(setGasPrices).catch(() => {});
-    if (gasIntervalRef.current) clearInterval(gasIntervalRef.current);
-    gasIntervalRef.current = setInterval(() => {
-      getGasPrices(selectedChain.id).then(setGasPrices).catch(() => {});
-    }, 15_000);
-    return () => { if (gasIntervalRef.current) clearInterval(gasIntervalRef.current); };
-  }, [wallet.isUnlocked, selectedChain.id, selectedNonEvm]);
-
-  useEffect(() => {
-    if (!wallet.isUnlocked || !address) { setTokens([]); setTxs([]); return; }
-    loadTokens();
-  }, [wallet.isUnlocked, address, selectedChain.id]);
-
-  // Session-scoped TX history cache — key: `${address}:${chainId}`, value: { data, fetchedAt }
-  const txCacheRef = useRef<Map<string, { data: TxRecord[]; fetchedAt: number }>>(new Map());
-  const TX_CACHE_TTL = 90_000; // 90 seconds
-  // Compute all-chains total + auto-select highest-balance chain on first unlock
-  const autoSelectedRef = useRef(false);
-  useEffect(() => {
-    if (!wallet.isUnlocked || !address) return;
-    const doAutoSelect = !autoSelectedRef.current;
-    autoSelectedRef.current = true;
-    // Fetch ALL Alchemy chains (including testnets — user may hold testnet ETH)
-    const alchemyChains = CHAINS.filter(c => c.isAlchemy);
-    // Fetch EVM chains in parallel with non-EVM balances
-    const nonEvmCoins = Object.values(NON_EVM_META);
-    const nonEvmFetch = wallet.getMnemonicForExport().then(async (mnemonic) => {
-      if (!mnemonic) return 0;
-      const cgIds = nonEvmCoins.map(m => m.coingeckoId);
-      const prices = await getPrices(cgIds).catch(() => ({} as Record<string, number>));
-      const results = await Promise.allSettled(nonEvmCoins.map(async m => {
-        let bal = 0;
-        try {
-          if (m.coin === 'BTC')        { const w = deriveBTCWallet(mnemonic);   bal = (await getBTCBalance(w.address)).total; }
-          else if (m.coin === 'DOGE')  { const w = deriveDOGEWallet(mnemonic);  bal = (await getDOGEBalance(w.address)).total; }
-          else if (m.coin === 'BCH')   { const w = deriveBCHWallet(mnemonic);   bal = (await getBCHBalance(w.address)).total; }
-          else if (m.coin === 'SOL')   { const w = deriveSOLWallet(mnemonic);   bal = (await getSOLBalance(w.address)).sol; }
-          else if (m.coin === 'XRP')   { const w = deriveXRPWallet(mnemonic);   bal = (await getXRPBalance(w.address)).xrp; }
-          else if (m.coin === 'XLM')   { const w = deriveXLMWallet(mnemonic);   bal = (await getXLMBalance(w.address)).xlm; }
-          else if (m.coin === 'NANO')  { const w = deriveNANOWallet(mnemonic);  bal = (await getNANOBalance(w.address)).nano; }
-          else if (m.coin === 'HBAR')  { const w = deriveHBARWallet(mnemonic);  bal = (await getHBARBalance(w.evmAddress)).hbar; }
-          else if (m.coin === 'SUI')   { const w = deriveSUIWallet(mnemonic);   bal = (await getSUIBalance(w.address)).sui; }
-          else if (m.coin === 'APTOS') { const w = deriveAPTOSWallet(mnemonic); bal = (await getAPTOSBalance(w.address)).apt; }
-          else if (m.coin === 'LTC')   { const w = deriveLTCWallet(mnemonic);   bal = (await getLTCBalance(w.address)).total; }
-          else if (m.coin === 'TRON')  { const w = deriveTronWallet(mnemonic);  bal = (await getTronBalance(w.address)).trx; }
-          else if (m.coin === 'USDT')  { const w = deriveTronWallet(mnemonic);  bal = (await getTetherBalanceOnTron(w.address)).usdt; }
-        } catch { bal = 0; }
-        return bal * (prices[m.coingeckoId] ?? 0);
-      }));
-      return results.reduce((s, r) => s + (r.status === 'fulfilled' ? r.value : 0), 0);
-    }).catch(() => 0);
-
-    Promise.all([
-      Promise.all(
-        alchemyChains.map(async c => {
-          try {
-            const toks = await fetchTokenBalances(address, c.id);
-            const cgIds = [...new Set([c.coingeckoId, ...toks.map(t => t.coingeckoId).filter(Boolean) as string[]])];
-            const p = await getPrices(cgIds);
-            const usd = toks.reduce((s, t) => {
-              const cg = t.coingeckoId ?? c.coingeckoId;
-              return s + parseFloat(t.balance || '0') * (p[cg] ?? 0);
-            }, 0);
-            return { chain: c, usd, toks, p };
-          } catch { return { chain: c, usd: 0, toks: [], p: {} }; }
-        })
-      ),
-      nonEvmFetch,
-    ]).then(([results, nonEvmTotal]) => {
-      const evmTotal = results.reduce((s, r) => s + r.usd, 0);
-      setAllChainsTotal(evmTotal + nonEvmTotal);
-      setAllChainTokens(results.map(r => ({ chain: r.chain, toks: r.toks, p: r.p })));
-      if (doAutoSelect) {
-        const best = results.reduce((a, b) => b.usd > a.usd ? b : a, results[0]);
-        if (best && best.usd > 0) {
-          setSelectedChain(best.chain);
-          setTokens(best.toks);
-          setPrices(best.p);
-        }
-      }
-    }).catch(() => { setAllChainsTotal(0); });
-  }, [wallet.isUnlocked, address]);
-
-  useEffect(() => {
-    if (activeTab === 'transactions' && wallet.isUnlocked && address) loadTxs();
-  }, [activeTab, wallet.isUnlocked, address, selectedChain.id]);
-
-  const handleCopy = handleCopyAddress;
-
-  const handleConnectExtension = async () => {
-    if (!wallet.isUnlocked) return;
-    const mnemonic = await wallet.getMnemonicForExport();
-    if (!mnemonic) return;
-    const passphrase = prompt('Set a PIN / passphrase for your ABD Wallet extension (min 6 chars):');
-    if (!passphrase || passphrase.length < 6) return;
-    setExtAttaching(true);
-    setExtError(null);
-    window.postMessage({ type: 'CW_ATTACH_REQUEST', mnemonic, passphrase }, window.location.origin);
-    setTimeout(() => setExtAttaching(false), 10000);
-  };
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    if (activeTab === 'transactions' && address) {
-      txCacheRef.current.delete(`${address}:${selectedChain.id}`);
-    }
-    await Promise.all([
-      activeTab === 'balance' ? loadTokens() : Promise.resolve(),
-      activeTab === 'transactions' ? loadTxs() : Promise.resolve(),
-      activeTab === 'nfts' ? loadNfts() : Promise.resolve(),
-      activeTab === 'approvals' ? loadApprovals() : Promise.resolve(),
-    ]);
-    setIsRefreshing(false);
-  };
-
-  const handleRevokeApproval = async (approval: TokenApproval) => {
-    if (!address || (!wallet.scatteredKeyStore && !activeLedger)) return;
-    const key = `${approval.token}-${approval.spender}`;
-    setRevokingApproval(key);
-    try {
-      const provider = getProvider(selectedChain.id);
-      const iface = new ethers.Interface(['function approve(address spender, uint256 amount) returns (bool)']);
-      const data = iface.encodeFunctionData('approve', [approval.spender, 0n]);
-      const nonce = await provider.getTransactionCount(address, 'latest');
-      const feeData = await provider.getFeeData();
-      const tx: ethers.TransactionRequest = {
-        to: approval.token,
-        from: address,
-        data,
-        nonce,
-        chainId: selectedChain.id,
-        gasLimit: 60000n,
-        maxFeePerGas: feeData.maxFeePerGas ?? undefined,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? undefined,
-      };
-      const signed = activeLedger
-        ? await ledgerSign(activeLedger.derivationPath, tx)
-        : await ephemeralSign(wallet.scatteredKeyStore!, tx);
-      await provider.broadcastTransaction(signed);
-      setApprovals(prev => prev.filter(a => !(a.token === approval.token && a.spender === approval.spender)));
-    } catch (e: unknown) {
-      alert(`Revoke failed: ${e instanceof Error ? e.message : String(e)}`);
-    } finally {
-      setRevokingApproval(null);
-    }
-  };
-
-  const chainTotalUSD = tokens.reduce((sum, t) => {
-    const price = prices[t.coingeckoId ?? ''] ?? prices[selectedChain.coingeckoId] ?? 0;
-    return sum + parseFloat(t.balance || '0') * price;
-  }, 0);
-  // After initial load: show selected chain's USD. Before: show all-chains total loading.
-  const isLoadingTotal = allChainsTotal === null && wallet.isUnlocked;
-  // Once allChainsTotal resolves, display selected chain's USD for network-switch UX
-  const displayTotal = isLoadingTotal ? 0 : chainTotalUSD;
-
-  // CountUp fires ONCE on initial load — not on manual network changes
-  const countUpFiredRef = useRef(false);
-  const prevTotalUSDRef = useRef(0);
-  const [countFrom, setCountFrom] = useState(0);
-  const [countTo, setCountTo] = useState(0);
-  const [countKey, setCountKey] = useState(0);
-  const [showFullBalance, setShowFullBalance] = useState(false);
-  useEffect(() => {
-    if (isLoadingTotal) return;
-    if (!countUpFiredRef.current) {
-      // First time: animate from 0 to initial total
-      countUpFiredRef.current = true;
-      setCountFrom(0);
-      setCountTo(chainTotalUSD);
-      setCountKey(1);
-      prevTotalUSDRef.current = chainTotalUSD;
-    } else {
-      // Manual network switch: just update display value, no animation
-      setCountFrom(chainTotalUSD);
-      setCountTo(chainTotalUSD);
-      prevTotalUSDRef.current = chainTotalUSD;
-    }
-  }, [chainTotalUSD, isLoadingTotal]);
-
-  // ── Loading ──
-  if (!wallet.isUnlocked && !everUnlocked) {
+  if (!d.wallet.isUnlocked && !d.everUnlocked) {
     return (
-      <section className="flex-1 pt-[64px] px-4 pb-6 md:p-16 bg-surface flex flex-col overflow-y-auto overflow-x-hidden">
+      <section className="flex-1 pt-[64px] px-4 pb-6 md:p-16 flex flex-col overflow-y-auto overflow-x-hidden">
         <div className="max-w-3xl mx-auto w-full space-y-6 md:space-y-12 animate-pulse">
-          {/* Header skeleton */}
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-3 flex-1">
-              <div className="h-12 w-56 bg-white/5 rounded-xl" />
-              <div className="h-3 w-36 bg-white/5 rounded-full" />
+              <div className="h-12 w-56 bg-[rgba(166,177,198,0.15)] rounded-xl" />
+              <div className="h-3 w-36 bg-[rgba(166,177,198,0.15)] rounded-full" />
             </div>
-            <div className="h-9 w-32 bg-white/5 rounded-full" />
+            <div className="h-9 w-32 bg-[rgba(166,177,198,0.15)] rounded-full" />
           </div>
-          {/* Toggle skeleton */}
-          <div className="flex items-center justify-between py-4 border-y border-white/5">
-            <div className="h-3 w-48 bg-white/5 rounded-full" />
-            <div className="h-6 w-12 bg-white/5 rounded-full" />
-          </div>
-          {/* Balance skeleton */}
           <div className="space-y-6">
-            <div className="h-3 w-32 bg-white/5 rounded-full" />
-            <div className="h-28 w-64 bg-white/5 rounded-2xl" />
-            <div className="h-24 bg-white/5 rounded-xl" />
-          </div>
-          {/* Action grid skeleton */}
-          <div className="grid grid-cols-2 gap-4">
-            {[0,1,2,3].map(i => <div key={i} className="h-36 bg-white/5 rounded-xl" />)}
-          </div>
-          {/* Tabs skeleton */}
-          <div className="space-y-4">
-            <div className="flex gap-12 border-b border-white/5 pb-4">
-              <div className="h-3 w-16 bg-white/5 rounded-full" />
-              <div className="h-3 w-24 bg-white/5 rounded-full" />
-              <div className="h-3 w-20 bg-white/5 rounded-full" />
-            </div>
-            {[0,1,2].map(i => <div key={i} className="h-20 bg-white/5 rounded-xl" />)}
+            <div className="h-28 w-64 bg-[rgba(166,177,198,0.15)] rounded-2xl" />
+            <div className="h-24 bg-[rgba(166,177,198,0.15)] rounded-xl" />
           </div>
         </div>
       </section>
@@ -1931,893 +46,308 @@ export function WalletDashboard() {
 
   return (
     <>
-      {showSend && <SendModal tokens={tokens} prices={prices} defaultChain={selectedChain} onClose={() => setShowSend(false)} activeLedger={activeLedger} />}
-      {showSwap && !selectedNonEvm && <SwapModal onClose={() => setShowSwap(false)} activeLedger={activeLedger} />}
-      {showLedger && (
-        <LedgerConnectModal
-          onConnect={(entry) => { setActiveLedger(entry); setShowLedger(false); }}
-          onClose={() => setShowLedger(false)}
-        />
-      )}
-      {showNetworks && <AllNetworksModal selected={selectedChain} onSelect={c => { setSelectedChain(c); setManualChain(c); setSelectedNonEvm(null); }} selectedNonEvm={selectedNonEvm} onSelectNonEvm={coin => { setSelectedNonEvm(coin); }} onClose={() => setShowNetworks(false)} />}
-      {showQR && displayAddress && <QRModal address={displayAddress} onClose={() => setShowQR(false)} />}
-      {showWC && !selectedNonEvm && <WalletConnectModal onClose={() => setShowWC(false)} />}
-      {showNonEvmSend && selectedNonEvm && displayAddress && (
-        <NonEvmSendModal
-          coin={selectedNonEvm}
-          fromAddress={displayAddress}
-          onSend={handleNonEvmSend}
-          onClose={() => setShowNonEvmSend(false)}
-        />
-      )}
-      {showTransfer && address && (
-        <TransferModal onClose={() => setShowTransfer(false)} currentAddress={address} currentHistoryId={currentHistoryId} />
-      )}
-      {showAddressBook && (
-        <AddressBookModal
-          contacts={contacts}
-          onAdd={(c) => setContacts(addContact(c))}
-          onDelete={(id) => setContacts(deleteContact(id))}
-          onClose={() => setShowAddressBook(false)}
-        />
-      )}
-      {showCustomChainModal && <CustomChainModal onClose={() => setShowCustomChainModal(false)} onSaved={() => setCustomChains(loadCustomChains())} />}
-      {showCustomTokenModal && <CustomTokenModal customChains={customChains} activeAddress={wallet.activeAddress} onClose={() => setShowCustomTokenModal(false)} onSaved={() => setCustomTokens(loadCustomTokens())} />}
-      {showCustomAPIModal && <CustomAPIModal activeAddress={wallet.activeAddress} onClose={() => setShowCustomAPIModal(false)} onSaved={() => setCustomAPIs(loadCustomAPIs())} />}
-      {showSavedVaults && (
-        <SavedVaultsModal
-          vaults={walletHistory}
-          currentId={currentHistoryId}
-          liveNonEvm={selectedNonEvm ? (NON_EVM_META[selectedNonEvm] ?? null) : null}
-          liveChain={selectedChain}
-          onSwitch={async (snap) => {
-            try {
-              await switchToSnap(snap);
-              setShowSavedVaults(false);
-            } catch {
-              alert('Vault data not found.');
-            }
-          }}
-          onDelete={(id) => {
-            deleteSavedVault(id);
-            removeFromHistory(id);
-            setWalletHistory(getHistory());
-          }}
-          onClose={() => setShowSavedVaults(false)}
-        />
-      )}
-      <AnimatePresence>
-        {showWipeWarning && (
-          <WarningBanner type="wipe" onConfirm={() => { setShowWipeWarning(false); wallet.disableSessionLock(); wallet.wipeABDWallet(); clearShadow(); }} onCancel={() => setShowWipeWarning(false)} />
-        )}
-        {showNewWalletWarning && (
-          <WarningBanner type="new-wallet" onConfirm={() => { setShowNewWalletWarning(false); wallet.disableSessionLock(); wallet.wipeABDWallet(); clearShadow(); setTimeout(() => wallet.createABDWallet(), 80); }} onCancel={() => setShowNewWalletWarning(false)} />
-        )}
-      </AnimatePresence>
+      <NetworkOfflineBanner onRetry={d.handleRefresh} />
+      <DashboardModals
+        showSend={d.showSend}
+        setShowSend={d.setShowSend}
+        showSwap={d.showSwap}
+        setShowSwap={d.setShowSwap}
+        showLedger={d.showLedger}
+        setShowLedger={d.setShowLedger}
+        showNetworks={d.showNetworks}
+        setShowNetworks={d.setShowNetworks}
+        showQR={d.showQR}
+        setShowQR={d.setShowQR}
+        showWC={d.showWC}
+        setShowWC={d.setShowWC}
+        showNonEvmSend={d.showNonEvmSend}
+        setShowNonEvmSend={d.setShowNonEvmSend}
+        showTransfer={d.showTransfer}
+        setShowTransfer={d.setShowTransfer}
+        showAddressBook={d.showAddressBook}
+        setShowAddressBook={d.setShowAddressBook}
+        showSavedVaults={d.showSavedVaults}
+        setShowSavedVaults={d.setShowSavedVaults}
+        showPassphraseModal={d.showPassphraseModal}
+        setShowPassphraseModal={d.setShowPassphraseModal}
+        showCustomChainModal={d.showCustomChainModal}
+        setShowCustomChainModal={d.setShowCustomChainModal}
+        showCustomTokenModal={d.showCustomTokenModal}
+        setShowCustomTokenModal={d.setShowCustomTokenModal}
+        showCustomAPIModal={d.showCustomAPIModal}
+        setShowCustomAPIModal={d.setShowCustomAPIModal}
+        showWipeWarning={d.showWipeWarning}
+        setShowWipeWarning={d.setShowWipeWarning}
+        showNewWalletWarning={d.showNewWalletWarning}
+        setShowNewWalletWarning={d.setShowNewWalletWarning}
+        tokens={d.tokens}
+        prices={d.prices}
+        selectedChain={d.selectedChain}
+        setSelectedChain={d.setSelectedChain}
+        setManualChain={d.setManualChain}
+        selectedNonEvm={d.selectedNonEvm}
+        setSelectedNonEvm={d.setSelectedNonEvm}
+        liveNonEvm={d.selectedNonEvm ? NON_EVM_META[d.selectedNonEvm] ?? null : null}
+        displayAddress={d.displayAddress}
+        activeAddress={d.address}
+        activeLedger={d.activeLedger}
+        setActiveLedger={d.setActiveLedger}
+        contacts={d.contacts}
+        setContacts={d.setContacts}
+        customChains={d.customChains}
+        setCustomChains={d.setCustomChains}
+        setCustomTokens={d.setCustomTokens}
+        setCustomAPIs={d.setCustomAPIs}
+        walletHistory={d.walletHistory}
+        currentHistoryId={d.currentHistoryId}
+        onSwitchSnapshot={async (snap) => {
+          try {
+            await d.switchToSnap(snap);
+            d.setShowSavedVaults(false);
+          } catch {
+            alert('Vault data not found.');
+          }
+        }}
+        onDeleteSavedVault={(id) => {
+          deleteSavedVault(id);
+          removeFromHistory(id);
+          d.setWalletHistory(getHistory());
+        }}
+        onConfirmWipe={d.handleConfirmWipe}
+        onConfirmNewWallet={d.handleConfirmNewWallet}
+        onConfirmPassphrase={d.handleConfirmPassphrase}
+        onAddContact={(c) => d.setContacts(addContact(c))}
+        onDeleteContact={(id) => d.setContacts(deleteContact(id))}
+        handleNonEvmSend={d.handleNonEvmSend}
+      />
 
-      <section className="flex-1 pt-[64px] px-3 pb-40 md:pt-8 md:px-16 md:pb-16 bg-surface flex flex-col justify-between overflow-y-auto overflow-x-hidden">
+      <section className="flex-1 pt-[64px] px-3 pb-40 md:pt-8 md:px-16 md:pb-16 flex flex-col justify-between overflow-y-auto overflow-x-hidden">
         <div className="max-w-3xl mx-auto w-full space-y-4 md:space-y-10">
+          <DashboardHeader
+            frozenMode={d.frozenMode}
+            selectedNonEvm={d.selectedNonEvm}
+            manualChain={d.manualChain}
+            mode={d.mode}
+            setMode={d.setMode}
+            setShowNetworks={d.setShowNetworks}
+            isLoadingTotal={d.isLoadingTotal}
+            tokens={d.tokens}
+            prices={d.prices}
+            selectedChain={d.selectedChain}
+            isRefreshing={d.isRefreshing}
+            displayAddress={d.displayAddress}
+            shortAddr={d.shortAddr}
+          />
 
-          {/* ── Session Heading with Chain Selector + Toggle ── */}
-          <div className="flex items-start justify-between gap-3">
-            {/* Heading */}
-            <div className="space-y-0.5">
-              <h2 className="text-xl md:text-5xl font-black tracking-tighter text-white leading-tight whitespace-nowrap">
-                {upperEn(frozenMode === 'PERSISTENT' ? 'Persistent Session' : 'New Session')}
-              </h2>
-              <p className="text-tertiary font-black tracking-[0.15em] uppercase text-[0.6rem] opacity-80">
-                {frozenMode === 'PERSISTENT' ? 'Encrypted · Device-Bound' : 'Volatile wallet — RAM only'}
-              </p>
-            </div>
-            {/* Buttons — right-aligned, same row as heading */}
-            <div className="flex items-center gap-2 flex-shrink-0 mt-1">
-              <button
-                onClick={() => setShowNetworks(true)}
-                className="bg-surface-container-high px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/5 hover:border-white/10 transition-colors">
-                <div className="w-2 h-2 bg-tertiary rounded-full animate-pulse shadow-[0_0_12px_rgba(82,255,172,0.8)]"></div>
-                <span className="text-[0.6rem] font-black tracking-[0.15em] uppercase text-white truncate max-w-[50px] md:max-w-none">
-                  {selectedNonEvm ? (NON_EVM_META[selectedNonEvm]?.name ?? selectedNonEvm) : manualChain ? manualChain.name : 'Network'}
-                </span>
-                <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 14 }}>expand_more</span>
-              </button>
-              <motion.button
-                onClick={() => setMode(m => m === 'simple' ? 'advanced' : 'simple')}
-                whileTap={{ scale: 0.95 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 9999, border: `1px solid ${mode === 'advanced' ? 'rgba(82,255,172,0.3)' : 'rgba(255,255,255,0.1)'}`, background: mode === 'advanced' ? 'rgba(82,255,172,0.08)' : 'rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'border-color 0.25s, background 0.25s' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(82,255,172,0.12)'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(82,255,172,0.35)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = mode === 'advanced' ? 'rgba(82,255,172,0.08)' : 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLButtonElement).style.borderColor = mode === 'advanced' ? 'rgba(82,255,172,0.3)' : 'rgba(255,255,255,0.1)'; }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 13, color: '#52ffac' }}>{mode === 'advanced' ? 'arrow_back' : 'settings'}</span>
-                <AnimatePresence mode="wait">
-                  {mode === 'simple' ? (
-                    <motion.span key="adv-label"
-                      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.15 }}
-                      style={{ fontSize: 9, fontWeight: 900, color: '#52ffac', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
-                      Advanced
-                    </motion.span>
-                  ) : (
-                    <motion.span key="simple-label"
-                      initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.15 }}
-                      style={{ fontSize: 9, fontWeight: 900, color: '#52ffac', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
-                      Simple
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.button>
-            </div>
-          </div>
+          <DashboardActionGrid
+            walletUnlocked={d.wallet.isUnlocked}
+            walletHistory={d.walletHistory}
+            setShowSavedVaults={d.setShowSavedVaults}
+            extPresent={d.extPresent}
+            extAttached={d.extAttached}
+            extError={d.extError}
+            extAttaching={d.extAttaching}
+            setShowPassphraseModal={d.setShowPassphraseModal}
+            activeLedger={d.activeLedger}
+            setActiveLedger={d.setActiveLedger}
+            selectedNonEvm={d.selectedNonEvm}
+            setShowWC={d.setShowWC}
+            setShowSend={d.setShowSend}
+            setShowNonEvmSend={d.setShowNonEvmSend}
+            setShowQR={d.setShowQR}
+            setShowNewWalletWarning={d.setShowNewWalletWarning}
+            mode={d.mode}
+            setShowSwap={d.setShowSwap}
+            setShowAddressBook={d.setShowAddressBook}
+            setShowLedger={d.setShowLedger}
+            setShowCustomChainModal={d.setShowCustomChainModal}
+            setShowCustomTokenModal={d.setShowCustomTokenModal}
+            setShowCustomAPIModal={d.setShowCustomAPIModal}
+            setShowTransfer={d.setShowTransfer}
+            currentHistoryId={d.currentHistoryId}
+            hasTokensOnChain={d.hasTokensOnChain}
+          />
 
-          {/* ── Balance Section ── */}
-          <div className="space-y-3 md:space-y-6">
-            <p className="text-on-surface-variant font-black tracking-[0.2em] uppercase text-xs opacity-60">Total Curated Value</p>
-            <div className="flex items-end gap-4">
-              <h1 className="text-[2.6rem] md:text-[9rem] font-black tracking-tighter leading-none text-white">
-                {isLoadingTotal ? (
-                  <span className="text-on-surface-variant opacity-30">...</span>
-                ) : (
-                  <span className="flex items-baseline gap-0">
-                    <span className="text-on-surface-variant opacity-60">$</span>
-                    {/* Show full balance or masked: "24.63..." */}
-                    {showFullBalance ? (
-                      <span>{countTo.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</span>
-                    ) : (
-                      <span className="flex items-baseline gap-0">
-                        {/* Whole number + first 2 decimals always visible */}
-                        <CountUp
-                          key={countKey + '_vis'}
-                          from={Math.floor(countFrom)}
-                          to={Math.floor(countTo)}
-                          separator=","
-                          duration={2.5}
-                        />
-                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>.</span>
-                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>
-                          {String(Math.round((countTo % 1) * 100)).padStart(2, '0')}
-                        </span>
-                        {/* ... tap to reveal rest */}
-                        <button
-                          onClick={() => setShowFullBalance(true)}
-                          className="hover:opacity-80 transition-opacity font-black"
-                          style={{ fontSize: '0.55em', background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 0 2px', lineHeight: 1, color: 'rgba(255,255,255,0.3)', letterSpacing: '-0.02em', alignSelf: 'flex-end', marginBottom: '0.15em' }}>
-                          ...
-                        </button>
-                      </span>
-                    )}
-                  </span>
-                )}
-              </h1>
-              {isRefreshing && (
-                <div className="mb-4" style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid rgba(82,255,172,0.2)', borderTopColor: '#52ffac', animation: 'spin 1s linear infinite' }} />
-              )}
-            </div>
-
-            {/* ── Address Card ── */}
-            <div
-              className="bg-white text-black p-5 md:p-7 rounded-full flex justify-between items-center group cursor-pointer hover:bg-neutral-200 transition-all"
-              onClick={handleCopy}>
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                {selectedNonEvm ? (() => {
-                  const m = NON_EVM_META[selectedNonEvm];
-                  return <CoinIcon symbol={m?.symbol ?? selectedNonEvm} color={m?.color ?? '#888'} logoUrl={m?.logoUrl} size={40} />;
-                })() : (
-                  <ChainIcon chain={selectedChain} size={40} />
-                )}
-                <div className="flex flex-col min-w-0">
-                  <span className="text-[0.65rem] font-black uppercase tracking-widest opacity-60 mb-1">
-                    {selectedNonEvm ? `${NON_EVM_META[selectedNonEvm]?.name ?? selectedNonEvm} Address` : 'Active Monolith Address'}
-                  </span>
-                  <span className="text-base md:text-3xl font-black tracking-tighter font-mono truncate">{shortAddr}</span>
-                </div>
-              </div>
-              <span className="material-symbols-outlined text-3xl md:text-4xl ml-3 flex-shrink-0">{copied ? 'check' : 'content_copy'}</span>
-            </div>
-          </div>
-
-          {/* ── Saved Vaults Switcher ── */}
-          {wallet.isUnlocked && walletHistory.filter(s => s.isSaved).length > 0 && (
-            <motion.button
-              onClick={() => setShowSavedVaults(true)}
-              whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-              className="w-full group bg-tertiary hover:bg-tertiary-container text-on-tertiary p-5 md:p-7 rounded-full flex justify-between items-center transition-all shadow-[0_8px_30px_rgba(82,255,172,0.15)] active:scale-[0.98]">
-              <div className="flex items-center gap-4">
-                <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
-                <span className="text-sm font-black tracking-widest uppercase">
-                  {walletHistory.filter(s => s.isSaved).length} Saved Vault{walletHistory.filter(s => s.isSaved).length > 1 ? 's' : ''}
-                </span>
-              </div>
-              <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
-            </motion.button>
-          )}
-
-          {/* ── Extension Connect Banner ── */}
-          {extPresent && !extAttached && wallet.isUnlocked && (
-            <div style={{ background: 'rgba(168,85,247,0.07)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 9999, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <div>
-                <p style={{ color: '#ddd', fontSize: 12, fontWeight: 700, margin: 0 }}>ABD Wallet Extension detected</p>
-                <p style={{ color: '#666', fontSize: 11, margin: '2px 0 0' }}>Connect to use it as a browser wallet for dApps</p>
-              </div>
-              <button
-                onClick={handleConnectExtension}
-                disabled={extAttaching}
-                style={{ background: '#a855f7', border: 'none', borderRadius: 999, color: '#fff', fontSize: 11, fontWeight: 700, padding: '8px 16px', cursor: extAttaching ? 'not-allowed' : 'pointer', opacity: extAttaching ? 0.6 : 1, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                {extAttaching ? 'Attaching…' : 'Connect Extension'}
-              </button>
-            </div>
-          )}
-          {extError && extPresent && !extAttached && (
-            <p style={{ color: '#ff8888', fontSize: 11, margin: '-4px 0 4px', padding: '0 4px' }}>{extError}</p>
-          )}
-          {extAttached && wallet.isUnlocked && (
-            <div style={{ background: 'rgba(82,255,172,0.05)', border: '1px solid rgba(82,255,172,0.15)', borderRadius: 9999, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#52ffac', boxShadow: '0 0 6px rgba(82,255,172,0.6)', flexShrink: 0 }} />
-              <p style={{ color: '#888', fontSize: 11, fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Extension connected — browser dApps can now use this wallet</p>
-            </div>
-          )}
-
-          {/* ── Ledger Active Banner ── */}
-          {activeLedger && (
-            <div style={{ background: 'rgba(79,70,229,0.08)', border: '1px solid rgba(79,70,229,0.25)', borderRadius: 9999, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#818cf8' }}>usb</span>
-                <div>
-                  <p style={{ color: '#c7d2fe', fontSize: 12, fontWeight: 700, margin: 0 }}>Ledger Active</p>
-                  <p style={{ color: '#555', fontSize: 10, fontFamily: 'monospace', margin: '1px 0 0' }}>{activeLedger.address.slice(0, 10)}...{activeLedger.address.slice(-6)}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveLedger(null)}
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 999, padding: '6px 14px', cursor: 'pointer', color: '#888', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Disconnect
-              </button>
-            </div>
-          )}
-
-          {/* ── Action Grid ── */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            {[
-              { icon: 'power',       label: 'Connect',          onClick: () => { if (!selectedNonEvm) setShowWC(true); }, disabled: !!selectedNonEvm },
-              { icon: 'north_east',  label: 'Send',             onClick: () => { if (selectedNonEvm) setShowNonEvmSend(true); else setShowSend(true); } },
-              { icon: 'qr_code_2',  label: 'QR / Receive',     onClick: () => setShowQR(true) },
-              { icon: 'add_card',   label: 'Create New Wallet', onClick: () => setShowNewWalletWarning(true) },
-            ].map((item) => (
-              <motion.button
-                key={item.label}
-                layout
-                onClick={item.onClick}
-                whileHover={{ scale: (item as { disabled?: boolean }).disabled ? 1 : 1.03, rotateX: 3, rotateY: -3 }}
-                whileTap={{ scale: (item as { disabled?: boolean }).disabled ? 1 : 0.96 }}
-                transition={springs.snappy}
-                style={{ transformStyle: 'preserve-3d', perspective: 800, opacity: (item as { disabled?: boolean }).disabled ? 0.35 : 1 }}
-                className="bg-surface-container-highest p-4 md:p-8 rounded-xl flex flex-col items-center gap-1.5 md:gap-4 hover:bg-white hover:text-black transition-colors group border border-white/5 cursor-pointer">
-                <span className="material-symbols-outlined text-3xl md:text-5xl group-hover:scale-110 transition-transform">{item.icon}</span>
-                <span className="font-black uppercase tracking-widest text-[0.6rem]">{item.label}</span>
-              </motion.button>
-            ))}
-            <AnimatePresence>
-              {mode === 'advanced' && [
-                { icon: 'swap_vert',  label: 'Swap',           onClick: () => { if (!selectedNonEvm) setShowSwap(true); }, disabled: !!selectedNonEvm },
-                { icon: 'contacts',  label: 'Address Book',    onClick: () => setShowAddressBook(true) },
-                { icon: 'usb',       label: 'Ledger',          onClick: () => setShowLedger(true) },
-                { icon: 'link',      label: 'Custom Chain',    onClick: () => setShowCustomChainModal(true) },
-                { icon: 'token',     label: 'Custom Token',    onClick: () => setShowCustomTokenModal(true) },
-                { icon: 'api',       label: 'Custom API',      onClick: () => setShowCustomAPIModal(true) },
-              ].map((item, i) => (
-                <motion.button
-                  key={item.label}
-                  layout
-                  initial={{ opacity: 0, y: 24, scale: 0.93 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 16, scale: 0.94 }}
-                  viewport={{ once: true, margin: '-40px' }}
-                  transition={{ ...springs.smooth, delay: i * 0.06 }}
-                  onClick={item.onClick}
-                  whileHover={{ scale: (item as { disabled?: boolean }).disabled ? 1 : 1.03, rotateX: 3, rotateY: -3 }}
-                  whileTap={{ scale: (item as { disabled?: boolean }).disabled ? 1 : 0.96 }}
-                  style={{ transformStyle: 'preserve-3d', perspective: 800, opacity: (item as { disabled?: boolean }).disabled ? 0.35 : 1 }}
-                  className="bg-surface-container-highest p-4 md:p-8 rounded-xl flex flex-col items-center gap-1.5 md:gap-4 hover:bg-white hover:text-black transition-colors group border border-white/5 cursor-pointer">
-                  <span className="material-symbols-outlined text-2xl md:text-5xl group-hover:scale-110 transition-transform">{item.icon}</span>
-                  <span className="font-black uppercase tracking-widest text-[0.55rem] md:text-[0.6rem]">{item.label}</span>
-                </motion.button>
-              ))}
-            </AnimatePresence>
-            {(() => {
-              const hasOtherSaved = walletHistory.filter(s => s.isSaved && s.id !== currentHistoryId).length >= 1;
-              const currentChainToks = allChainTokens.find(x => x.chain.id === selectedChain.id)?.toks ?? tokens;
-              const hasBalance = currentChainToks.some(t => parseFloat(t.balance || '0') > 0);
-              if (!hasOtherSaved || !hasBalance) return null;
-              return (
-                <motion.button
-                  layout
-                  onClick={() => setShowTransfer(true)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={springs.snappy}
-                  className="bg-surface-container-highest p-4 md:p-8 rounded-xl flex flex-col items-center gap-1.5 md:gap-4 hover:bg-white hover:text-black transition-colors group active:scale-95 border border-white/5 col-span-2 cursor-pointer">
-                  <span className="material-symbols-outlined text-3xl md:text-5xl group-hover:scale-110 transition-transform">swap_horiz</span>
-                  <span className="font-black uppercase tracking-widest text-[0.6rem]">Transfer Between Wallets</span>
-                </motion.button>
-              );
-            })()}
-          </div>
-
-
-          {/* ── Tabs & List ── */}
+          {/* Tabs Navigation and Body */}
           <div className="pt-2 md:pt-8">
-            <div className="flex gap-6 md:gap-12 mb-4 md:mb-8 border-b border-white/5 overflow-x-auto">
+            <div className="flex gap-6 md:gap-12 mb-4 md:mb-8 border-b border-transparent overflow-x-auto">
               <button
-                onClick={() => setActiveTab('balance')}
-                className={`font-black uppercase tracking-widest text-xs pb-4 transition-colors whitespace-nowrap ${activeTab === 'balance' ? 'text-white border-b-2 border-tertiary' : 'text-on-surface-variant hover:text-white'}`}>
+                onClick={() => d.setActiveTab('balance')}
+                className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
+                  d.activeTab === 'balance' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                }`}
+              >
                 Balance
               </button>
               <button
-                onClick={() => { setActiveTab('transactions'); }}
-                className={`font-black uppercase tracking-widest text-xs pb-4 transition-colors whitespace-nowrap ${activeTab === 'transactions' ? 'text-white border-b-2 border-tertiary' : 'text-on-surface-variant hover:text-white'}`}>
+                onClick={() => d.setActiveTab('transactions')}
+                className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
+                  d.activeTab === 'transactions' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                }`}
+              >
                 Transactions
               </button>
               <AnimatePresence>
-                {mode === 'advanced' && (
+                {d.mode === 'advanced' && (
                   <>
-                    <motion.button key="tab-nfts"
-                      initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}
-                      transition={{ ...springs.smooth, delay: 0 }}
-                      onClick={() => setActiveTab('nfts')}
-                      className={`font-black uppercase tracking-widest text-xs pb-4 transition-colors whitespace-nowrap ${activeTab === 'nfts' ? 'text-white border-b-2 border-tertiary' : 'text-on-surface-variant hover:text-white'}`}>
+                    <motion.button
+                      key="tab-nfts"
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -12 }}
+                      onClick={() => d.setActiveTab('nfts')}
+                      className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
+                        d.activeTab === 'nfts' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                      }`}
+                    >
                       NFTs
                     </motion.button>
-                    {!selectedNonEvm && (
-                      <motion.button key="tab-approvals"
-                        initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}
-                        transition={{ ...springs.smooth, delay: 0.04 }}
-                        onClick={() => setActiveTab('approvals')}
-                        className={`font-black uppercase tracking-widest text-xs pb-4 transition-colors whitespace-nowrap ${activeTab === 'approvals' ? 'text-white border-b-2 border-red-400' : 'text-on-surface-variant hover:text-white'}`}>
+                    {!d.selectedNonEvm && (
+                      <motion.button
+                        key="tab-approvals"
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -12 }}
+                        onClick={() => d.setActiveTab('approvals')}
+                        className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
+                          d.activeTab === 'approvals' ? 'text-[#23262b] border-b-2 border-red-400' : 'text-[#8a8f98] hover:text-[#23262b]'
+                        }`}
+                      >
                         Approvals
                       </motion.button>
                     )}
-                    {!selectedNonEvm && (
-                      <motion.button key="tab-staking"
-                        initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}
-                        transition={{ ...springs.smooth, delay: 0.08 }}
-                        onClick={() => setActiveTab('staking')}
-                        className={`font-black uppercase tracking-widest text-xs pb-4 transition-colors whitespace-nowrap ${activeTab === 'staking' ? 'text-white border-b-2 border-yellow-400' : 'text-on-surface-variant hover:text-white'}`}>
+                    {!d.selectedNonEvm && (
+                      <motion.button
+                        key="tab-staking"
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -12 }}
+                        onClick={() => d.setActiveTab('staking')}
+                        className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
+                          d.activeTab === 'staking' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                        }`}
+                      >
                         Staking
                       </motion.button>
                     )}
-                    <motion.button key="tab-lightning"
-                      initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}
-                      transition={{ ...springs.smooth, delay: 0.12 }}
-                      onClick={() => setActiveTab('lightning')}
-                      className={`font-black uppercase tracking-widest text-xs pb-4 transition-colors whitespace-nowrap ${activeTab === 'lightning' ? 'text-white border-b-2 border-tertiary' : 'text-on-surface-variant hover:text-white'}`}>
-                      ⚡ Lightning
+                    <motion.button
+                      key="tab-lightning"
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -12 }}
+                      onClick={() => d.setActiveTab('lightning')}
+                      className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
+                        d.activeTab === 'lightning' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                      }`}
+                    >
+                      Lightning
                     </motion.button>
                   </>
                 )}
               </AnimatePresence>
-              <button onClick={handleRefresh} className="ml-auto pb-4 text-on-surface-variant hover:text-white transition-colors flex-shrink-0">
-                <span className={`material-symbols-outlined text-base ${isRefreshing ? 'animate-spin' : ''}`}>refresh</span>
+              <button onClick={d.handleRefresh} className="ml-auto pb-4 text-[#8a8f98] hover:text-[#23262b] transition-colors flex-shrink-0">
+                <span className={`material-symbols-outlined text-base ${d.isRefreshing ? 'animate-spin' : ''}`}>refresh</span>
               </button>
             </div>
 
-            {/* Non-EVM balance card — shown when non-EVM chain selected */}
-            {selectedNonEvm && activeTab === 'balance' && (() => {
-              const meta = NON_EVM_META[selectedNonEvm];
-              const bal = nonEvmBal;
-              const usdVal = bal !== null ? bal * nonEvmUsdPrice : null;
-              return (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 px-1 mb-2">
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: meta?.color ?? '#888' }} />
-                    <span style={{ fontSize: 9, fontWeight: 900, color: meta?.color ?? '#888', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Network — {meta?.name ?? selectedNonEvm}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-6 bg-white text-black rounded-xl">
-                    <div className="flex items-center gap-4">
-                      {meta && <CoinIcon symbol={meta.symbol} color={meta.color} logoUrl={meta.logoUrl} size={48} />}
-                      <div>
-                        <p className="font-black text-black text-base">{meta?.symbol ?? selectedNonEvm}</p>
-                        <p style={{ fontSize: '0.65rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>{meta?.name ?? selectedNonEvm}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {nonEvmLoading ? (
-                        <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #ddd', borderTopColor: '#333', animation: 'spin 1s linear infinite' }} />
-                      ) : (
-                        <>
-                          <p className="font-black text-black text-base">
-                            {bal === null ? '—' : bal < 0.000001 && bal > 0 ? '< 0.000001' : new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(bal ?? 0)}
-                          </p>
-                          <p style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700 }}>{usdVal !== null && usdVal > 0 ? formatUSD(usdVal) : '—'}</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* EVM balance tab */}
-            {!selectedNonEvm && activeTab === 'balance' && (
-              <div className="space-y-3">
-                {/* Current network — clean white card matching the rest of the list */}
-                {manualChain && (() => {
-                  const ct = allChainTokens.find(x => x.chain.id === manualChain.id);
-                  const ctToks = ct?.toks ?? tokens;
-                  const ctP = ct?.p ?? prices;
-                  // Show all tokens for current network (native + ERC-20 with balance)
-                  const currentToks = ctToks.filter(t => parseFloat(t.balance || '0') > 0);
-                  return (
-                    <div className="slide-up mb-1">
-                      {/* Current network label */}
-                      <div className="flex items-center gap-2 px-1 mb-2">
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#52ffac' }} />
-                        <span style={{ fontSize: 9, fontWeight: 900, color: '#52ffac', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Current Network — {manualChain.name}</span>
-                      </div>
-                      {currentToks.length === 0 ? (
-                        <div className="flex items-center justify-between p-6 bg-white text-black rounded-xl">
-                          <div className="flex items-center gap-4">
-                            <ChainIcon chain={manualChain} size={48} />
-                            <div>
-                              <p className="font-black text-black text-base">{manualChain.symbol}</p>
-                              <p style={{ fontSize: '0.65rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>{manualChain.name}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-black text-black text-base">0</p>
-                            <p style={{ fontSize: '0.65rem', color: '#666', fontWeight: 700 }}>—</p>
-                          </div>
-                        </div>
-                      ) : (
-                        currentToks.map((token, i) => {
-                          const cgId = token.coingeckoId ?? manualChain.coingeckoId;
-                          const price = cgId ? (ctP[cgId] ?? 0) : 0;
-                          const usdVal = parseFloat(token.balance || '0') * price;
-                          const bal = parseFloat(token.balance || '0');
-                          return (
-                            <div key={`cur-${token.contractAddress}-${i}`}
-                              className="flex items-center justify-between p-6 bg-white text-black rounded-xl"
-                              style={{ marginBottom: i < currentToks.length - 1 ? 4 : 0 }}>
-                              <div className="flex items-center gap-4">
-                                {token.logo
-                                  ? <img src={token.logo} alt={token.symbol} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                  : <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18, color: '#333', flexShrink: 0 }}>{token.symbol.slice(0,1)}</div>
-                                }
-                                <div>
-                                  <p style={{ fontWeight: 900, color: '#000', fontSize: '1.05rem' }}>{token.symbol}</p>
-                                  <p style={{ fontSize: '0.65rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>{manualChain.name}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p style={{ fontWeight: 900, color: '#000', fontSize: '1.05rem' }}>
-                                  {bal < 0.000001 ? '< 0.000001' : new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(bal)}
-                                </p>
-                                <p style={{ fontSize: '0.65rem', color: '#888', fontWeight: 700 }}>{usdVal > 0 ? formatUSD(usdVal) : '—'}</p>
-                              </div>
-                            </div>
-                          );
-                        })
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {/* All chains with non-zero balance */}
-                {isLoadingTotal ? (
-                  <div className="flex justify-center py-12">
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(82,255,172,0.2)', borderTopColor: '#52ffac', animation: 'spin 1s linear infinite' }} />
-                  </div>
-                ) : allChainTokens.length > 0 ? (
-                  (() => {
-                    const items = allChainTokens.flatMap(({ chain: c, toks, p }, ci) =>
-                      toks.filter(t => parseFloat(t.balance || '0') > 0 && c.id !== manualChain?.id).map((token, i) => ({ c, token, p, ci, i }))
-                    );
-                    return (
-                      <motion.div variants={variants.staggerContainer} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {items.map(({ c, token, p, ci, i }) => {
-                          const cgId = token.coingeckoId ?? c.coingeckoId;
-                          const price = cgId ? (p[cgId] ?? 0) : 0;
-                          const usdVal = parseFloat(token.balance || '0') * price;
-                          const chg = cgId ? (changes24h[cgId] ?? null) : null;
-                          return (
-                            <motion.div key={`${c.id}-${token.contractAddress}-${i}`}
-                              variants={variants.staggerItem}
-                              transition={springs.smooth}
-                              whileHover={{ x: 4, transition: springs.snappy }}
-                              className="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-white/5 hover:bg-surface-container-high transition-colors cursor-pointer">
-                              <div className="flex items-center gap-5">
-                                {token.logo ? (
-                                  <img src={token.logo} alt={token.symbol} className="w-14 h-14 rounded-full object-cover shrink-0"
-                                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                ) : (
-                                  <div className="w-14 h-14 bg-surface-container-highest rounded-full flex items-center justify-center font-black text-xl shrink-0">
-                                    {token.symbol.slice(0, 1)}
-                                  </div>
-                                )}
-                                <div>
-                                  <p className="font-black text-white text-lg">{token.symbol}</p>
-                                  <p className="text-[0.65rem] text-on-surface-variant uppercase tracking-widest font-bold">{c.name}</p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-black text-white text-lg">
-                                  {parseFloat(token.balance) < 0.000001 ? '< 0.000001' : new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(parseFloat(token.balance))}
-                                </p>
-                                <p className="text-[0.65rem] text-on-surface-variant tracking-widest font-bold">
-                                  {price > 0 ? formatUSD(usdVal) : '—'}
-                                </p>
-                                {chg !== null && (
-                                  <p style={{ fontSize: 9, fontWeight: 700, color: chg >= 0 ? '#4ade80' : '#f87171' }}>
-                                    {chg >= 0 ? '▲' : '▼'} {Math.abs(chg).toFixed(2)}%
-                                  </p>
-                                )}
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </motion.div>
-                    );
-                  })()
-                ) : tokens.filter(t => parseFloat(t.balance || '0') > 0).map((token, i) => {
-                  const cgId = token.coingeckoId ?? selectedChain.coingeckoId;
-                  const price = cgId ? (prices[cgId] ?? 0) : 0;
-                  const usdVal = parseFloat(token.balance || '0') * price;
-                  const chg = cgId ? (changes24h[cgId] ?? null) : null;
-                  return (
-                    <div key={`${token.contractAddress}-${i}`}
-                      className="slide-up flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-white/5 hover:bg-surface-container-high transition-all cursor-pointer"
-                      style={{ animationDelay: `${i * 60}ms` }}>
-                      <div className="flex items-center gap-5">
-                        {token.logo ? (
-                          <img src={token.logo} alt={token.symbol} className="w-14 h-14 rounded-full object-cover shrink-0"
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        ) : (
-                          <div className="w-14 h-14 bg-surface-container-highest rounded-full flex items-center justify-center font-black text-xl shrink-0">
-                            {token.symbol.slice(0, 1)}
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-black text-white text-lg">{token.symbol}</p>
-                          <p className="text-[0.65rem] text-on-surface-variant uppercase tracking-widest font-bold">{token.name}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-black text-white text-lg">
-                          {parseFloat(token.balance) < 0.000001 ? '< 0.000001' : new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(parseFloat(token.balance))}
-                        </p>
-                        <p className="text-[0.65rem] text-on-surface-variant tracking-widest font-bold">
-                          {price > 0 ? formatUSD(usdVal) : '—'}
-                        </p>
-                        {chg !== null && (
-                          <p style={{ fontSize: 9, fontWeight: 700, color: chg >= 0 ? '#4ade80' : '#f87171' }}>
-                            {chg >= 0 ? '▲' : '▼'} {Math.abs(chg).toFixed(2)}%
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* TRANSACTIONS TAB */}
-            {!selectedNonEvm && activeTab === 'transactions' && (
-              <div className="space-y-3">
-                {isLoadingTxs ? (
-                  <div className="flex justify-center py-12">
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(82,255,172,0.2)', borderTopColor: '#52ffac', animation: 'spin 1s linear infinite' }} />
-                  </div>
-                ) : txs.length === 0 ? (
-                  <div className="flex items-center p-6 bg-surface-container-low rounded-xl border border-white/5">
-                    <p className="text-on-surface-variant font-black text-xs uppercase tracking-widest">
-                      {selectedChain.isAlchemy ? `No transactions on ${selectedChain.name}` : 'TX history requires Alchemy RPC'}
-                    </p>
-                  </div>
-                ) : (
-                  txs.map((tx) => {
-                    const isOut = tx.direction === 'out';
-                    const txDate = tx.timestamp ? new Date(tx.timestamp) : null;
-                    const date = txDate ? txDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
-                    const time = txDate ? txDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
-                    return (
-                      <a key={tx.hash} href={`${selectedChain.explorerUrl}/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-between p-6 bg-surface-container-low rounded-xl border border-white/5 hover:bg-surface-container-high transition-colors cursor-pointer no-underline">
-                        <div className="flex items-center gap-5">
-                          <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${isOut ? 'bg-red-500/10' : 'bg-tertiary/10'}`}>
-                            {isOut
-                              ? <ArrowUpRight size={20} className="text-red-400" />
-                              : <ArrowDownLeft size={20} className="text-tertiary" />}
-                          </div>
-                          <div>
-                            <p className="font-black text-white text-lg">{isOut ? 'Sent' : 'Received'}</p>
-                            <p className="text-[0.65rem] text-on-surface-variant uppercase tracking-widest font-bold font-mono">
-                              {tx.hash.slice(0, 10)}...{tx.hash.slice(-4)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={`font-black text-lg ${isOut ? 'text-red-400' : 'text-tertiary'}`}>
-                            {isOut ? '-' : '+'}{tx.value} {tx.asset}
-                          </p>
-                          <p className="text-[0.65rem] text-on-surface-variant tracking-widest font-bold">{date}{time ? ` · ${time}` : ''}</p>
-                        </div>
-                      </a>
-                    );
-                  })
-                )}
-              </div>
-            )}
-
-            {/* NFT TAB */}
-            {!selectedNonEvm && activeTab === 'nfts' && (
-              <div className="space-y-3">
-                {isLoadingNfts ? (
-                  <div className="flex justify-center py-12">
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(82,255,172,0.2)', borderTopColor: '#52ffac', animation: 'spin 1s linear infinite' }} />
-                  </div>
-                ) : nfts.length === 0 ? (
-                  <div className="flex flex-col items-center gap-3 p-10 bg-surface-container-low rounded-xl border border-white/5">
-                    <span className="material-symbols-outlined text-4xl text-on-surface-variant opacity-30">image</span>
-                    <p className="text-on-surface-variant font-black text-xs uppercase tracking-widest">
-                      {selectedChain.isAlchemy ? `No NFTs on ${selectedChain.name}` : 'NFT tab requires Alchemy RPC'}
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                    {nfts.map((nft, i) => (
-                      <div key={`${nft.contractAddress}-${nft.tokenId}-${i}`}
-                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '1rem', overflow: 'hidden' }}>
-                        {nft.imageUrl ? (
-                          <img src={nft.imageUrl} alt={nft.name}
-                            style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        ) : (
-                          <div style={{ width: '100%', aspectRatio: '1', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: 40, color: 'rgba(255,255,255,0.15)' }}>image</span>
-                          </div>
-                        )}
-                        <div style={{ padding: '10px 12px' }}>
-                          <p style={{ color: '#fff', fontWeight: 900, fontSize: 12, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nft.name}</p>
-                          {nft.collectionName && (
-                            <p style={{ color: '#555', fontSize: 10, margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nft.collectionName}</p>
-                          )}
-                          <p style={{ color: '#444', fontSize: 9, fontFamily: 'monospace', margin: '4px 0 0' }}>#{nft.tokenId.slice(0, 10)}</p>
-                          {nft.floorPrice != null && (
-                            <p style={{ color: '#52ffac', fontSize: 9, fontWeight: 700, margin: '3px 0 0' }}>
-                              Floor {nft.floorPrice < 0.001 ? '< 0.001' : nft.floorPrice.toFixed(3)} {nft.floorPriceCurrency ?? 'ETH'}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* APPROVALS TAB */}
-            {!selectedNonEvm && activeTab === 'approvals' && (
-              <div className="space-y-3">
-                {!selectedChain.isAlchemy ? (
-                  <div className="flex items-center gap-3 p-6 bg-surface-container-low rounded-xl border border-white/5">
-                    <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 18 }}>info</span>
-                    <p className="text-on-surface-variant font-black text-xs uppercase tracking-widest">Approval scanning requires Alchemy RPC</p>
-                  </div>
-                ) : isLoadingApprovals ? (
-                  <div className="flex justify-center py-12">
-                    <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(248,113,113,0.2)', borderTopColor: '#f87171', animation: 'spin 1s linear infinite' }} />
-                  </div>
-                ) : approvals.length === 0 ? (
-                  <div className="flex flex-col items-center gap-3 p-10 bg-surface-container-low rounded-xl border border-white/5">
-                    <span className="material-symbols-outlined text-4xl" style={{ color: '#4ade80', opacity: 0.6 }}>verified_user</span>
-                    <p className="text-on-surface-variant font-black text-xs uppercase tracking-widest">No active approvals found</p>
-                    <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>Scanned {KNOWN_SPENDERS_COUNT} common DEX/bridge spenders on {selectedChain.name}</p>
-                  </div>
-                ) : (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px 4px' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#f87171' }}>warning</span>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{approvals.length} Active Approval{approvals.length > 1 ? 's' : ''}</p>
-                      <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginLeft: 4 }}>— revoke unused allowances to reduce risk</p>
-                    </div>
-                    {approvals.map((a) => {
-                      const key = `${a.token}-${a.spender}`;
-                      const isRevoking = revokingApproval === key;
-                      return (
-                        <div key={key}
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: a.unlimited ? 'rgba(248,113,113,0.05)' : 'rgba(255,255,255,0.02)', border: `1px solid ${a.unlimited ? 'rgba(248,113,113,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 12, gap: 12 }}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <p style={{ fontWeight: 900, color: '#fff', fontSize: 13, margin: 0 }}>{a.symbol}</p>
-                              {a.unlimited && (
-                                <span style={{ fontSize: 8, fontWeight: 900, color: '#f87171', background: 'rgba(248,113,113,0.15)', borderRadius: 4, padding: '2px 6px', textTransform: 'uppercase', letterSpacing: '0.08em', flexShrink: 0 }}>Unlimited</span>
-                              )}
-                            </div>
-                            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', margin: '2px 0 0', fontWeight: 700 }}>→ {a.spenderName}</p>
-                            {!a.unlimited && (
-                              <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', margin: '1px 0 0', fontFamily: 'monospace' }}>{parseFloat(a.allowance).toLocaleString()} {a.symbol}</p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleRevokeApproval(a)}
-                            disabled={isRevoking}
-                            style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 999, color: '#f87171', fontSize: 10, fontWeight: 900, padding: '7px 16px', cursor: isRevoking ? 'not-allowed' : 'pointer', opacity: isRevoking ? 0.5 : 1, textTransform: 'uppercase', letterSpacing: '0.08em', flexShrink: 0, transition: 'all 0.15s' }}
-                            onMouseEnter={e => { if (!isRevoking) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(248,113,113,0.2)'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(248,113,113,0.1)'; }}>
-                            {isRevoking ? 'Revoking…' : 'Revoke'}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* STAKING TAB */}
-            {!selectedNonEvm && activeTab === 'staking' && (
-              <StakingPanel
-                activeLedger={activeLedger}
-                ethPrice={prices['ethereum'] ?? 0}
+            {/* Render Active Tab */}
+            {d.activeTab === 'balance' && (
+              <BalanceTab
+                selectedNonEvm={d.selectedNonEvm}
+                nonEvmBal={d.nonEvmBal}
+                nonEvmUsdPrice={d.nonEvmUsdPrice}
+                nonEvmLoading={d.nonEvmLoading}
+                manualChain={d.manualChain}
+                allChainTokens={d.allChainTokens}
+                tokens={d.tokens}
+                prices={d.prices}
+                changes24h={d.changes24h}
+                isLoadingTotal={d.isLoadingTotal}
+                selectedChain={d.selectedChain}
               />
             )}
 
-            {/* LIGHTNING TAB */}
-            {!selectedNonEvm && activeTab === 'lightning' && <LightningTab />}
-
-            {/* Wallet History */}
-            {activeTab === 'balance' && walletHistory.length > 0 && (
-              <div style={{ paddingTop: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  <span style={{ fontSize: 9, fontWeight: 900, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em' }}>{upperEn('Wallet History')}</span>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <AnimatePresence>
-                    {walletHistory.map((snap, i) => {
-                      const isCurrent = snap.id === currentHistoryId;
-                      return (
-                        <motion.div
-                          key={snap.id}
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -6 }}
-                          transition={{ ...springs.smooth, delay: i * 0.03 }}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 12,
-                            padding: '12px 16px',
-                            background: isCurrent ? 'rgba(82,255,172,0.06)' : '#111',
-                            border: `1px solid ${isCurrent ? 'rgba(82,255,172,0.2)' : 'rgba(255,255,255,0.07)'}`,
-                            borderRadius: 9999,
-                            cursor: isCurrent ? 'default' : 'pointer',
-                            transition: 'border-color 0.15s, background 0.15s',
-                          }}
-                          onClick={async () => {
-                            if (isCurrent) return;
-                            try { await switchToSnap(snap); }
-                            catch { alert('Vault data not found.'); }
-                          }}
-                        >
-                          {/* Chain Icon — for active item use live state, for others use stored snap */}
-                          {(() => {
-                            const liveNonEvm = isCurrent && selectedNonEvm ? NON_EVM_META[selectedNonEvm] : null;
-                            const liveChain  = isCurrent && !selectedNonEvm ? selectedChain : null;
-                            const dispColor  = liveNonEvm?.color ?? liveChain?.color ?? snap.chainColor;
-                            const dispLogo   = liveNonEvm?.logoUrl ?? liveChain?.logoUrl ?? snap.chainLogo;
-                            const dispName   = liveNonEvm?.name ?? liveChain?.name ?? snap.chainName ?? '';
-                            return (
-                              <>
-                                <div style={{ width: 36, height: 36, borderRadius: '50%', background: dispColor ? `${dispColor}22` : (isCurrent ? 'rgba(82,255,172,0.1)' : 'rgba(255,255,255,0.05)'), border: `1px solid ${dispColor ? `${dispColor}44` : (isCurrent ? 'rgba(82,255,172,0.25)' : 'rgba(255,255,255,0.08)')}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                                  {dispLogo
-                                    ? <img src={dispLogo} alt={dispName} style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
-                                    : <span className="material-symbols-outlined" style={{ fontSize: 16, color: dispColor ?? (isCurrent ? '#52ffac' : '#555') }}>account_balance_wallet</span>
-                                  }
-                                </div>
-
-                                {/* Info */}
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                                    <span style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, color: isCurrent ? '#52ffac' : '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                      {snap.shortAddress}
-                              </span>
-                              {isCurrent && (
-                                <span style={{ fontSize: 8, fontWeight: 900, color: '#52ffac', background: 'rgba(82,255,172,0.12)', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: '0.1em', flexShrink: 0 }}>
-                                  Active
-                                </span>
-                              )}
-                              {snap.isSaved && (
-                                <span style={{ fontSize: 8, fontWeight: 900, color: '#52ffac', background: 'rgba(82,255,172,0.08)', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase', letterSpacing: '0.1em', flexShrink: 0 }}>
-                                  Saved
-                                </span>
-                              )}
-                            </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    {dispName && (
-                                      <span style={{ fontSize: 9, fontWeight: 900, color: dispColor ?? '#666', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                                        {dispName}
-                                      </span>
-                                    )}
-                                    <span style={{ fontSize: 9, color: '#333', fontWeight: 600 }}>
-                                      {new Date(snap.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                  </div>
-                                </div>
-                              </>
-                            );
-                          })()}
-
-                          {/* Actions */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                            {/* Save to Saved Vaults — only if not yet saved */}
-                            {!snap.isSaved && (
-                              <button
-                                disabled={isSavingVault}
-                                onClick={async e => {
-                                  e.stopPropagation();
-                                  setIsSavingVault(true);
-                                  try {
-                                    // Write current chain info into snapshot before saving
-                                    if (isCurrent) {
-                                      if (selectedNonEvm && NON_EVM_META[selectedNonEvm]) {
-                                        const m = NON_EVM_META[selectedNonEvm];
-                                        updateSnapshotChain(snap.id, { chainName: m.name, chainColor: m.color, chainLogo: m.logoUrl, coinSymbol: m.symbol, isNonEvm: true, chainId: undefined });
-                                      } else {
-                                        updateSnapshotChain(snap.id, { chainId: selectedChain.id, chainName: selectedChain.name, chainColor: selectedChain.color, chainLogo: selectedChain.logoUrl, coinSymbol: selectedChain.symbol, isNonEvm: false });
-                                      }
-                                    }
-                                    await wallet.persistCurrentWallet(snap.id);
-                                    setWalletHistory(getHistory());
-                                  } catch { alert('Failed to save vault.'); }
-                                  finally { setIsSavingVault(false); }
-                                }}
-                                style={{ background: 'none', border: '1px solid rgba(82,255,172,0.35)', borderRadius: 999, padding: '5px 14px', color: '#52ffac', cursor: isSavingVault ? 'not-allowed' : 'pointer', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', opacity: isSavingVault ? 0.5 : 1 }}>
-                                {isSavingVault ? '…' : 'Save'}
-                              </button>
-                            )}
-                            {/* Switch — available for all non-current entries */}
-                            {!isCurrent && (
-                              <button
-                                onClick={async e => {
-                                  e.stopPropagation();
-                                  try { await switchToSnap(snap); }
-                                  catch { alert('Vault data not found.'); }
-                                }}
-                                style={{ background: '#52ffac', border: 'none', borderRadius: 999, padding: '5px 14px', color: '#000', cursor: 'pointer', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                Switch
-                              </button>
-                            )}
-                            <button
-                              onClick={e => {
-                                e.stopPropagation();
-                                deleteSavedVault(snap.id);
-                                removeFromHistory(snap.id);
-                                setWalletHistory(getHistory());
-                              }}
-                              style={{ background: 'none', border: 'none', padding: '4px 6px', color: '#333', cursor: 'pointer', borderRadius: 6, transition: 'color 0.15s', display: 'flex' }}
-                              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ff6b6b'; }}
-                              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#333'; }}>
-                              <X size={12} />
-                            </button>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              </div>
+            {d.activeTab === 'transactions' && (
+              <TransactionsTab selectedChain={d.selectedChain} txs={d.txs} isLoadingTxs={d.isLoadingTxs} />
             )}
 
-            {/* Advanced Mode hint */}
-            {activeTab === 'balance' && (
-              <div style={{ paddingTop: 8, textAlign: 'center' }}>
-                <button onClick={() => setMode('advanced')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', transition: 'color 0.2s' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#52ffac'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#555'; }}>
-                  Didn&apos;t find what you&apos;re looking for? Try Advanced Mode →
-                </button>
-              </div>
+            {d.activeTab === 'nfts' && !d.selectedNonEvm && (
+              <NFTsTab selectedChain={d.selectedChain} nfts={d.nfts} isLoadingNfts={d.isLoadingNfts} />
+            )}
+
+            {d.activeTab === 'approvals' && !d.selectedNonEvm && (
+              <ApprovalsTab
+                selectedChain={d.selectedChain}
+                approvals={d.approvals}
+                isLoadingApprovals={d.isLoadingApprovals}
+                revokingApproval={d.revokingApproval}
+                onRevoke={d.handleRevokeApproval}
+              />
+            )}
+
+            {d.activeTab === 'staking' && !d.selectedNonEvm && (
+              <StakingPanel activeLedger={d.activeLedger} ethPrice={d.prices['ethereum'] ?? 0} />
+            )}
+
+            {d.activeTab === 'lightning' && <LightningTab />}
+
+            {/* Wallet History Section */}
+            {d.activeTab === 'balance' && (
+              <WalletHistorySection
+                walletHistory={d.walletHistory}
+                currentHistoryId={d.currentHistoryId}
+                selectedNonEvm={d.selectedNonEvm}
+                selectedChain={d.selectedChain}
+                isSavingVault={d.isSavingVault}
+                onSwitch={async (snap) => {
+                  try {
+                    await d.switchToSnap(snap);
+                  } catch {
+                    alert('Vault data not found.');
+                  }
+                }}
+                onSave={async (snap, isCurrent) => {
+                  d.setIsSavingVault(true);
+                  try {
+                    if (isCurrent) {
+                      if (d.selectedNonEvm && NON_EVM_META[d.selectedNonEvm]) {
+                        const m = NON_EVM_META[d.selectedNonEvm];
+                        updateSnapshotChain(snap.id, {
+                          chainName: m.name,
+                          chainColor: m.color,
+                          chainLogo: m.logoUrl,
+                          coinSymbol: m.symbol,
+                          isNonEvm: true,
+                          chainId: undefined,
+                        });
+                      } else {
+                        updateSnapshotChain(snap.id, {
+                          chainId: d.selectedChain.id,
+                          chainName: d.selectedChain.name,
+                          chainColor: d.selectedChain.color,
+                          chainLogo: d.selectedChain.logoUrl,
+                          coinSymbol: d.selectedChain.symbol,
+                          isNonEvm: false,
+                        });
+                      }
+                    }
+                    await d.wallet.persistCurrentWallet(snap.id);
+                    d.setWalletHistory(getHistory());
+                  } catch {
+                    alert('Failed to save vault.');
+                  } finally {
+                    d.setIsSavingVault(false);
+                  }
+                }}
+                onDelete={(id) => {
+                  deleteSavedVault(id);
+                  removeFromHistory(id);
+                  d.setWalletHistory(getHistory());
+                }}
+                onOpenAdvanced={() => d.setMode('advanced')}
+              />
             )}
           </div>
-
-
         </div>
       </section>
     </>

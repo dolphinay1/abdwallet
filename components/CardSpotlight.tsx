@@ -19,7 +19,7 @@ interface CardSpotlightProps {
 export function CardSpotlight({
   children,
   radius = 280,
-  color = 'rgba(255,255,255,0.04)',
+  color = 'rgba(166,177,198,0.04)',
   style,
   className,
   onClick,

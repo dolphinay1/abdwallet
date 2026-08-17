@@ -28,16 +28,16 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
   const [errMsg, setErrMsg] = useState('');
 
   const box: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.05)', borderRadius: '0.75rem',
-    padding: '10px 14px', border: '1px solid rgba(255,255,255,0.08)',
+    background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '0.75rem',
+    padding: '10px 14px', border: '1px solid rgba(166,177,198,0.08)',
   };
   const inp: React.CSSProperties = {
     width: '100%', background: 'transparent', border: 'none', outline: 'none',
-    color: '#fff', fontSize: 13, fontFamily: 'inherit',
+    color: '#23262b', fontSize: 13, fontFamily: 'inherit',
   };
   const lbl: React.CSSProperties = {
-    color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-    letterSpacing: '0.1em', marginBottom: 4, display: 'block',
+    color: '#8a8f98', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
+    letterSpacing: '0.1em', marginBottom: 4, display: 'block', fontFamily: '"Russo One", sans-serif',
   };
 
   const handleFetch = async () => {
@@ -77,11 +77,11 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-      style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#111', borderRadius: '1.5rem', width: 420, maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', padding: 28, border: '1px solid rgba(255,255,255,0.1)' }}>
+      style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(228,230,238,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#e4e6ee', boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)', borderRadius: '1.5rem', width: 420, maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', padding: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <span style={{ color: '#fff', fontSize: 18, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.01em' }}>Add Custom Token</span>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#aaa', display: 'flex' }}>
+          <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 18, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Add Custom Token</span>
+          <button onClick={onClose} style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
@@ -102,11 +102,11 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
             <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 8 }}>
               <input style={{ ...inp, flex: 1 }} placeholder="0x..." value={contractAddress}
                 onChange={e => { setContractAddress(e.target.value); setFetchStatus('idle'); }} />
-              <button onClick={handleFetch} style={{ flexShrink: 0, background: 'rgba(82,255,172,0.1)', border: '1px solid rgba(82,255,172,0.25)', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', color: '#52ffac', fontSize: 10, fontWeight: 900, textTransform: 'uppercase' }}>
+              <button className="russo-one-regular" onClick={handleFetch} style={{ flexShrink: 0, background: 'rgba(43,45,51,0.1)', border: '1px solid rgba(43,45,51,0.25)', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', color: '#2b2d33', fontSize: 10, fontWeight: 400, textTransform: 'uppercase' }}>
                 {fetchStatus === 'loading' ? '...' : 'Auto-fill'}
               </button>
-              {fetchStatus === 'ok' && <Check size={14} style={{ color: '#52ffac', flexShrink: 0 }} />}
-              {fetchStatus === 'error' && <AlertCircle size={14} style={{ color: '#ff6b6b', flexShrink: 0 }} />}
+              {fetchStatus === 'ok' && <Check size={14} style={{ color: '#2b2d33', flexShrink: 0 }} />}
+              {fetchStatus === 'error' && <AlertCircle size={14} style={{ color: '#b91c1c', flexShrink: 0 }} />}
             </div>
           </div>
 
@@ -127,13 +127,13 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
           </div>
 
           {errMsg && (
-            <div style={{ background: 'rgba(255,100,100,0.1)', border: '1px solid rgba(255,100,100,0.2)', borderRadius: 8, padding: '8px 12px', color: '#ffa9a9', fontSize: 11 }}>
+            <div style={{ background: 'rgba(255,100,100,0.1)', border: '1px solid rgba(255,100,100,0.2)', borderRadius: 8, padding: '8px 12px', color: '#b91c1c', fontSize: 11 }}>
               {errMsg}
             </div>
           )}
 
-          <button onClick={handleSave}
-            style={{ background: '#52ffac', color: '#002111', border: 'none', borderRadius: '0.75rem', padding: '14px', fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', marginTop: 4 }}>
+          <button className="russo-one-regular" onClick={handleSave}
+            style={{ background: '#2b2d33', color: '#f5f6fa', border: 'none', borderRadius: '0.75rem', padding: '14px', fontSize: 13, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', marginTop: 4 }}>
             Save Token
           </button>
         </div>

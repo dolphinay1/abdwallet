@@ -17,8 +17,6 @@ export function checkSingletonTab(): boolean {
         if (process.env.NODE_ENV === 'production') {
           const ext = process.env.NEXT_PUBLIC_EXTERNAL_LINK || 'https://www.google.com';
           window.location.replace(ext);
-        } else {
-          console.log('DEV MODE: Bypassed singleton tab redirect.');
         }
         return false;
       }

@@ -126,17 +126,17 @@ export function LitecoinPanel() {
   };
 
   const box: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.05)', borderRadius: '0.75rem',
-    padding: '10px 14px', border: '1px solid rgba(255,255,255,0.07)',
+    background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '0.75rem',
+    padding: '10px 14px', border: '1px solid rgba(166,177,198,0.07)',
   };
   const inp: React.CSSProperties = {
     width: '100%', background: 'transparent', border: 'none', outline: 'none',
-    color: '#fff', fontSize: 13, fontFamily: 'inherit',
+    color: '#23262b', fontSize: 13, fontFamily: 'inherit',
   };
 
   if (!ltcWallet) {
     return (
-      <div style={{ padding: '20px 0', color: '#555', fontSize: 13, textAlign: 'center' }}>
+      <div style={{ padding: '20px 0', color: '#8a8f98', fontSize: 13, textAlign: 'center' }}>
         Loading LTC wallet…
       </div>
     );
@@ -151,27 +151,27 @@ export function LitecoinPanel() {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#a5b4fc18', border: '1.5px solid #a5b4fc44', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#8a8f9818', border: '1.5px solid #8a8f9844', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <svg viewBox="0 0 24 24" width={22} height={22} fill="none">
-            <circle cx="12" cy="12" r="10" fill="#a5b4fc" opacity="0.15"/>
-            <text x="12" y="16" textAnchor="middle" fill="#a5b4fc" fontSize="9" fontWeight="900">LTC</text>
+            <circle cx="12" cy="12" r="10" fill="#8a8f98" opacity="0.15"/>
+            <text x="12" y="16" textAnchor="middle" fill="#8a8f98" fontSize="9" fontWeight="900">LTC</text>
           </svg>
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ color: '#fff', fontSize: 15, fontWeight: 900, margin: 0 }}>Litecoin</p>
-          <p style={{ color: '#555', fontSize: 10, margin: 0, fontFamily: 'monospace' }}>{shortAddr}</p>
+          <p style={{ color: '#23262b', fontSize: 15, fontWeight: 900, margin: 0 }}>Litecoin</p>
+          <p style={{ color: '#8a8f98', fontSize: 10, margin: 0, fontFamily: 'monospace' }}>{shortAddr}</p>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <p style={{ color: '#fff', fontSize: 14, fontWeight: 900, margin: 0 }}>{balTotal.toFixed(6)} LTC</p>
-          {ltcPrice > 0 && <p style={{ color: '#52ffac', fontSize: 10, margin: 0, fontWeight: 700 }}>${balUSD.toFixed(2)}</p>}
+          <p style={{ color: '#23262b', fontSize: 14, fontWeight: 900, margin: 0 }}>{balTotal.toFixed(6)} LTC</p>
+          {ltcPrice > 0 && <p style={{ color: '#2b2d33', fontSize: 10, margin: 0, fontWeight: 700 }}>${balUSD.toFixed(2)}</p>}
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 12 }}>
+      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid rgba(166,177,198,0.06)', paddingBottom: 12 }}>
         {(['receive', 'send', 'history'] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
-            style={{ background: tab === t ? 'rgba(165,180,252,0.1)' : 'transparent', border: tab === t ? '1px solid rgba(165,180,252,0.25)' : '1px solid transparent', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', color: tab === t ? '#a5b4fc' : '#666', fontSize: 11, fontWeight: 900, textTransform: 'capitalize', transition: 'all 0.15s' }}>
+            style={{ background: tab === t ? 'rgba(138,143,152,0.1)' : 'transparent', border: tab === t ? '1px solid rgba(138,143,152,0.25)' : '1px solid transparent', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', color: tab === t ? '#8a8f98' : '#8a8f98', fontSize: 11, fontWeight: 900, textTransform: 'capitalize', transition: 'all 0.15s' }}>
             {t}
           </button>
         ))}
@@ -180,16 +180,16 @@ export function LitecoinPanel() {
       {/* Receive */}
       {tab === 'receive' && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-          <div style={{ background: '#fff', borderRadius: '0.75rem', padding: 14 }}>
+          <div style={{ background: '#23262b', borderRadius: '0.75rem', padding: 14 }}>
             <QRCodeSVG value={ltcWallet.address} size={160} level="M" />
           </div>
           <div style={{ ...box, width: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ flex: 1, color: '#ccc', fontSize: 11, fontFamily: 'monospace', wordBreak: 'break-all' }}>{ltcWallet.address}</span>
-            <button onClick={handleCopy} style={{ flexShrink: 0, background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', color: '#aaa', display: 'flex' }}>
-              {copied ? <Check size={14} style={{ color: '#52ffac' }} /> : <Copy size={14} />}
+            <span style={{ flex: 1, color: '#8a8f98', fontSize: 11, fontFamily: 'monospace', wordBreak: 'break-all' }}>{ltcWallet.address}</span>
+            <button onClick={handleCopy} style={{ flexShrink: 0, background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}>
+              {copied ? <Check size={14} style={{ color: '#2b2d33' }} /> : <Copy size={14} />}
             </button>
           </div>
-          <p style={{ color: '#555', fontSize: 10, textAlign: 'center' }}>Send only LTC to this address (bech32 P2WPKH)</p>
+          <p style={{ color: '#8a8f98', fontSize: 10, textAlign: 'center' }}>Send only LTC to this address (bech32 P2WPKH)</p>
         </div>
       )}
 
@@ -198,17 +198,17 @@ export function LitecoinPanel() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {sendStatus === 'done' ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '16px 0' }}>
-              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(82,255,172,0.1)', border: '2px solid rgba(82,255,172,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Check size={22} style={{ color: '#52ffac' }} />
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(43,45,51,0.1)', border: '2px solid rgba(43,45,51,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Check size={22} style={{ color: '#2b2d33' }} />
               </div>
-              <span style={{ color: '#fff', fontWeight: 900, fontSize: 15, textTransform: 'uppercase' }}>Broadcast!</span>
-              <span style={{ color: '#555', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>{txid}</span>
+              <span className="russo-one-regular" style={{ color: '#23262b', fontWeight: 400, fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Broadcast!</span>
+              <span style={{ color: '#8a8f98', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>{txid}</span>
               <a href={`${BLOCKCHAIR_EXPLORER}/${txid}`} target="_blank" rel="noopener noreferrer"
-                style={{ color: '#a5b4fc', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 700 }}>
+                style={{ color: '#8a8f98', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 700 }}>
                 View on Explorer <ExternalLink size={11} />
               </a>
-              <button onClick={() => { setSendStatus('idle'); setTo(''); setAmount(''); setTxid(''); }}
-                style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', color: '#aaa', fontSize: 11, fontWeight: 700, marginTop: 4 }}>
+              <button className="russo-one-regular" onClick={() => { setSendStatus('idle'); setTo(''); setAmount(''); setTxid(''); }}
+                style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', color: '#8a8f98', fontSize: 11, fontWeight: 400, marginTop: 4 }}>
                 New Transaction
               </button>
             </div>
@@ -218,8 +218,8 @@ export function LitecoinPanel() {
               <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input placeholder="Recipient LTC address" value={to} onChange={e => setTo(e.target.value)} style={{ ...inp, flex: 1 }} />
                 <button onClick={() => qrInputRef.current?.click()}
-                  style={{ flexShrink: 0, background: 'rgba(165,180,252,0.08)', border: '1px solid rgba(165,180,252,0.2)', borderRadius: 7, padding: '5px 7px', cursor: 'pointer', display: 'flex' }}>
-                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" strokeWidth={2} strokeLinecap="round">
+                  style={{ flexShrink: 0, background: 'rgba(138,143,152,0.08)', border: '1px solid rgba(138,143,152,0.2)', borderRadius: 7, padding: '5px 7px', cursor: 'pointer', display: 'flex' }}>
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#8a8f98" strokeWidth={2} strokeLinecap="round">
                     <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                     <line x1="14" y1="14" x2="14" y2="14"/><line x1="17" y1="14" x2="21" y2="14"/>
                   </svg>
@@ -232,9 +232,9 @@ export function LitecoinPanel() {
               <div style={{ ...box, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <input placeholder="0.00" type="number" min="0" step="0.00001" value={amount} onChange={e => setAmount(e.target.value)}
                   style={{ ...inp, flex: 1, fontSize: 18, fontWeight: 900 }} />
-                <span style={{ color: '#666', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>LTC</span>
-                <button onClick={() => setAmount(balTotal.toFixed(8))}
-                  style={{ flexShrink: 0, background: 'rgba(165,180,252,0.08)', border: '1px solid rgba(165,180,252,0.2)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', color: '#a5b4fc', fontSize: 10, fontWeight: 900 }}>
+                <span style={{ color: '#8a8f98', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>LTC</span>
+                <button className="russo-one-regular" onClick={() => setAmount(balTotal.toFixed(8))}
+                  style={{ flexShrink: 0, background: 'rgba(138,143,152,0.08)', border: '1px solid rgba(138,143,152,0.2)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', color: '#8a8f98', fontSize: 10, fontWeight: 400 }}>
                   MAX
                 </button>
               </div>
@@ -244,18 +244,18 @@ export function LitecoinPanel() {
                 <div style={{ display: 'flex', gap: 6 }}>
                   {(['slow', 'medium', 'fast'] as FeeSpeed[]).map(s => (
                     <button key={s} onClick={() => setFeeSpeed(s)}
-                      style={{ flex: 1, background: feeSpeed === s ? 'rgba(165,180,252,0.12)' : 'rgba(255,255,255,0.04)', border: feeSpeed === s ? '1px solid rgba(165,180,252,0.3)' : '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '6px 4px', cursor: 'pointer', color: feeSpeed === s ? '#a5b4fc' : '#666', fontSize: 10, fontWeight: 900, textTransform: 'capitalize', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      style={{ flex: 1, background: feeSpeed === s ? 'rgba(138,143,152,0.12)' : 'rgba(166,177,198,0.04)', border: feeSpeed === s ? '1px solid rgba(138,143,152,0.3)' : '1px solid rgba(166,177,198,0.07)', borderRadius: 8, padding: '6px 4px', cursor: 'pointer', color: feeSpeed === s ? '#8a8f98' : '#8a8f98', fontSize: 10, fontWeight: 900, textTransform: 'capitalize', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <span>{s}</span>
-                      <span style={{ fontSize: 9, color: feeSpeed === s ? '#a5b4fc' : '#444' }}>{fees[s]} sat/vB</span>
+                      <span style={{ fontSize: 9, color: feeSpeed === s ? '#8a8f98' : '#8a8f98' }}>{fees[s]} sat/vB</span>
                     </button>
                   ))}
                 </div>
               )}
 
-              {errMsg && <span style={{ color: '#ffa9a9', fontSize: 11 }}>{errMsg}</span>}
+              {errMsg && <span style={{ color: '#b91c1c', fontSize: 11 }}>{errMsg}</span>}
 
-              <button onClick={handleSend} disabled={sendStatus === 'building' || sendStatus === 'broadcasting'}
-                style={{ background: sendStatus === 'idle' || sendStatus === 'error' ? '#a5b4fc' : '#1a1a1a', color: sendStatus === 'idle' || sendStatus === 'error' ? '#1e1b4b' : '#666', border: 'none', borderRadius: '0.75rem', padding: '14px', fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: sendStatus === 'building' || sendStatus === 'broadcasting' ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}>
+              <button className="russo-one-regular" onClick={handleSend} disabled={sendStatus === 'building' || sendStatus === 'broadcasting'}
+                style={{ background: sendStatus === 'idle' || sendStatus === 'error' ? '#8a8f98' : '#e4e6ee', color: sendStatus === 'idle' || sendStatus === 'error' ? '#e4e6ee' : '#8a8f98', border: 'none', borderRadius: '0.75rem', padding: '14px', fontSize: 13, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: sendStatus === 'building' || sendStatus === 'broadcasting' ? 'not-allowed' : 'pointer', transition: 'all 0.15s' }}>
                 {sendStatus === 'building' ? 'Building TX…' : sendStatus === 'broadcasting' ? 'Broadcasting…' : 'Send LTC'}
               </button>
             </>
@@ -267,21 +267,21 @@ export function LitecoinPanel() {
       {tab === 'history' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {loadingTxs ? (
-            <p style={{ color: '#555', fontSize: 12, textAlign: 'center', padding: '12px 0' }}>Loading…</p>
+            <p style={{ color: '#8a8f98', fontSize: 12, textAlign: 'center', padding: '12px 0' }}>Loading…</p>
           ) : txs.length === 0 ? (
-            <p style={{ color: '#555', fontSize: 12, textAlign: 'center', padding: '12px 0' }}>No transactions found</p>
+            <p style={{ color: '#8a8f98', fontSize: 12, textAlign: 'center', padding: '12px 0' }}>No transactions found</p>
           ) : txs.map(tx => {
             const isIn = tx.amount > 0;
             return (
-              <div key={tx.txid} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '0.75rem', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div key={tx.txid} style={{ background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '0.75rem', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', flex: 1, flexDirection: 'column', gap: 2 }}>
-                  <span style={{ color: isIn ? '#52ffac' : '#ffa9a9', fontSize: 12, fontWeight: 900 }}>
+                  <span style={{ color: isIn ? '#2b2d33' : '#b91c1c', fontSize: 12, fontWeight: 900 }}>
                     {isIn ? '+' : ''}{tx.amount.toFixed(6)} LTC
                   </span>
-                  <span style={{ color: '#555', fontSize: 9, fontFamily: 'monospace' }}>{tx.txid.slice(0, 16)}…</span>
+                  <span style={{ color: '#8a8f98', fontSize: 9, fontFamily: 'monospace' }}>{tx.txid.slice(0, 16)}…</span>
                 </div>
                 <a href={`${BLOCKCHAIR_EXPLORER}/${tx.txid}`} target="_blank" rel="noopener noreferrer"
-                  style={{ color: '#a5b4fc', display: 'flex', marginLeft: 8 }}>
+                  style={{ color: '#8a8f98', display: 'flex', marginLeft: 8 }}>
                   <ExternalLink size={12} />
                 </a>
               </div>

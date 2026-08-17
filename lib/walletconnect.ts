@@ -9,7 +9,12 @@ import { getProvider } from './provider';
 import { CHAINS } from './chains';
 import type { ScatteredStore } from './memory-vault';
 
-const PROJECT_ID = (process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID)!;
+const PROJECT_ID = (process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID) ?? '';
+
+/** True when a Reown/WalletConnect project ID is configured — the modal uses this to show a setup hint. */
+export function wcIsConfigured(): boolean {
+  return PROJECT_ID.length > 0;
+}
 
 const METADATA = {
   name: 'ABD Wallet',
@@ -61,6 +66,9 @@ export async function getWalletKit(): Promise<InstanceType<typeof WalletKit>> {
   if (_initPromise) return _initPromise;
 
   _initPromise = (async () => {
+    if (!PROJECT_ID) {
+      throw new Error('WalletConnect project ID missing — set NEXT_PUBLIC_WC_PROJECT_ID in .env.local (free at cloud.reown.com)');
+    }
     if (!_core) {
       _core = new Core({ projectId: PROJECT_ID });
     }

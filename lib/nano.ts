@@ -5,6 +5,7 @@
 
 import { wallet as nanoWallet, block } from 'nanocurrency-web';
 import * as bip39Lib from 'bip39';
+import { zeroFill } from './crypto';
 
 const API = 'https://rpc.nano.to';
 
@@ -46,8 +47,10 @@ function nanoToRaw(nano: number): string {
 export function deriveNANOWallet(mnemonic: string): NANOWallet {
   // nanocurrency-web.fromMnemonic rejects standard BIP39 mnemonics.
   // Derive via BIP39 seed (64 bytes = 128 hex chars) passed to fromSeed.
-  const seed = bip39Lib.mnemonicToSeedSync(mnemonic.trim()).toString('hex');
+  const seedBuffer = bip39Lib.mnemonicToSeedSync(mnemonic.trim());
+  const seed = seedBuffer.toString('hex');
   const derived = nanoWallet.fromSeed(seed);
+  zeroFill(seedBuffer);
   const account = derived.accounts[0];
   return {
     address: account.address,
@@ -93,36 +96,40 @@ export async function getNANOTransactions(address: string, limit = 20): Promise<
 }
 
 export async function sendNANO(from: NANOWallet, to: string, amountNANO: number): Promise<string> {
-  // Fetch account info for frontier and balance
-  const info = await rpc('account_info', { account: from.address, representative: true });
-  if (info.error) throw new Error('Account not opened — receive Nano first');
+  try {
+    // Fetch account info for frontier and balance
+    const info = await rpc('account_info', { account: from.address, representative: true });
+    if (info.error) throw new Error('Account not opened — receive Nano first');
 
-  const frontier = info.frontier as string;
-  const currentBalance = info.balance as string;
-  const representative = info.representative as string;
+    const frontier = info.frontier as string;
+    const currentBalance = info.balance as string;
+    const representative = info.representative as string;
 
-  const amountRaw = nanoToRaw(amountNANO);
-  const newBalance = (BigInt(currentBalance) - BigInt(amountRaw)).toString();
+    const amountRaw = nanoToRaw(amountNANO);
+    const newBalance = (BigInt(currentBalance) - BigInt(amountRaw)).toString();
 
-  if (BigInt(newBalance) < 0n) throw new Error('Insufficient NANO balance');
+    if (BigInt(newBalance) < 0n) throw new Error('Insufficient NANO balance');
 
-  // Get PoW
-  const workData = await rpc('work_generate', { hash: frontier, difficulty: 'fffffff800000000' });
-  const work = workData.work as string;
+    // Get PoW
+    const workData = await rpc('work_generate', { hash: frontier, difficulty: 'fffffff800000000' });
+    const work = workData.work as string;
 
-  // Build and sign block
-  const sendBlock = block.send({
-    walletBalanceRaw: currentBalance,
-    fromAddress: from.address,
-    toAddress: to,
-    representativeAddress: representative,
-    frontier,
-    amountRaw,
-    work,
-  }, from.privateKey);
+    // Build and sign block
+    const sendBlock = block.send({
+      walletBalanceRaw: currentBalance,
+      fromAddress: from.address,
+      toAddress: to,
+      representativeAddress: representative,
+      frontier,
+      amountRaw,
+      work,
+    }, from.privateKey);
 
-  // Broadcast
-  const result = await rpc('process', { json_block: 'true', subtype: 'send', block: sendBlock });
-  if (result.hash) return result.hash as string;
-  throw new Error((result.error as string) ?? 'NANO broadcast failed');
+    // Broadcast
+    const result = await rpc('process', { json_block: 'true', subtype: 'send', block: sendBlock });
+    if (result.hash) return result.hash as string;
+    throw new Error((result.error as string) ?? 'NANO broadcast failed');
+  } finally {
+    (from as any).privateKey = null;
+  }
 }

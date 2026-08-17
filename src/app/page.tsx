@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 import { useWallet } from "@/context/WalletContext";
@@ -16,9 +17,22 @@ const WalletDashboard = dynamic(
 );
 
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false);
   const wallet = useWallet();
 
-  // If wallet context is missing (SSR) or not unlocked, show auth screen
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // SSR fallback — show minimal skeleton until client hydration completes
+  if (!isMounted) {
+    return (
+      <main className="min-h-screen w-full bg-[#E2E6EE] flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-slate-400 border-t-slate-700 animate-spin" />
+      </main>
+    );
+  }
+
   if (!wallet || !wallet.isUnlocked) {
     return <AuthScreen />;
   }

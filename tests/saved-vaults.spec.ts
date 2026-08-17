@@ -17,11 +17,11 @@ test('saved vaults bundled into PNG', async ({ page }) => {
   await goToIdlePanel(page);
 
   const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('__cw_wallet_history__') ?? '[]').filter((s: any) => s.isSaved).length
+    JSON.parse(localStorage.getItem('__gw_wallet_history__') ?? '[]').filter((s: any) => s.isSaved).length
   );
   expect(saved).toBe(2);
 
   const pngPath = await persistSession(page);
   console.log('PNG:', pngPath);
-  console.log('✅ Test passed');
+  console.log('[ok] Test passed');
 });

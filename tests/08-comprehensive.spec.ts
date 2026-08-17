@@ -30,24 +30,24 @@ test.describe('1. Wallet Creation', () => {
   test('1-a: auto-creates wallet, address in localStorage', async ({ page }) => {
     await boot(page, '[1a]');
     const addr = await page.evaluate(() => {
-      const h = JSON.parse(localStorage.getItem('__cw_wallet_history__') ?? '[]');
+      const h = JSON.parse(localStorage.getItem('__gw_wallet_history__') ?? '[]');
       return h[0]?.address ?? null;
     });
     expect(addr).toMatch(/^0x[0-9a-fA-F]{40}$/);
     await ss(page, '08-01a-created');
-    console.log('✅ Wallet address:', addr);
+    console.log('[ok] Wallet address:', addr);
   });
 
   test('1-b: short address shown in header', async ({ page }) => {
     await boot(page, '[1b]');
     const short = await page.evaluate(() => {
-      const h = JSON.parse(localStorage.getItem('__cw_wallet_history__') ?? '[]');
+      const h = JSON.parse(localStorage.getItem('__gw_wallet_history__') ?? '[]');
       const a: string = h[0]?.address ?? '';
       return a ? `${a.slice(0, 6)}...${a.slice(-4)}` : '';
     });
     expect(short).toBeTruthy();
     await expect(page.locator(`text=${short}`).first()).toBeVisible({ timeout: 8000 });
-    console.log('✅ Short address in UI:', short);
+    console.log('[ok] Short address in UI:', short);
   });
 
 });
@@ -61,7 +61,7 @@ test.describe('2. Network Selector', () => {
     await page.waitForTimeout(600);
     await ss(page, '08-02a-network-modal');
     await expect(page.locator('text=ALL NETWORKS').or(page.locator('text=All Networks')).first()).toBeVisible({ timeout: 6000 });
-    console.log('✅ Network modal opens');
+    console.log('[ok] Network modal opens');
     await page.keyboard.press('Escape');
   });
 
@@ -75,9 +75,9 @@ test.describe('2. Network Selector', () => {
       await polygonCard.click();
       await page.waitForTimeout(800);
       const netBtnText = await page.locator('button').filter({ hasText: /NETWORK|Polygon/i }).first().textContent().catch(() => '');
-      console.log('✅ Polygon selected, network button:', netBtnText?.trim());
+      console.log('[ok] Polygon selected, network button:', netBtnText?.trim());
     } else {
-      console.log('ℹ️  Polygon card not found — need to scroll');
+      console.log('[info] Polygon card not found — need to scroll');
     }
   });
 
@@ -91,8 +91,8 @@ test.describe('2. Network Selector', () => {
     await ss(page, '08-02c-nonEvm');
     const btc = page.locator('text=Bitcoin').or(page.locator('text=BTC')).first();
     const visible = await btc.isVisible({ timeout: 4000 }).catch(() => false);
-    if (visible) console.log('✅ BTC/Bitcoin visible in network modal');
-    else console.log('ℹ️  BTC section requires scroll — partial pass');
+    if (visible) console.log('[ok] BTC/Bitcoin visible in network modal');
+    else console.log('[info] BTC section requires scroll — partial pass');
     await page.keyboard.press('Escape');
   });
 
@@ -112,7 +112,7 @@ test.describe('3. QR / Receive', () => {
     await expect(page.locator('text=RECEIVE').first()).toBeVisible({ timeout: 6000 });
     // Address displayed below QR
     await expect(page.locator('text=COPY ADDRESS').or(page.locator('button:has-text("COPY")')).first()).toBeVisible({ timeout: 5000 });
-    console.log('✅ QR modal open with RECEIVE heading and COPY ADDRESS button');
+    console.log('[ok] QR modal open with RECEIVE heading and COPY ADDRESS button');
     await page.keyboard.press('Escape');
   });
 
@@ -124,14 +124,14 @@ test.describe('4. Send Modal', () => {
   test('4-a: send modal opens with address + amount inputs', async ({ page }) => {
     await boot(page, '[4a]');
     const sendBtn = page.locator('button').filter({ hasText: /^SEND$/i }).first();
-    if (!await sendBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  SEND button not found'); return; }
+    if (!await sendBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] SEND button not found'); return; }
     await sendBtn.click();
     await page.waitForTimeout(600);
     await ss(page, '08-04a-send-modal');
     await expect(page.locator('text=SEND').filter({ visible: true }).first()).toBeVisible({ timeout: 5000 });
     const toInput = page.locator('input').filter({ hasText: '' }).first();
     await expect(page.locator('input').first()).toBeVisible({ timeout: 5000 });
-    console.log('✅ Send modal open');
+    console.log('[ok] Send modal open');
     await page.keyboard.press('Escape');
   });
 
@@ -151,7 +151,7 @@ test.describe('4. Send Modal', () => {
     await boot(page, '[4b]');
 
     const sendBtn = page.locator('button').filter({ hasText: /^SEND$/i }).first();
-    if (!await sendBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  SEND skipped'); return; }
+    if (!await sendBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] SEND skipped'); return; }
     await sendBtn.click();
     await page.waitForTimeout(500);
 
@@ -162,8 +162,8 @@ test.describe('4. Send Modal', () => {
 
     const warning = page.locator('text=Security Risk').or(page.locator('text=phishing')).or(page.locator('text=blacklist')).or(page.locator('text=Danger')).or(page.locator('text=risk')).first();
     const visible = await warning.isVisible({ timeout: 6000 }).catch(() => false);
-    if (visible) console.log('✅ Risk warning shown for blacklisted address');
-    else console.log('ℹ️  Risk warning not visible — debounce may need more time');
+    if (visible) console.log('[ok] Risk warning shown for blacklisted address');
+    else console.log('[info] Risk warning not visible — debounce may need more time');
     await page.keyboard.press('Escape');
   });
 
@@ -184,7 +184,7 @@ test.describe('4. Send Modal', () => {
 
     await boot(page, '[4c]');
     const sendBtn = page.locator('button').filter({ hasText: /^SEND$/i }).first();
-    if (!await sendBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  SEND skipped'); return; }
+    if (!await sendBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] SEND skipped'); return; }
     await sendBtn.click();
     await page.waitForTimeout(500);
 
@@ -203,10 +203,10 @@ test.describe('4. Send Modal', () => {
       // Confirm step should show balance change preview
       const simText = page.locator('text=Simulated').or(page.locator('text=Balance Change')).or(page.locator('text=Confirm')).first();
       const visible = await simText.isVisible({ timeout: 5000 }).catch(() => false);
-      if (visible) console.log('✅ TX simulation confirm step shown');
-      else console.log('ℹ️  Simulation confirm step not found');
+      if (visible) console.log('[ok] TX simulation confirm step shown');
+      else console.log('[info] Simulation confirm step not found');
     } else {
-      console.log('ℹ️  Send ETH button not found (no balance)');
+      console.log('[info] Send ETH button not found (no balance)');
     }
     await page.keyboard.press('Escape');
   });
@@ -219,13 +219,13 @@ test.describe('5. Swap (LiFi)', () => {
   test('5-a: swap modal opens', async ({ page }) => {
     await boot(page, '[5a]');
     const swapBtn = page.locator('button').filter({ hasText: /^SWAP$/i }).first();
-    if (!await swapBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  SWAP skipped'); return; }
+    if (!await swapBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] SWAP skipped'); return; }
     await swapBtn.click();
     await page.waitForTimeout(1000);
     await ss(page, '08-05a-swap');
     const swapHeading = page.locator('text=SWAP').or(page.locator('text=Swap')).filter({ visible: true }).first();
     await expect(swapHeading).toBeVisible({ timeout: 6000 });
-    console.log('✅ Swap modal opened');
+    console.log('[ok] Swap modal opened');
     await page.keyboard.press('Escape');
   });
 
@@ -239,8 +239,8 @@ test.describe('5. Swap (LiFi)', () => {
     const fromToken = page.locator('text=ETH').filter({ visible: true }).first();
     const visible = await fromToken.isVisible({ timeout: 5000 }).catch(() => false);
     await ss(page, '08-05b-swap-tokens');
-    if (visible) console.log('✅ Swap: ETH from-token visible');
-    else console.log('ℹ️  From token not confirmed');
+    if (visible) console.log('[ok] Swap: ETH from-token visible');
+    else console.log('[info] From token not confirmed');
     await page.keyboard.press('Escape');
   });
 
@@ -263,9 +263,9 @@ test.describe('7. Gas Tracker', () => {
     const gwei = page.locator('text=Gwei').first();
     const slowVis = await slow.isVisible({ timeout: 6000 }).catch(() => false);
     const gweiVis = await gwei.isVisible({ timeout: 3000 }).catch(() => false);
-    if (slowVis && gweiVis) console.log('✅ Gas tracker: Slow + Gwei labels visible');
-    else if (slowVis) console.log('✅ Gas tracker: Slow label visible');
-    else console.log('ℹ️  Gas widget not visible — may need Ethereum mainnet chain selected');
+    if (slowVis && gweiVis) console.log('[ok] Gas tracker: Slow + Gwei labels visible');
+    else if (slowVis) console.log('[ok] Gas tracker: Slow label visible');
+    else console.log('[info] Gas widget not visible — may need Ethereum mainnet chain selected');
   });
 
 });
@@ -280,8 +280,8 @@ test.describe('8. Balance Tab', () => {
     // USD total — formatted as $X.XX
     const usd = page.locator('text=$').filter({ visible: true }).first();
     const vis = await usd.isVisible({ timeout: 6000 }).catch(() => false);
-    if (vis) console.log('✅ USD balance display visible');
-    else console.log('ℹ️  USD balance not found (wallet may be empty)');
+    if (vis) console.log('[ok] USD balance display visible');
+    else console.log('[info] USD balance not found (wallet may be empty)');
   });
 
   test('8-b: 24h price change arrows shown (mocked)', async ({ page }) => {
@@ -309,8 +309,8 @@ test.describe('8. Balance Tab', () => {
     const up = page.locator('text=▲').first();
     const dn = page.locator('text=▼').first();
     const has = await up.isVisible({ timeout: 5000 }).catch(() => false) || await dn.isVisible({ timeout: 2000 }).catch(() => false);
-    if (has) console.log('✅ 24h price change indicator (▲/▼) visible');
-    else console.log('ℹ️  24h arrows not visible — may need token with balance');
+    if (has) console.log('[ok] 24h price change indicator (▲/▼) visible');
+    else console.log('[info] 24h arrows not visible — may need token with balance');
   });
 
   test('8-c: all-chains portfolio total computed', async ({ page }) => {
@@ -320,8 +320,8 @@ test.describe('8. Balance Tab', () => {
     // countUp animation shows $XX.XX
     const total = page.locator('text=TOTAL CURATED VALUE').first();
     const vis = await total.isVisible({ timeout: 6000 }).catch(() => false);
-    if (vis) console.log('✅ "TOTAL CURATED VALUE" label visible');
-    else console.log('ℹ️  Total label not found');
+    if (vis) console.log('[ok] "TOTAL CURATED VALUE" label visible');
+    else console.log('[info] Total label not found');
   });
 
 });
@@ -340,8 +340,8 @@ test.describe('9. Transactions', () => {
     const ok = await empty.isVisible({ timeout: 6000 }).catch(() => false)
       || await sent.isVisible({ timeout: 2000 }).catch(() => false)
       || await req.isVisible({ timeout: 2000 }).catch(() => false);
-    if (ok) console.log('✅ Transactions tab shows expected state');
-    else console.log('ℹ️  TX tab state not confirmed');
+    if (ok) console.log('[ok] Transactions tab shows expected state');
+    else console.log('[info] TX tab state not confirmed');
   });
 
 });
@@ -356,8 +356,8 @@ test.describe('10. NFTs', () => {
     await ss(page, '08-10a-nfts');
     const empty = page.locator('text=No NFTs').or(page.locator('text=requires Alchemy')).or(page.locator('text=NFT tab')).first();
     const ok = await empty.isVisible({ timeout: 8000 }).catch(() => false);
-    if (ok) console.log('✅ NFTs tab shows correct state');
-    else console.log('ℹ️  NFTs state not confirmed');
+    if (ok) console.log('[ok] NFTs tab shows correct state');
+    else console.log('[info] NFTs state not confirmed');
   });
 
   test('10-b: floor price shown on NFT card (mocked)', async ({ page }) => {
@@ -378,8 +378,8 @@ test.describe('10. NFTs', () => {
     await ss(page, '08-10b-nft-floor');
     const floor = page.locator('text=Floor').first();
     const vis = await floor.isVisible({ timeout: 6000 }).catch(() => false);
-    if (vis) console.log('✅ Floor price label visible on NFT card');
-    else console.log('ℹ️  NFT floor price not visible (may need Alchemy chain)');
+    if (vis) console.log('[ok] Floor price label visible on NFT card');
+    else console.log('[info] NFT floor price not visible (may need Alchemy chain)');
   });
 
 });
@@ -392,8 +392,8 @@ test.describe('11. Approvals', () => {
     await scrollTabBar(page);
     const tab = page.locator('button').filter({ hasText: /Approvals/i });
     const visible = await tab.first().isVisible({ timeout: 8000 }).catch(() => false);
-    if (visible) console.log('✅ Approvals tab visible');
-    else console.log('ℹ️  Approvals tab not found (may need scroll)');
+    if (visible) console.log('[ok] Approvals tab visible');
+    else console.log('[info] Approvals tab not found (may need scroll)');
   });
 
   test('11-b: approvals tab shows scan state', async ({ page }) => {
@@ -407,8 +407,8 @@ test.describe('11. Approvals', () => {
     const req = page.locator('text=requires Alchemy').first();
     const ok = await empty.isVisible({ timeout: 8000 }).catch(() => false)
       || await req.isVisible({ timeout: 3000 }).catch(() => false);
-    if (ok) console.log('✅ Approvals tab shows expected state');
-    else console.log('ℹ️  Approvals state not confirmed');
+    if (ok) console.log('[ok] Approvals tab shows expected state');
+    else console.log('[info] Approvals state not confirmed');
   });
 
   test('11-c: revoke button shown for unlimited approval (mocked)', async ({ page }) => {
@@ -431,8 +431,8 @@ test.describe('11. Approvals', () => {
     await ss(page, '08-11c-revoke');
     const revoke = page.locator('button').filter({ hasText: /^Revoke$/i }).first();
     const unlimited = page.locator('text=Unlimited').first();
-    if (await revoke.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ Revoke button visible');
-    if (await unlimited.isVisible({ timeout: 3000 }).catch(() => false)) console.log('✅ Unlimited badge shown');
+    if (await revoke.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] Revoke button visible');
+    if (await unlimited.isVisible({ timeout: 3000 }).catch(() => false)) console.log('[ok] Unlimited badge shown');
   });
 
 });
@@ -444,8 +444,8 @@ test.describe('12. Staking', () => {
     await boot(page, '[12a]');
     await scrollTabBar(page);
     const visible = await page.locator('button').filter({ hasText: /Staking/i }).first().isVisible({ timeout: 8000 }).catch(() => false);
-    if (visible) console.log('✅ Staking tab visible');
-    else console.log('ℹ️  Staking tab not found (may need scroll)');
+    if (visible) console.log('[ok] Staking tab visible');
+    else console.log('[info] Staking tab not found (may need scroll)');
   });
 
   test('12-b: Lido and Rocket Pool cards shown (mocked APY)', async ({ page }) => {
@@ -464,8 +464,8 @@ test.describe('12. Staking', () => {
     await ss(page, '08-12b-staking');
     const lido = page.locator('text=Lido').filter({ visible: true }).first();
     const rp = page.locator('text=Rocket Pool').filter({ visible: true }).first();
-    if (await lido.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ Lido card visible');
-    if (await rp.isVisible({ timeout: 3000 }).catch(() => false)) console.log('✅ Rocket Pool card visible');
+    if (await lido.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] Lido card visible');
+    if (await rp.isVisible({ timeout: 3000 }).catch(() => false)) console.log('[ok] Rocket Pool card visible');
   });
 
   test('12-c: APY percentage shown', async ({ page }) => {
@@ -479,8 +479,8 @@ test.describe('12. Staking', () => {
     await scrollTabBar(page); const _stk = page.locator('button').filter({ hasText: /Staking/i }).first(); if (await _stk.isVisible({ timeout: 6000 }).catch(() => false)) await _stk.click();
     await page.waitForTimeout(2000);
     const apy = page.locator('text=APY').first();
-    if (await apy.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ APY label shown');
-    else console.log('ℹ️  APY text not found');
+    if (await apy.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] APY label shown');
+    else console.log('[info] APY text not found');
   });
 
   test('12-d: staked position shown (mocked)', async ({ page }) => {
@@ -501,8 +501,8 @@ test.describe('12. Staking', () => {
     await page.waitForTimeout(2500);
     await ss(page, '08-12d-position');
     const pos = page.locator('text=stETH').or(page.locator('text=Your Staked')).or(page.locator('text=1.234')).first();
-    if (await pos.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ Staked position shown');
-    else console.log('ℹ️  Staked position not visible');
+    if (await pos.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] Staked position shown');
+    else console.log('[info] Staked position not visible');
   });
 
   test('12-e: stake form has MAX button and amount input', async ({ page }) => {
@@ -515,8 +515,8 @@ test.describe('12. Staking', () => {
     await ss(page, '08-12e-stake-form');
     const maxBtn = page.locator('button').filter({ hasText: /MAX/i }).first();
     const input = page.locator('input[type="number"]').or(page.locator('input[placeholder="0.0"]')).first();
-    if (await maxBtn.isVisible({ timeout: 5000 }).catch(() => false)) console.log('✅ MAX button visible in stake form');
-    if (await input.isVisible({ timeout: 3000 }).catch(() => false)) console.log('✅ Stake amount input visible');
+    if (await maxBtn.isVisible({ timeout: 5000 }).catch(() => false)) console.log('[ok] MAX button visible in stake form');
+    if (await input.isVisible({ timeout: 3000 }).catch(() => false)) console.log('[ok] Stake amount input visible');
   });
 
 });
@@ -527,12 +527,12 @@ test.describe('13. Address Book', () => {
   test('13-a: address book modal opens', async ({ page }) => {
     await boot(page, '[13a]');
     const btn = page.locator('button').filter({ hasText: /ADDRESS BOOK/i }).first();
-    if (!await btn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  AB skipped'); return; }
+    if (!await btn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] AB skipped'); return; }
     await btn.click();
     await page.waitForTimeout(600);
     await ss(page, '08-13a-ab');
     await expect(page.locator('text=Address Book').or(page.locator('text=ADDRESS BOOK')).filter({ visible: true }).first()).toBeVisible({ timeout: 6000 });
-    console.log('✅ Address Book modal open');
+    console.log('[ok] Address Book modal open');
     await page.keyboard.press('Escape');
   });
 
@@ -544,7 +544,7 @@ test.describe('14. Ledger', () => {
   test('14-a: ledger button in action grid', async ({ page }) => {
     await boot(page, '[14a]');
     await expect(page.locator('button').filter({ hasText: /LEDGER/i }).first()).toBeVisible({ timeout: 8000 });
-    console.log('✅ Ledger button visible');
+    console.log('[ok] Ledger button visible');
   });
 
   test('14-b: ledger modal opens with connect instructions', async ({ page }) => {
@@ -553,8 +553,8 @@ test.describe('14. Ledger', () => {
     await page.waitForTimeout(700);
     await ss(page, '08-14b-ledger');
     const connect = page.locator('text=Connect Ledger').or(page.locator('text=Connect your Ledger')).or(page.locator('text=Unlock')).or(page.locator('text=Ledger')).filter({ visible: true }).first();
-    if (await connect.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ Ledger modal open with instructions');
-    else console.log('ℹ️  Ledger modal content not confirmed');
+    if (await connect.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] Ledger modal open with instructions');
+    else console.log('[info] Ledger modal content not confirmed');
     await page.keyboard.press('Escape');
   });
 
@@ -566,13 +566,13 @@ test.describe('15. WalletConnect', () => {
   test('15-a: connect modal opens with WC URI input', async ({ page }) => {
     await boot(page, '[15a]');
     const btn = page.locator('button').filter({ hasText: /^CONNECT$/i }).first();
-    if (!await btn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  CONNECT skipped'); return; }
+    if (!await btn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] CONNECT skipped'); return; }
     await btn.click();
     await page.waitForTimeout(800);
     await ss(page, '08-15a-wc');
     const input = page.locator('input[placeholder*="wc:"]').or(page.locator('text=WalletConnect')).first();
-    if (await input.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ WalletConnect modal open');
-    else console.log('ℹ️  WC modal content not confirmed');
+    if (await input.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] WalletConnect modal open');
+    else console.log('[info] WC modal content not confirmed');
     await page.keyboard.press('Escape');
   });
 
@@ -584,25 +584,25 @@ test.describe('16. Advanced Mode', () => {
   test('16-a: advanced/simple toggle works', async ({ page }) => {
     await boot(page, '[16a]');
     const advBtn = page.locator('button').filter({ hasText: /ADVANCED/i }).first();
-    if (!await advBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('ℹ️  ADVANCED skipped'); return; }
+    if (!await advBtn.isVisible({ timeout: 6000 }).catch(() => false)) { console.log('[info] ADVANCED skipped'); return; }
     await advBtn.click();
     await page.waitForTimeout(500);
     await ss(page, '08-16a-advanced');
     const simpleBtn = page.locator('button').filter({ hasText: /Simple/i }).first();
     if (await simpleBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-      console.log('✅ Advanced mode active — Simple button visible');
+      console.log('[ok] Advanced mode active — Simple button visible');
       await simpleBtn.click();
       await page.waitForTimeout(400);
-      console.log('✅ Returned to simple mode');
+      console.log('[ok] Returned to simple mode');
     } else {
-      console.log('ℹ️  Advanced toggle not confirmed');
+      console.log('[info] Advanced toggle not confirmed');
     }
   });
 
   test('16-b: "Try Advanced Mode" hint visible in balance tab', async ({ page }) => {
     await boot(page, '[16b]');
     await expect(page.locator("button:has-text(\"Didn't find\")").first()).toBeVisible({ timeout: 8000 });
-    console.log('✅ "Try Advanced Mode" hint visible');
+    console.log('[ok] "Try Advanced Mode" hint visible');
   });
 
 });
@@ -615,8 +615,8 @@ test.describe('17. Session Toggle', () => {
     await ss(page, '08-17a-session');
     const persist = page.locator('text=PERSIST CURRENT SESSION').or(page.locator('text=Persistent Session')).or(page.locator('text=Keep session')).first();
     const vis = await persist.isVisible({ timeout: 8000 }).catch(() => false);
-    if (vis) console.log('✅ Session persist button/text visible');
-    else console.log('ℹ️  Session toggle not found');
+    if (vis) console.log('[ok] Session persist button/text visible');
+    else console.log('[info] Session toggle not found');
   });
 
 });
@@ -633,8 +633,8 @@ test.describe('18. Security Trust Footer', () => {
     const items = ['Zero Backend', 'No Tracking', 'Responsible Disclosure', 'Open Source'];
     for (const item of items) {
       const vis = await page.locator(`text=${item}`).first().isVisible({ timeout: 4000 }).catch(() => false);
-      if (vis) console.log(`✅ "${item}" trust signal visible`);
-      else console.log(`ℹ️  "${item}" not found`);
+      if (vis) console.log(`[ok] "${item}" trust signal visible`);
+      else console.log(`[info] "${item}" not found`);
     }
   });
 
@@ -652,8 +652,8 @@ test.describe('19. Lightning Tab', () => {
     await page.waitForTimeout(600);
     await ss(page, '08-19a-lightning');
     const noProvider = page.locator('text=No Lightning Provider').or(page.locator('text=Alby')).first();
-    if (await noProvider.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ Lightning: provider list shown');
-    else console.log('ℹ️  Lightning tab content not confirmed');
+    if (await noProvider.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] Lightning: provider list shown');
+    else console.log('[info] Lightning tab content not confirmed');
   });
 
 });
@@ -666,7 +666,7 @@ test.describe('20. Security Traps', () => {
     await ss(page, '08-20a-normal');
     const len = await page.evaluate(() => document.body.innerText.length);
     expect(len).toBeGreaterThan(50);
-    console.log('✅ Page body has content — no trap triggered on load');
+    console.log('[ok] Page body has content — no trap triggered on load');
   });
 
   test('20-b: DevTools guard loaded without crash', async ({ page }) => {
@@ -674,7 +674,7 @@ test.describe('20. Security Traps', () => {
     // DevToolsGuard overrides console.log — ensure page still works
     const hasContent = await page.evaluate(() => document.body.innerText.length > 0);
     expect(hasContent).toBe(true);
-    console.log('✅ DevTools guard active, page functional');
+    console.log('[ok] DevTools guard active, page functional');
   });
 
 });
@@ -692,8 +692,8 @@ test.describe('21. Mobile', () => {
     await page.waitForTimeout(1200);
     await page.screenshot({ path: 'test-results/08-21a-mobile.png', fullPage: true });
     const send = page.locator('button').filter({ hasText: /SEND/i }).first();
-    if (await send.isVisible({ timeout: 6000 }).catch(() => false)) console.log('✅ SEND button visible on 390px');
-    else console.log('ℹ️  SEND not visible on mobile — check layout');
+    if (await send.isVisible({ timeout: 6000 }).catch(() => false)) console.log('[ok] SEND button visible on 390px');
+    else console.log('[info] SEND not visible on mobile — check layout');
     await ctx.close();
   });
 
@@ -715,8 +715,8 @@ test.describe('22. Security Headers', () => {
     ];
     for (const [header, pattern, label] of checks) {
       const val = h[header] ?? '';
-      if (pattern.test(val)) console.log(`✅ ${label}`);
-      else console.log(`⚠️  MISSING: ${label} (got: "${val.slice(0, 80)}")`);
+      if (pattern.test(val)) console.log(`[ok] ${label}`);
+      else console.log(`[warn] MISSING: ${label} (got: "${val.slice(0, 80)}")`);
     }
   });
 
@@ -729,15 +729,15 @@ test.describe('23. New Wallet Flow', () => {
     await boot(page, '[23a]');
     const btn = page.locator('button').filter({ hasText: /CREATE NEW WALLET/i }).first();
     await expect(btn).toBeVisible({ timeout: 8000 });
-    console.log('✅ CREATE NEW WALLET button visible');
+    console.log('[ok] CREATE NEW WALLET button visible');
   });
 
   test('23-b: PERSIST CURRENT SESSION button visible', async ({ page }) => {
     await boot(page, '[23b]');
     const btn = page.locator('text=PERSIST CURRENT SESSION').first();
     const vis = await btn.isVisible({ timeout: 8000 }).catch(() => false);
-    if (vis) console.log('✅ PERSIST CURRENT SESSION visible');
-    else console.log('ℹ️  Persist button not found by this selector');
+    if (vis) console.log('[ok] PERSIST CURRENT SESSION visible');
+    else console.log('[info] Persist button not found by this selector');
   });
 
 });

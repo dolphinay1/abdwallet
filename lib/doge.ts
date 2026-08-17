@@ -6,6 +6,7 @@ import BIP32Factory from 'bip32';
 import * as ecc from 'tiny-secp256k1';
 import * as bitcoin from 'bitcoinjs-lib';
 import ECPairFactory from 'ecpair';
+import { zeroFill } from './crypto';
 
 let bip32: ReturnType<typeof BIP32Factory>;
 let ECPair: ReturnType<typeof ECPairFactory>;
@@ -60,6 +61,7 @@ export function deriveDOGEWallet(mnemonic: string): DOGEWallet {
   const seed = bip39.mnemonicToSeedSync(mnemonic.trim());
   const root = bip32.fromSeed(seed, DOGECOIN);
   const child = root.derivePath("m/44'/3'/0'/0/0");
+  zeroFill(seed);
   if (!child.privateKey) throw new Error('DOGE derivation failed');
 
   const pubKey = child.publicKey;
@@ -166,13 +168,21 @@ export async function buildDOGETransaction(opts: {
     psbt.addOutput({ address: from.address, value: change });
   }
 
-  const keyPair = ECPair.fromWIF(from.privateKeyWIF, DOGECOIN);
-  for (let i = 0; i < usedUtxos.length; i++) {
-    psbt.signInput(i, keyPair as unknown as bitcoin.Signer);
-  }
-  psbt.finalizeAllInputs();
+  let keyPair: bitcoin.Signer | null = null;
+  try {
+    keyPair = ECPair.fromWIF(from.privateKeyWIF, DOGECOIN) as unknown as bitcoin.Signer;
+    for (let i = 0; i < usedUtxos.length; i++) {
+      psbt.signInput(i, keyPair);
+    }
+    psbt.finalizeAllInputs();
 
-  return { hex: psbt.extractTransaction().toHex(), fee: feeSats / SATOSHI };
+    return { hex: psbt.extractTransaction().toHex(), fee: feeSats / SATOSHI };
+  } finally {
+    if (keyPair && (keyPair as any).privateKey) {
+      zeroFill((keyPair as any).privateKey);
+    }
+    keyPair = null;
+  }
 }
 
 export async function broadcastDOGE(hex: string): Promise<string> {

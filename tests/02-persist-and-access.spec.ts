@@ -25,7 +25,7 @@ test.describe('Persist & Access Vault', () => {
     expect(arr.length).toBe(1);
 
     await page.screenshot({ path: 'test-results/02-single-persist.png', fullPage: true });
-    console.log(`✅ PNG: ${arr.length} mnemonic`);
+    console.log(`[ok] PNG: ${arr.length} mnemonic`);
   });
 
   test('PNG contains 2 mnemonics for 2 saved vaults', async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe('Persist & Access Vault', () => {
     expect(arr.length).toBe(2);
 
     await page.screenshot({ path: 'test-results/02-multi-persist.png', fullPage: true });
-    console.log(`✅ PNG: ${arr.length} mnemonics`);
+    console.log(`[ok] PNG: ${arr.length} mnemonics`);
   });
 
   test('Access Vault restores primary wallet', async ({ page }) => {
@@ -62,7 +62,7 @@ test.describe('Persist & Access Vault', () => {
     const pngPath = await persistSession(page);
 
     const persistedAddress = await page.evaluate(() => {
-      const h = JSON.parse(localStorage.getItem('__cw_wallet_history__') ?? '[]');
+      const h = JSON.parse(localStorage.getItem('__gw_wallet_history__') ?? '[]');
       return h.find((s: any) => s.isSaved)?.address ?? null;
     });
 
@@ -79,7 +79,7 @@ test.describe('Persist & Access Vault', () => {
     expect(restored.some((s: any) => s.address === persistedAddress)).toBe(true);
 
     await page.screenshot({ path: 'test-results/02-access-success.png', fullPage: true });
-    console.log('✅ Wallet restored:', persistedAddress?.slice(0, 10));
+    console.log('[ok] Wallet restored:', persistedAddress?.slice(0, 10));
   });
 
   test('Access Vault restores ALL saved vaults into history', async ({ page }) => {
@@ -116,7 +116,7 @@ test.describe('Persist & Access Vault', () => {
     expect(restored.some((s: any) => s.address === addressB)).toBe(true);
 
     await page.screenshot({ path: 'test-results/02-restore-all.png', fullPage: true });
-    console.log('✅ Both vaults restored:', addressA.slice(0,10), addressB.slice(0,10));
+    console.log('[ok] Both vaults restored:', addressA.slice(0,10), addressB.slice(0,10));
   });
 
   test('Wrong passphrase shows error, wallet not unlocked', async ({ page }) => {
@@ -143,7 +143,7 @@ test.describe('Persist & Access Vault', () => {
     await expect(page.locator('text=Wallet Unlocked')).not.toBeVisible();
 
     await page.screenshot({ path: 'test-results/02-wrong-pass.png', fullPage: true });
-    console.log('✅ Wrong passphrase rejected');
+    console.log('[ok] Wrong passphrase rejected');
   });
 
 });

@@ -135,7 +135,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const triggerPanic = useCallback(() => {
-    console.log('BREACH: triggerPanic called!');
+    if (process.env.NODE_ENV === 'development') console.warn('[ABD] Panic triggered');
     wipeABDWallet();
     if ('caches' in window) {
       caches.keys().then(names => names.forEach(name => caches.delete(name)));
@@ -432,7 +432,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setTimeout(() => wipeABDWallet(), 100);
     });
     if (isUnauthorizedEnvironment()) {
-      console.log('BREACH: Unauthorized environment detected');
+      if (process.env.NODE_ENV === 'development') console.warn('[ABD] Unauthorized environment detected');
       activateSilentLockout();
     }
   }, [wipeABDWallet]);
@@ -506,28 +506,26 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let knownCount = 0;
     let graceTicks = 0;
-    const id = setInterval(() => {
-      const current = document.querySelectorAll('[data-aethilm="brand"]').length;
-      if (knownCount > 0 && current === 0) {
-        if (graceTicks > 0) { graceTicks--; return; }
-        wipeABDWallet();
-      } else {
-        if (current > 0) knownCount = current;
-        if (current === 0 && knownCount > 0) graceTicks = 1;
-      }
-    }, 3000);
-    return () => clearInterval(id);
+    // Delay first check to allow React to fully mount
+    const startDelay = setTimeout(() => {
+      const id = setInterval(() => {
+        const current = document.querySelectorAll('[data-aethilm="brand"]').length;
+        if (knownCount > 0 && current === 0) {
+          if (graceTicks > 0) { graceTicks--; return; }
+          wipeABDWallet();
+        } else {
+          if (current > 0) knownCount = current;
+          if (current === 0 && knownCount > 0) graceTicks = 2;
+        }
+      }, 5000);
+      return () => clearInterval(id);
+    }, 10000);
+    return () => clearTimeout(startDelay);
   }, [wipeABDWallet]);
 
-  // Console honey-trap
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (Object.getOwnPropertyDescriptor(window, 'wallet')) return;
-    Object.defineProperty(window, 'wallet', {
-      get: () => { triggerPanic(); return { error: 'Build Integrity Failure: 0xAE7H1LM' }; },
-      configurable: false,
-    });
-  }, [triggerPanic]);
+  // Console honey-trap — disabled: browser wallet extensions (MetaMask, Trust Wallet)
+  // probe window.wallet to detect providers, causing false-positive breach detection.
+  // This was triggering triggerPanic() on page load for any user with a wallet extension.
 
   return (
     <WalletContext.Provider value={{

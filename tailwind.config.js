@@ -17,15 +17,15 @@ module.exports = {
     extend: {
       colors: {
         abd: {
-          black: "#050505",
-          dark: "#121212",
-          gray: "#2A2A2A",
-          white: "#F5F5F5",
-          accent: "#FFFFFF",
-          fee: "#FF4D4D",
-          success: "#00E676",
-          emerald: "#10b981",
-          violet: "#8b5cf6",
+          black: "#e4e6ee",
+          dark: "#e4e6ee",
+          gray: "#c9ced9",
+          white: "#23262b",
+          accent: "#2b2d33",
+          fee: "#b91c1c",
+          success: "#23262b",
+          emerald: "#6b7280",
+          violet: "#8a8f98",
         },
       },
       fontFamily: {
@@ -33,9 +33,12 @@ module.exports = {
         display: ['var(--font-space-grotesk)', 'Inter', 'sans-serif'],
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(255, 255, 255, 0.15)',
-        'glow-emerald': '0 0 20px rgba(16, 185, 129, 0.25)',
-        'glow-violet': '0 0 20px rgba(139, 92, 246, 0.25)',
+        'glow': '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',
+        'glow-emerald': '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',
+        'glow-violet': '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',
+        'neu': '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',
+        'neu-sm': '6px 6px 12px rgba(166, 177, 198, 0.55), -6px -6px 12px rgba(255, 255, 255, 0.9)',
+        'neu-inset': 'inset 4px 4px 8px rgba(166, 177, 198, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.9)',
       },
       keyframes: {
         'fade-in-down': {
@@ -51,8 +54,8 @@ module.exports = {
           '100%': { backgroundPosition: '200% 0' },
         },
         'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 8px rgba(16, 185, 129, 0.15)' },
-          '50%': { boxShadow: '0 0 24px rgba(16, 185, 129, 0.4)' },
+          '0%, 100%': { boxShadow: '6px 6px 12px rgba(166, 177, 198, 0.55), -6px -6px 12px rgba(255, 255, 255, 0.9)' },
+          '50%': { boxShadow: '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)' },
         },
       },
       animation: {
@@ -68,11 +71,14 @@ module.exports = {
   },
   plugins: [heroui({
     themes: {
-      dark: {
+      light: {
         colors: {
           primary: {
-            DEFAULT: '#52ffac',
-            foreground: '#002111',
+            DEFAULT: '#2b2d33',
+            foreground: '#f5f6fa',
+          },
+          danger: {
+            DEFAULT: '#b91c1c',
           },
         },
       },

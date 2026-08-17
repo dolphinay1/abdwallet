@@ -23,21 +23,21 @@ interface WarningBannerProps {
 
 const MESSAGES: Record<WarningType, { icon: React.ReactNode; title: string; body: (d?: WarningBannerProps['data']) => string; confirmLabel: string; confirmDanger?: boolean }> = {
   'send-large': {
-    icon: <AlertTriangle size={18} color="#ffb400" />,
+    icon: <AlertTriangle size={18} color="#23262b" />,
     title: 'Large Transfer',
     body: (d) => `You're about to send $${(d?.amount ?? 0).toFixed(2)} worth of ${d?.coin ?? 'crypto'}. Double-check the recipient address — transactions cannot be reversed.`,
     confirmLabel: 'Proceed',
     confirmDanger: true,
   },
   'wipe': {
-    icon: <AlertTriangle size={18} color="#ff6b6b" />,
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
     title: 'Wipe Wallet',
     body: () => 'This will permanently erase all keys from memory. If you haven\'t saved your vault, funds will be inaccessible.',
     confirmLabel: 'Wipe',
     confirmDanger: true,
   },
   'new-wallet': {
-    icon: <AlertCircle size={18} color="#ffb400" />,
+    icon: <AlertCircle size={18} color="#23262b" />,
     title: 'New Wallet',
     body: () => 'Creating a new wallet will replace the current session. Save your vault first if you need to recover this wallet.',
     confirmLabel: 'Create New',
@@ -50,14 +50,14 @@ const MESSAGES: Record<WarningType, { icon: React.ReactNode; title: string; body
     confirmLabel: 'Got it',
   },
   'transfer-confirm': {
-    icon: <AlertTriangle size={18} color="#ffb400" />,
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
     title: 'Confirm Transfer',
     body: (d) => `Transfer ${d?.coin ?? ''} to ${d?.address ? `${d.address.slice(0, 8)}…${d.address.slice(-4)}` : 'another wallet'}? This is an on-chain transaction with network fees.`,
     confirmLabel: 'Confirm Transfer',
     confirmDanger: true,
   },
   'delete-wallet': {
-    icon: <AlertTriangle size={18} color="#ff6b6b" />,
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
     title: 'Remove Wallet',
     body: () => 'Remove this wallet from history? If it\'s not saved in a vault, you won\'t be able to recover it.',
     confirmLabel: 'Remove',
@@ -76,25 +76,26 @@ export function WarningBanner({ type, onConfirm, onCancel, data, inline = false 
       exit="exit"
       transition={springs.bouncy}
       style={{
-        background: '#111',
-        border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: '1rem',
+        background: '#e4e6ee',
+        borderRadius: '1.5rem',
+        boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)',
         padding: '1rem',
         maxWidth: 360,
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.75rem',
+        color: '#23262b',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
         <div style={{ flexShrink: 0, marginTop: 2 }}>{msg.icon}</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{msg.title}</div>
-          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>{msg.body(data)}</div>
+          <div style={{ fontSize: '0.8rem', color: '#8a8f98', lineHeight: 1.5 }}>{msg.body(data)}</div>
         </div>
         {onCancel && (
-          <button onClick={onCancel} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#8a8f98', cursor: 'pointer', flexShrink: 0 }}>
             <X size={16} />
           </button>
         )}
@@ -103,12 +104,12 @@ export function WarningBanner({ type, onConfirm, onCancel, data, inline = false 
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         {onCancel && (
           <button onClick={onCancel}
-            style={{ flex: 1, padding: '0.5rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: '0.82rem' }}>
+            style={{ flex: 1, padding: '0.5rem', background: '#e4e6ee', boxShadow: '4px 4px 8px rgba(166,177,198,0.55), -4px -4px 8px rgba(255,255,255,0.9)', border: 'none', borderRadius: '9999px', color: '#23262b', cursor: 'pointer', fontSize: '0.82rem' }}>
             Cancel
           </button>
         )}
         <button onClick={onConfirm}
-          style={{ flex: 1, padding: '0.5rem', background: msg.confirmDanger ? 'rgba(255,107,107,0.15)' : 'var(--theme-accent-dim)', border: `1px solid ${msg.confirmDanger ? 'rgba(255,107,107,0.4)' : 'var(--theme-accent-border)'}`, borderRadius: '0.5rem', color: msg.confirmDanger ? '#ff6b6b' : 'var(--theme-accent)', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}>
+          style={{ flex: 1, padding: '0.5rem', background: msg.confirmDanger ? '#b91c1c' : '#2b2d33', border: 'none', borderRadius: '9999px', color: '#f5f6fa', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', boxShadow: '4px 4px 8px rgba(166,177,198,0.55), -4px -4px 8px rgba(255,255,255,0.9)' }}>
           <Check size={13} />
           {msg.confirmLabel}
         </button>
@@ -123,7 +124,7 @@ export function WarningBanner({ type, onConfirm, onCancel, data, inline = false 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(228,230,238,0.7)', zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
       onClick={(e) => { if (e.target === e.currentTarget && onCancel) onCancel(); }}
     >
       {content}
@@ -134,8 +135,8 @@ export function WarningBanner({ type, onConfirm, onCancel, data, inline = false 
 // Lightweight inline alert strip (no buttons)
 export function InlineWarning({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ background: 'rgba(255,180,0,0.08)', border: '1px solid rgba(255,180,0,0.25)', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#ffb400' }}>
-      <AlertTriangle size={13} />
+    <div style={{ background: '#e4e6ee', boxShadow: 'inset 4px 4px 8px rgba(166,177,198,0.5), inset -4px -4px 8px rgba(255,255,255,0.9)', borderRadius: '9999px', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem', color: '#23262b' }}>
+      <AlertTriangle size={13} color="#23262b" />
       {children}
     </div>
   );

@@ -123,15 +123,15 @@ export async function scanDApp(url: string): Promise<DAppRisk> {
 // ── Risk badge colors ─────────────────────────────────────────────────────────
 
 export function riskColor(level: RiskLevel): string {
-  if (level === 'danger') return '#f87171';
-  if (level === 'warning') return '#fbbf24';
-  if (level === 'safe') return '#4ade80';
-  return '#6b7280';
+  if (level === 'danger') return '#b91c1c';
+  if (level === 'warning') return '#2b2d33';
+  if (level === 'safe') return '#23262b';
+  return '#8a8f98';
 }
 
 export function riskBg(level: RiskLevel): string {
-  if (level === 'danger') return 'rgba(248,113,113,0.12)';
-  if (level === 'warning') return 'rgba(251,191,36,0.12)';
-  if (level === 'safe') return 'rgba(74,222,128,0.10)';
-  return 'rgba(107,114,128,0.10)';
+  if (level === 'danger') return 'rgba(185,28,28,0.10)';
+  if (level === 'warning') return 'rgba(43,45,51,0.07)';
+  if (level === 'safe') return 'rgba(35,38,43,0.06)';
+  return 'rgba(138,143,152,0.10)';
 }

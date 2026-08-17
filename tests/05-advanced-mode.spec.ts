@@ -27,7 +27,7 @@ test.describe('Advanced Mode', () => {
 
     // After Simple click, AdvancedDashboard should not be shown — verify simpleBtn is gone
     await expect(page.locator(SEL.simpleBtn).filter({ visible: true })).toHaveCount(0);
-    console.log('✅ Advanced ↔ Simple toggle');
+    console.log('[ok] Advanced ↔ Simple toggle');
   });
 
   test('"Try Advanced Mode" hint link works', async ({ page }) => {
@@ -39,7 +39,7 @@ test.describe('Advanced Mode', () => {
     await page.locator(SEL.hintLink).first().click();
     await page.waitForTimeout(600);
     await expect(page.locator('text=Advanced Mode').filter({ visible: true }).first()).toBeVisible();
-    console.log("✅ Hint link → Advanced Mode");
+    console.log("[ok] Hint link → Advanced Mode");
   });
 
   test('custom chains localStorage key is created on Add', async ({ page }) => {
@@ -78,7 +78,7 @@ test.describe('Advanced Mode', () => {
     });
     await page.screenshot({ path: 'test-results/05-chain-added.png', fullPage: true });
     console.log('Custom chains in storage:', chains.length);
-    console.log('✅ Custom chain modal tested');
+    console.log('[ok] Custom chain modal tested');
   });
 
 });

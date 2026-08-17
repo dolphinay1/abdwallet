@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getChainById } from '@/lib/chains';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+export const dynamic = 'force-dynamic';
 
 // Etherscan-compatible explorer API endpoints per chain
 const EXPLORER_API: Record<number, string> = {
@@ -11,6 +14,16 @@ const EXPLORER_API: Record<number, string> = {
   8453: 'https://api.basescan.org/api',
   43114: 'https://api.snowtrace.io/api',
   250: 'https://api.ftmscan.com/api',
+  59144: 'https://api.lineascan.build/api',
+  534352: 'https://api.scrollscan.com/api',
+  81457: 'https://api.blastscan.io/api',
+  100: 'https://api.gnosisscan.io/api',
+  42220: 'https://api.celoscan.io/api',
+  25: 'https://api.cronoscan.com/api',
+  1284: 'https://api-moonbeam.moonscan.io/api',
+  1101: 'https://api-zkevm.polygonscan.com/api',
+  2222: 'https://api.kavascan.com/api',
+  1313161554: 'https://api.aurorascan.dev/api',
   11155111: 'https://api-sepolia.etherscan.io/api',
   84532: 'https://api-sepolia.basescan.org/api',
   421614: 'https://api-sepolia.arbiscan.io/api',
@@ -22,6 +35,9 @@ const EXPLORER_API: Record<number, string> = {
  * { address, apiUrl, apiKey } format. Returns TxRecord[] directly.
  */
 export async function POST(req: Request) {
+  const limit = checkRateLimit(req, 60, 60_000);
+  if (!limit.allowed) return limit.response!;
+
   try {
     const body = await req.json();
     const { address, chainId, apiUrl, apiKey } = body;

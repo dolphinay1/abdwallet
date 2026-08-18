@@ -49,6 +49,12 @@ async function decryptMnemonic(vault, passphrase) {
 }
 
 // ── Session state (cleared when browser closes) ────────────────────────────
+// The session stores the encrypted mnemonic blob. The AES-GCM key used to
+// decrypt it is held in a module-level variable (_sessionKey). If Chrome kills
+// the service worker, _sessionKey is lost and signing returns "Locked" until
+// the user re-unlocks via the popup.
+
+let _sessionKey = null;
 
 async function getSession() {
   return new Promise(resolve => {
@@ -63,9 +69,28 @@ async function setSession(data) {
 }
 
 async function clearSession() {
+  _sessionKey = null;
   return new Promise(resolve => {
     chrome.storage.session.remove([SESSION_KEY], resolve);
   });
+}
+
+async function decryptWithKey(vault, key) {
+  const iv = fromHex(vault.iv);
+  const ct = fromHex(vault.ct);
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new TextDecoder().decode(plain);
+}
+
+async function getSessionMnemonic() {
+  const session = await getSession();
+  if (!session || !session.blob) return null;
+  if (!_sessionKey) return null;
+  try {
+    return await decryptWithKey(session.blob, _sessionKey);
+  } catch {
+    return null;
+  }
 }
 
 // ── Persistent vault ───────────────────────────────────────────────────────
@@ -146,7 +171,7 @@ function getRpcForChain(chainId) {
     534352:  'https://rpc.scroll.io',
     81457:   'https://rpc.blast.io',
     100:     'https://rpc.gnosischain.com',
-    43220:   'https://forno.celo.org',
+    42220:   'https://forno.celo.org',
   };
   return rpcs[id] || rpcs[1];
 }
@@ -221,8 +246,8 @@ async function handleMessage(msg, _sender) {
     const { address } = await deriveWallet(mnemonic);
     vault.address = address;
     await saveVault(vault);
-    // Store only address + timestamp in session — mnemonic is decrypted per-request
-    await setSession({ address, unlockedAt: Date.now() });
+    _sessionKey = await deriveKey(passphrase, fromHex(vault.salt));
+    await setSession({ address, unlockedAt: Date.now(), blob: { salt: vault.salt, iv: vault.iv, ct: vault.ct } });
     return { ok: true, address };
   }
 
@@ -234,8 +259,8 @@ async function handleMessage(msg, _sender) {
     try {
       const mnemonic = await decryptMnemonic(vault, passphrase);
       const { address } = await deriveWallet(mnemonic);
-      // Store only address + timestamp — mnemonic stays out of session storage
-      await setSession({ address, unlockedAt: Date.now() });
+      _sessionKey = await deriveKey(passphrase, fromHex(vault.salt));
+      await setSession({ address, unlockedAt: Date.now(), blob: { salt: vault.salt, iv: vault.iv, ct: vault.ct } });
       return { ok: true, address };
     } catch {
       return { error: 'Wrong passphrase' };
@@ -287,39 +312,39 @@ async function handleMessage(msg, _sender) {
   // ── EIP-1193: personal_sign ───────────────────────────────────────────────
   if (type === 'CW_PERSONAL_SIGN') {
     const { message, requestId } = msg;
-    const session = await getSession();
-    if (!session) return { error: 'Locked' };
+    const mnemonic = await getSessionMnemonic();
+    if (!mnemonic) return { error: 'Locked — reopen the popup and unlock again' };
     const approved = await requestApproval(requestId, { type: 'personal_sign', message });
     if (!approved) return { error: 'User rejected' };
     await clearPendingRequest(requestId);
-    const sig = await signMessage(session.mnemonic, message);
+    const sig = await signMessage(mnemonic, message);
     return { result: sig };
   }
 
   // ── EIP-1193: eth_signTypedData_v4 ────────────────────────────────────────
   if (type === 'CW_SIGN_TYPED') {
     const { domain, types, value, requestId } = msg;
-    const session = await getSession();
-    if (!session) return { error: 'Locked' };
+    const mnemonic = await getSessionMnemonic();
+    if (!mnemonic) return { error: 'Locked — reopen the popup and unlock again' };
     const approved = await requestApproval(requestId, { type: 'typed_data', domain, types, value });
     if (!approved) return { error: 'User rejected' };
     await clearPendingRequest(requestId);
-    const sig = await signTypedData(session.mnemonic, domain, types, value);
+    const sig = await signTypedData(mnemonic, domain, types, value);
     return { result: sig };
   }
 
   // ── EIP-1193: eth_sendTransaction ─────────────────────────────────────────
   if (type === 'CW_SEND_TX') {
     const { tx, requestId, chainId: msgChainId } = msg;
-    const session = await getSession();
-    if (!session) return { error: 'Locked' };
+    const mnemonic = await getSessionMnemonic();
+    if (!mnemonic) return { error: 'Locked — reopen the popup and unlock again' };
     const approved = await requestApproval(requestId, { type: 'send_tx', tx });
     if (!approved) return { error: 'User rejected' };
     await clearPendingRequest(requestId);
     try {
       // Resolve chainId — prefer explicit msg chainId, fallback to tx field
       const chainId = msgChainId || tx.chainId;
-      const signed = await signTransaction(session.mnemonic, tx);
+      const signed = await signTransaction(mnemonic, tx);
       const rpcUrl = getRpcForChain(chainId);
       const resp = await fetch(rpcUrl, {
         method: 'POST',

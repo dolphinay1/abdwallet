@@ -10,6 +10,7 @@ export function useExtensionBridge() {
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
       if (e.data?.type === 'CW_EXT_PRESENT') setExtPresent(true);
       if (e.data?.type === 'CW_STATUS_RESULT') {
         setExtPresent(true);
@@ -26,7 +27,7 @@ export function useExtensionBridge() {
       }
     };
     window.addEventListener('message', handler);
-    window.postMessage({ type: 'CW_STATUS_REQUEST' }, '*');
+    window.postMessage({ type: 'CW_STATUS_REQUEST' }, window.location.origin);
     return () => window.removeEventListener('message', handler);
   }, []);
 
@@ -39,7 +40,7 @@ export function useExtensionBridge() {
         mnemonic,
         passphrase,
       },
-      '*'
+      window.location.origin
     );
   }, []);
 

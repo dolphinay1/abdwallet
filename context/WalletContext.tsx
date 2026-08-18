@@ -35,7 +35,6 @@ import {
 } from '@/lib/persistent-vault';
 import { persistWallet as historyPersistWallet, loadSavedMnemonic, getHistory, clearUnsavedBlobs } from '@/lib/wallet-history';
 import { saveSession, loadSession, clearSession, getTabKey } from '@/lib/session-lock';
-import { getPrivateKeyAtIndex } from '@/lib/accounts';
 import { clearWalletKit } from '@/lib/walletconnect';
 
 export type WalletMode = 'EPHEMERAL' | 'PERSISTENT';
@@ -71,18 +70,13 @@ interface WalletContextType extends WalletState {
   createABDWallet: () => Promise<void>;
   importABDWallet: (mnemonic: string) => Promise<void>;
   wipeABDWallet: (opts?: { keepSession?: boolean }) => void;
-  triggerPanic: () => void;
   rotateVaultKeys: () => void;
-  getMnemonic: () => string | null;
   getMnemonicForExport: () => Promise<string | null>;
   activeAddress: string | null;
   scatteredKeyStore: ScatteredStore | null;
   enablePersistentMode: (passphrase: string, mnemonic: string) => Promise<void>;
   unlockPersistentVault: (passphrase: string) => Promise<void>;
-  enableSessionLock: () => Promise<void>;
   disableSessionLock: () => void;
-  markSessionRestored: () => void;
-  switchAccount: (index: number) => Promise<void>;
   persistCurrentWallet: (id: string) => Promise<void>;
   switchToSavedWallet: (id: string) => Promise<void>;
 }
@@ -108,7 +102,6 @@ const INITIAL_STATE: WalletState = {
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<WalletState>(INITIAL_STATE);
   const scatteredKeyRef = useRef<ScatteredStore | null>(null);
-  const mnemonicShownRef = useRef(false);
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mnemonicRef = useRef<string | null>(null);
@@ -119,7 +112,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       wipeScatteredStore(scatteredKeyRef.current);
       scatteredKeyRef.current = null;
     }
-    mnemonicShownRef.current = false;
     mnemonicRef.current = null;
     _vaultCombinedKey = null;
     vaultKeyRef.current = null;
@@ -135,15 +127,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     if (sessionTimer.current) clearTimeout(sessionTimer.current);
     _updateDecoys();
   }, []);
-
-  const triggerPanic = useCallback(() => {
-    if (process.env.NODE_ENV === 'development') console.warn('[ABD] Panic triggered');
-    wipeABDWallet();
-    if ('caches' in window) {
-      caches.keys().then(names => names.forEach(name => caches.delete(name)));
-    }
-    window.location.replace(process.env.NEXT_PUBLIC_EXTERNAL_LINK || 'https://www.google.com');
-  }, [wipeABDWallet]);
 
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
@@ -255,12 +238,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const getMnemonic = useCallback((): string | null => {
-    if (!state._v_enc || mnemonicShownRef.current) return null;
-    mnemonicShownRef.current = true;
-    try { return decryptData(state._v_enc); } catch { return null; }
-  }, [state._v_enc]);
-
   const getMnemonicForExport = useCallback(async (): Promise<string | null> => {
     // Primary: in-memory ref (always up-to-date)
     if (mnemonicRef.current && mnemonicRef.current.trim().split(/\s+/).length >= 12) {
@@ -339,38 +316,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     setState(p => ({ ...p, mode: 'PERSISTENT' }));
   }, [importABDWallet]);
 
-  const enableSessionLock = useCallback(async () => {
-    const mnemonic = mnemonicRef.current;
-    if (!mnemonic) return;
-    const tabKey = getTabKey();
-    const payload = encryptData(mnemonic, tabKey);
-    saveSession(payload);
-    setState((p) => ({ ...p, isSessionLocked: true }));
-  }, []);
-
   const disableSessionLock = useCallback(() => {
     clearSession();
     setState((p) => ({ ...p, isSessionLocked: false }));
-  }, []);
-
-  const markSessionRestored = useCallback(() => {
-    setState((p) => ({ ...p, isSessionLocked: true }));
-  }, []);
-
-  const switchAccount = useCallback(async (index: number) => {
-    const mnemonic = mnemonicRef.current;
-    if (!mnemonic) return;
-    const privateKey = getPrivateKeyAtIndex(mnemonic, index);
-    const address = new ethers.Wallet(privateKey).address;
-    // Replace scattered key store with new account's key
-    if (scatteredKeyRef.current) wipeScatteredStore(scatteredKeyRef.current);
-    scatteredKeyRef.current = scatterStore(privateKey);
-    const sessionKey = vaultKeyRef.current ?? getCurrentKey();
-    setState(prev => ({
-      ...prev,
-      _u_ap: address,
-      _k_enc: encryptData(privateKey, sessionKey),
-    }));
   }, []);
 
   const persistCurrentWallet = useCallback(async (id: string) => {
@@ -455,11 +403,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Canary trap
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const canaryProxy = new Proxy({ value: 'aethilm_sovereign' }, {
+    const canaryProxy = new Proxy({ value: 'abd_sovereign' }, {
       set: () => { wipeABDWallet(); return false; },
       deleteProperty: () => { wipeABDWallet(); return false; },
     });
-    (window as unknown as Record<string, unknown>)['_aethilm_canary'] = canaryProxy;
+    (window as unknown as Record<string, unknown>)['_abd_canary'] = canaryProxy;
   }, [wipeABDWallet]);
 
   // Honey input trap
@@ -482,7 +430,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     // Delay first check to allow React to fully mount
     const startDelay = setTimeout(() => {
       const id = setInterval(() => {
-        const current = document.querySelectorAll('[data-aethilm="brand"]').length;
+        const current = document.querySelectorAll('[data-abd="brand"]').length;
         if (knownCount > 0 && current === 0) {
           if (graceTicks > 0) { graceTicks--; return; }
           wipeABDWallet();
@@ -498,7 +446,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   // Console honey-trap — disabled: browser wallet extensions (MetaMask, Trust Wallet)
   // probe window.wallet to detect providers, causing false-positive breach detection.
-  // This was triggering triggerPanic() on page load for any user with a wallet extension.
+  // This was triggering a full wipe on page load for any user with a wallet extension.
 
   return (
     <WalletContext.Provider value={{
@@ -507,17 +455,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       createABDWallet,
       importABDWallet,
       wipeABDWallet,
-      triggerPanic,
       rotateVaultKeys,
-      getMnemonic,
       getMnemonicForExport,
       scatteredKeyStore: scatteredKeyRef.current,
       enablePersistentMode,
       unlockPersistentVault,
-      enableSessionLock,
       disableSessionLock,
-      markSessionRestored,
-      switchAccount,
       persistCurrentWallet,
       switchToSavedWallet,
     }}>

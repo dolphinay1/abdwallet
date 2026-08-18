@@ -12,6 +12,7 @@ export const AbdLogo: React.FC<AbdLogoProps> = ({ size = 125, className = '' }) 
 
   return (
     <div
+      data-abd="brand"
       className={`relative flex items-center justify-center select-none transition-transform duration-300 ${className}`}
       style={{
         width: `${width}px`,

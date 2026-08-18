@@ -75,7 +75,7 @@ export function WalletHistorySection({
                   if (!isCurrent) onSwitch(snap);
                 }}
               >
-                {/* Action Buttons: Delete & Save */}
+                {/* Action Button: Delete (Top Right) */}
                 <div style={{ position: 'absolute', top: 4, right: 4, display: 'flex', gap: 4 }}>
                   <button
                     onClick={(e) => {
@@ -83,7 +83,7 @@ export function WalletHistorySection({
                       onDelete(snap.id);
                     }}
                     style={{
-                      background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: 'pointer', borderRadius: '50%'
+                      background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#b91c1c')}
                     onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
@@ -91,8 +91,17 @@ export function WalletHistorySection({
                     <X size={12} strokeWidth={3} />
                   </button>
                 </div>
+
+                {/* Action Button: Save (Dynamic Position: Top Left in Ext, Bottom Left in Web) */}
                 {!snap.isSaved && (
-                  <div style={{ position: 'absolute', bottom: 8, left: 8 }}>
+                  <div 
+                    style={{ 
+                      position: 'absolute', 
+                      ...(typeof window !== 'undefined' && window.self !== window.top 
+                        ? { top: 4, left: 4 } 
+                        : { bottom: 8, left: 8 }) 
+                    }}
+                  >
                     <button
                       disabled={isSavingVault}
                       onClick={(e) => {
@@ -100,12 +109,12 @@ export function WalletHistorySection({
                         onSave(snap, isCurrent);
                       }}
                       style={{
-                        background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: isSavingVault ? 'not-allowed' : 'pointer', borderRadius: '50%'
+                        background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: isSavingVault ? 'not-allowed' : 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = '#059669')}
                       onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 18 }}>save</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: typeof window !== 'undefined' && window.self !== window.top ? 15 : 18 }}>save</span>
                     </button>
                   </div>
                 )}

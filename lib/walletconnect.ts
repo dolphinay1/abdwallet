@@ -20,7 +20,7 @@ const METADATA = {
   name: 'ABD Wallet',
   description: 'Secure ephemeral EVM wallet',
   url: typeof window !== 'undefined' ? window.location.origin : 'https://abdwallet.app',
-  icons: ['https://abdwallet.app/favicon.ico'],
+  icons: ['https://abdwallet.app/icon.png'],
 };
 
 // ── Singleton — one Core + one WalletKit, ever ────────────────────────────────

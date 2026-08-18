@@ -35,7 +35,7 @@ export function useExtensionBridge() {
     setExtError(null);
     window.postMessage(
       {
-        type: 'CW_ATTACH_VAULT',
+        type: 'CW_ATTACH_REQUEST',
         mnemonic,
         passphrase,
       },

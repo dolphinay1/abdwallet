@@ -85,7 +85,7 @@ export function DashboardActionGrid({
       )}
 
       {/* Extension banners */}
-      {extPresent && !extAttached && walletUnlocked && (
+      {extPresent && !extAttached && walletUnlocked && typeof window !== 'undefined' && window.self === window.top && (
         <div
           style={{
             background: 'rgba(138,143,152,0.07)',
@@ -125,10 +125,10 @@ export function DashboardActionGrid({
           </button>
         </div>
       )}
-      {extError && extPresent && !extAttached && (
+      {extError && extPresent && !extAttached && typeof window !== 'undefined' && window.self === window.top && (
         <p style={{ color: '#b91c1c', fontSize: 11, margin: '-4px 0 4px', padding: '0 4px' }}>{extError}</p>
       )}
-      {extAttached && walletUnlocked && (
+      {extAttached && walletUnlocked && typeof window !== 'undefined' && window.self === window.top && (
         <div
           style={{
             background: 'rgba(43,45,51,0.05)',

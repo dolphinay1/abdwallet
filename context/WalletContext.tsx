@@ -457,7 +457,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Blur on tab switch
   useEffect(() => {
     const handler = () => {
-      if (document.hidden) { setState(p => ({ ...p, isBlurred: true })); document.title = 'By Aethilm'; }
+      if (document.hidden) { setState(p => ({ ...p, isBlurred: true })); document.title = 'ABD Wallet'; }
       else { setState(p => ({ ...p, isBlurred: false })); document.title = 'ABD Wallet'; }
     };
     document.addEventListener('visibilitychange', handler);

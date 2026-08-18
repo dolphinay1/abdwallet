@@ -26,7 +26,7 @@ describe('lib/crypto', () => {
   });
 
   it('sha256 produces 64-char hex string', async () => {
-    const hash = await sha256('aethilm');
+    const hash = await sha256('abdwallet');
     expect(hash).toHaveLength(64);
     expect(/^[0-9a-f]+$/.test(hash)).toBe(true);
   });

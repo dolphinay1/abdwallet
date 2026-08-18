@@ -136,7 +136,7 @@ export function DashboardHeader({
 
       {/* Balance card */}
       <div className="space-y-3 md:space-y-6">
-        <p className="text-[#8a8f98] russo-one-regular tracking-[0.2em] uppercase text-xs opacity-60">Total Curated Value</p>
+        <p className="text-[#8a8f98] russo-one-regular tracking-[0.2em] uppercase text-xs opacity-60">Selected Chain Balance</p>
         <div className="flex items-end gap-4">
           <h1 className="text-[2.6rem] md:text-[9rem] font-black tracking-tighter leading-none text-[#23262b]">
             {isLoadingTotal ? (

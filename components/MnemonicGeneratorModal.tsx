@@ -66,27 +66,27 @@ export function MnemonicGeneratorModal({ isOpen, onClose }: MnemonicGeneratorMod
 
   // Download .txt backup
   const handleDownload = () => {
-    const timestamp = new Date().toLocaleString('tr-TR');
+    const timestamp = new Date().toLocaleString('en-US');
     const content = `=====================================================
-ABD WALLET - GİZLİ KURTARMA ANAHTARI (SEED PHRASE)
+ABD WALLET - SECRET RECOVERY KEY (SEED PHRASE)
 =====================================================
-Üretim Tarihi: ${timestamp}
-Oluşturulma Türü: Yerel Cihaz İstemcisi (100% Offline)
+Generated: ${timestamp}
+Generation Method: Local Device Client (100% Offline)
 
-12 GİZLİ KURTARMA KELİMESİ:
+12 SECRET RECOVERY WORDS:
 -----------------------------------------------------
 ${words.map((w, i) => `${(i + 1).toString().padStart(2, ' ')}. ${w}`).join('\n')}
 
-TEK SATIR SEED PHRASE:
+SINGLE-LINE SEED PHRASE:
 ${mnemonic}
 
 =====================================================
-⚠️ KRİTİK GÜVENLİK VE YEDEKLEME UYARISI:
-1. Bu 12 kelime, cüzdanınızın tek ve nihai anahtarıdır.
-2. Bu kelimeleri kaybederseniz veya unutursanız fonlarınıza bir daha ASLA erişemezsiniz.
-3. Bu anahtar hiçbir sunucuya gönderilmez; tamamen cihazınızda yerel üretilmiştir.
-4. Dosyayı güvenli bir harici belleğe aktarın veya kağıda yazarak güvenli bir kasada saklayın.
-5. Bu anahtarları kimseyle (ABD Wallet geliştiricileri dahil) KESİNLİKLE paylaşmayın.
+⚠️ CRITICAL SECURITY & BACKUP WARNING:
+1. These 12 words are the sole and final key to your wallet.
+2. If you lose or forget them, you will NEVER access your funds again.
+3. This key is never sent to any server; it was generated entirely on your device.
+4. Move the file to a secure external drive, or write it on paper and store it in a safe.
+5. NEVER share these words with anyone (including ABD Wallet developers).
 =====================================================`;
 
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -143,10 +143,10 @@ ${mnemonic}
             </div>
             <div>
               <h2 className={`uppercase tracking-wider text-slate-800 ${isExt ? 'text-[13px] leading-tight' : 'text-lg sm:text-xl'}`} style={{ fontFamily: "'Russo One', sans-serif" }}>
-                12 Kelimelik Kurtarma Anahtarı
+                12-Word Recovery Phrase
               </h2>
               <p className={`text-slate-500 tracking-wide uppercase mt-0.5 ${isExt ? 'text-[9px]' : 'text-[11px]'}`} style={{ fontFamily: "'Russo One', sans-serif" }}>
-                Offline ve Güvenli Yerel Entropi
+                Offline & Secure Local Entropy
               </p>
             </div>
           </div>
@@ -214,7 +214,7 @@ ${mnemonic}
             }}
           >
             <RotateCw className={`stroke-[2.2] ${isExt ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
-            <span>Yeniden Üret</span>
+            <span>Regenerate</span>
           </button>
 
           <button
@@ -230,12 +230,12 @@ ${mnemonic}
             {copied ? (
               <>
                 <Check className={`text-emerald-600 stroke-[2.5] ${isExt ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
-                <span className="text-emerald-600">Kopyalandı!</span>
+                <span className="text-emerald-600">Copied!</span>
               </>
             ) : (
               <>
                 <Copy className={`stroke-[2.2] ${isExt ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
-                <span>Tümünü Kopyala</span>
+                <span>Copy All</span>
               </>
             )}
           </button>
@@ -253,7 +253,7 @@ ${mnemonic}
         >
           <ShieldAlert className={`flex-shrink-0 mt-0.5 text-rose-600 ${isExt ? 'w-3 h-3' : 'w-4 h-4'}`} />
           <p className="leading-relaxed uppercase tracking-wider">
-            KRİTİK UYARI: Bu 12 kelimeyi kaybederseniz cüzdana bir daha asla giriş yapamazsınız. Lütfen dosyayı indirin.
+            CRITICAL: If you lose these 12 words you can never recover this wallet. Download the backup file.
           </p>
         </div>
 
@@ -272,7 +272,7 @@ ${mnemonic}
             }}
           >
             <Download className={`stroke-[2.2] text-slate-700 ${isExt ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-            <span>CİHAZA İNDİR (.TXT)</span>
+            <span>DOWNLOAD (.TXT)</span>
           </button>
 
           {/* Secondary Action: Direct Unlock with this key */}
@@ -284,7 +284,7 @@ ${mnemonic}
             style={{ fontFamily: "'Russo One', sans-serif" }}
           >
             <ShieldCheck className={`stroke-[2.2] ${isExt ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
-            <span>{isCreating ? 'CÜZDAN KURULUYOR...' : 'BU ANAHTARLA CÜZDANI BAŞLAT'}</span>
+            <span>{isCreating ? 'CREATING WALLET...' : 'CREATE WALLET WITH THIS PHRASE'}</span>
             <ArrowRight className={`ml-1 ${isExt ? 'w-3 h-3' : 'w-3.5 h-3.5'}`} />
           </button>
         </div>

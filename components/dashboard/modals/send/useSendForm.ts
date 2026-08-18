@@ -205,7 +205,7 @@ export function useSendForm({
       return;
     }
     if (amountNum > selectedBal) {
-      setErrMsg('Secili Networkta Bakiye Yetersiz');
+      setErrMsg('Insufficient balance on selected network');
       return;
     }
 

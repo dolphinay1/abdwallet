@@ -28,7 +28,7 @@ test.describe('Security Controls', () => {
     await page.waitForTimeout(2000);
 
     // Logo div is absolute-positioned/hidden — use JS dispatchEvent
-    const logo = page.locator('[data-aethilm="brand"]').first();
+    const logo = page.locator('[data-abd="brand"]').first();
     await page.waitForTimeout(500);
     await logo.dispatchEvent('click');
     await page.waitForTimeout(200);

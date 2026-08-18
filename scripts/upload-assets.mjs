@@ -42,7 +42,7 @@ const bannerSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="
     fill="#ffffff" letter-spacing="8">ABD WALLET</text>
   <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle"
     font-family="system-ui, sans-serif" font-size="14" font-weight="200"
-    fill="#6b7280" letter-spacing="6">by Aethilm</text>
+    fill="#6b7280" letter-spacing="6">abdwallet.app</text>
 </svg>`;
 
 async function upload(filename, content, mimeType) {

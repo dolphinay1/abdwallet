@@ -11,8 +11,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ABD Wallet - Güvenli ve Gizli Kripto Cüzdanı",
-  description: "ABD Wallet — ücretsiz, non-custodial, çok zincirli kripto cüzdanı. Komisyon yok, ücret yok, takip yok. Özel anahtarlarınız asla tarayıcınızdan çıkmaz.",
+  title: "ABD Wallet — Free Anonymous EVM Wallet",
+  description: "Free anonymous temp wallet for all EVM chains. No signup, no KYC, no tracking. Your keys never leave your browser.",
 };
 
 export default function RootLayout({

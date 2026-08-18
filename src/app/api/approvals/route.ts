@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { resolveRpcUrl } from '@/lib/rpc-registry';
 import { ethers } from 'ethers';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,7 @@ const ERC20_ABI = [
 
 /**
  * Fetches ERC-20 token approvals for a given address.
+ * Accepts { address, chainId, tokenList? } — RPC resolved server-side (SSRF-safe).
  */
 export async function POST(req: Request) {
   const limit = checkRateLimit(req, 60, 60_000);
@@ -19,10 +21,15 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { address, rpcUrl, tokenList = [] } = body;
+    const { address, chainId, tokenList = [] } = body;
 
-    if (!address || !rpcUrl) {
-      return NextResponse.json({ error: 'address and rpcUrl are required' }, { status: 400 });
+    if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address) || chainId == null) {
+      return NextResponse.json({ error: 'address and chainId are required' }, { status: 400 });
+    }
+
+    const rpcUrl = await resolveRpcUrl(Number(chainId));
+    if (!rpcUrl) {
+      return NextResponse.json({ error: 'Unsupported chain / missing RPC' }, { status: 400 });
     }
 
     const provider = new ethers.JsonRpcProvider(rpcUrl);

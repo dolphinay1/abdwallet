@@ -26,22 +26,22 @@ interface TokenEntry {
 
 /**
  * Fetches native + ERC-20 token balances for a given address on an EVM chain.
- * Accepts { address, chainId } (RPC resolved server-side) or the legacy
- * { address, rpcUrl, tokens } format. Returns TokenBalance[] directly.
+ * Accepts { address, chainId, tokens? } — RPC resolved server-side (SSRF-safe).
+ * Returns TokenBalance[] directly.
  */
 export async function POST(req: Request) {
   const limit = checkRateLimit(req, 120, 60_000);
   if (!limit.allowed) return limit.response!;
   try {
     const body = await req.json();
-    const { address, chainId, rpcUrl: explicitRpc, tokens = [] } = body;
+    const { address, chainId, tokens = [] } = body;
 
-    if (!address) {
-      return NextResponse.json({ error: 'address is required' }, { status: 400 });
+    if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      return NextResponse.json({ error: 'address is required (0x + 40 hex chars)' }, { status: 400 });
     }
 
     const chain = chainId != null ? getChainById(Number(chainId)) : undefined;
-    const rpcUrl = explicitRpc || (chainId != null ? await resolveRpcUrl(Number(chainId)) : null);
+    const rpcUrl = chainId != null ? await resolveRpcUrl(Number(chainId)) : null;
     if (!rpcUrl) {
       return NextResponse.json({ error: 'Unsupported chain / missing RPC' }, { status: 400 });
     }

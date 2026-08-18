@@ -31,8 +31,8 @@ const EXPLORER_API: Record<number, string> = {
 
 /**
  * Fetches transaction history from Etherscan-compatible explorers.
- * Accepts { address, chainId } (explorer resolved server-side) or the legacy
- * { address, apiUrl, apiKey } format. Returns TxRecord[] directly.
+ * Accepts { address, chainId } only — explorer resolved server-side (SSRF-safe).
+ * Returns TxRecord[] directly.
  */
 export async function POST(req: Request) {
   const limit = checkRateLimit(req, 60, 60_000);
@@ -40,18 +40,18 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { address, chainId, apiUrl, apiKey } = body;
+    const { address, chainId } = body;
 
-    if (!address) {
-      return NextResponse.json({ error: 'address is required' }, { status: 400 });
+    if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      return NextResponse.json({ error: 'address is required (0x + 40 hex chars)' }, { status: 400 });
     }
 
     const chain = chainId != null ? getChainById(Number(chainId)) : undefined;
-    const explorerUrl = apiUrl || (chainId != null ? EXPLORER_API[Number(chainId)] : null);
+    const explorerUrl = chainId != null ? EXPLORER_API[Number(chainId)] : null;
     if (!explorerUrl) {
-      return NextResponse.json([]); // no explorer for this chain — empty history
+      return NextResponse.json([]);
     }
-    const key = apiKey || process.env.ETHERSCAN_API_KEY || '';
+    const key = process.env.ETHERSCAN_API_KEY || '';
 
     const url = `${explorerUrl}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=20&sort=desc&apikey=${key}`;
 

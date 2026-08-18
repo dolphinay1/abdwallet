@@ -7,7 +7,7 @@
 - Private keys are never transmitted to any server
 - All encryption happens locally (AES-256 via CryptoJS)
 - Automatic key rotation every 60 seconds
-- Wipes all data on tab close (unless persistence enabled)
+- Wipes all data on tab close (unless the wallet was explicitly saved to Saved Vaults)
 
 ## URL
 

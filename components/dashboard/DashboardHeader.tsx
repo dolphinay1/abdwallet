@@ -83,7 +83,7 @@ export function DashboardHeader({
             {upperEn(frozenMode === 'PERSISTENT' ? 'Persistent Session' : 'New Session')}
           </h2>
           <p className="text-[#8a8f98] russo-one-regular tracking-[0.15em] uppercase text-[0.6rem] opacity-80">
-            {frozenMode === 'PERSISTENT' ? 'Encrypted · Device-Bound' : 'Volatile wallet — RAM only'}
+            {frozenMode === 'PERSISTENT' ? 'Encrypted · Saved in this browser' : 'Ephemeral — nothing stored unless you save it'}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0 mt-1">

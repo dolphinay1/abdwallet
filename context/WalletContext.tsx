@@ -33,7 +33,7 @@ import {
   hasPersistedVault,
   loadPersistedVault,
 } from '@/lib/persistent-vault';
-import { persistWallet as historyPersistWallet, markWalletSaved, storeVaultBlob, loadSavedMnemonic, addToHistory, getHistory, makeSnapshot } from '@/lib/wallet-history';
+import { persistWallet as historyPersistWallet, loadSavedMnemonic, getHistory, clearUnsavedBlobs } from '@/lib/wallet-history';
 import { saveSession, loadSession, clearSession, getTabKey } from '@/lib/session-lock';
 import { getPrivateKeyAtIndex } from '@/lib/accounts';
 import { clearWalletKit } from '@/lib/walletconnect';
@@ -114,7 +114,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const mnemonicRef = useRef<string | null>(null);
   const vaultKeyRef = useRef<string | null>(null);
 
-  const wipeABDWallet = useCallback((opts?: { keepSession?: boolean }) => {
+  const wipeABDWallet = useCallback((opts?: { keepSession?: boolean; destroyHistory?: boolean }) => {
     if (scatteredKeyRef.current) {
       wipeScatteredStore(scatteredKeyRef.current);
       scatteredKeyRef.current = null;
@@ -129,6 +129,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     stopIntegrityWatch();
     void clearWalletKit();
     if (!opts?.keepSession) clearSession();
+    clearUnsavedBlobs();
+    try { localStorage.removeItem('__gw_non_evm_warned__'); } catch {}
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     if (sessionTimer.current) clearTimeout(sessionTimer.current);
     _updateDecoys();
@@ -160,7 +162,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           _vaultCombinedKey   = newKey;
           vaultKeyRef.current = newKey;
           mnemonicRef.current = rawMnemonic;
-          try { saveSession(encryptData(rawMnemonic, getTabKey())); } catch {}
           return {
             ...prev,
             _v_enc: encryptData(rawMnemonic, newKey),
@@ -189,8 +190,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       mnemonicRef.current = mnemonic;
       scatteredKeyRef.current = scatterStore(privateKey);
 
-      try { saveSession(encryptData(mnemonic, getTabKey())); } catch {}
-
       setState(prev => ({
         ...prev,
         _u_ap: address,
@@ -198,24 +197,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         _k_enc: encryptData(privateKey, sessionKey),
         isUnlocked: true,
         sessionStartedAt: Date.now(),
-        isSessionLocked: true,
+        isSessionLocked: false,
       }));
 
       startHeapNoise();
       startKeyRotation(makeRotationHandler());
       resetInactivityTimer();
       sessionTimer.current = setTimeout(() => wipeABDWallet(), 30 * 60 * 1000);
-
-      // Store mnemonic blob locally (isSaved stays false — user must manually save to Saved Vaults)
-      try {
-        const existing = getHistory().find(s => s.address === address);
-        const snapId = existing?.id ?? (() => {
-          const snap = makeSnapshot(address, 'EPHEMERAL');
-          addToHistory(snap);
-          return snap.id;
-        })();
-        await storeVaultBlob(snapId, mnemonic);
-      } catch {}
     } catch {
       console.error('Vault creation failed');
     }
@@ -233,8 +221,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       mnemonicRef.current = mnemonic.trim();
       scatteredKeyRef.current = scatterStore(privateKey);
 
-      try { saveSession(encryptData(mnemonic.trim(), getTabKey())); } catch {}
-
       setState(prev => ({
         ...prev,
         _u_ap: address,
@@ -242,26 +228,13 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         _k_enc: encryptData(privateKey, sessionKey),
         isUnlocked: true,
         sessionStartedAt: Date.now(),
-        isSessionLocked: true,
+        isSessionLocked: false,
       }));
 
       startHeapNoise();
       startKeyRotation(makeRotationHandler());
       resetInactivityTimer();
       sessionTimer.current = setTimeout(() => wipeABDWallet(), 30 * 60 * 1000);
-
-      // Store mnemonic blob locally (isSaved stays false — user must manually save to Saved Vaults)
-      try {
-        const addr = wallet.address;
-        const mn = mnemonic.trim();
-        const existing = getHistory().find(s => s.address === addr);
-        const snapId = existing?.id ?? (() => {
-          const snap = makeSnapshot(addr, 'EPHEMERAL');
-          addToHistory(snap);
-          return snap.id;
-        })();
-        await storeVaultBlob(snapId, mn);
-      } catch {}
     } catch {
       throw new Error('Invalid mnemonic');
     }
@@ -401,19 +374,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const persistCurrentWallet = useCallback(async (id: string) => {
-    // Each wallet already has its own vault blob stored when it was created/imported.
-    // We just need to mark it as saved — DO NOT overwrite the blob with the active
-    // wallet's mnemonic, which would corrupt non-active history entries.
-    try {
-      await loadSavedMnemonic(id); // verify blob exists
-      markWalletSaved(id);
-    } catch {
-      // Blob missing (old session without auto-store) — fall back to active mnemonic
-      const mnemonic = await getMnemonicForExport();
-      if (!mnemonic || mnemonic.trim().split(/\s+/).length < 12) throw new Error('No active wallet');
-      await historyPersistWallet(id, mnemonic);
+    // Persistence is opt-in: only the currently active wallet can be saved.
+    // Writing the active mnemonic into a different history entry would corrupt it,
+    // and non-active ephemeral wallets no longer have recoverable key material.
+    const snap = getHistory().find(s => s.id === id);
+    if (!snap) throw new Error('Wallet not found');
+    const active = state._u_ap;
+    if (!active || snap.address.toLowerCase() !== active.toLowerCase()) {
+      throw new Error('Only the active wallet can be saved');
     }
-  }, [getMnemonicForExport]);
+    const mnemonic = await getMnemonicForExport();
+    if (!mnemonic || mnemonic.trim().split(/\s+/).length < 12) throw new Error('No active wallet');
+    await historyPersistWallet(id, mnemonic);
+  }, [getMnemonicForExport, state._u_ap]);
 
   const switchToSavedWallet = useCallback(async (id: string) => {
     const mnemonic = await loadSavedMnemonic(id);

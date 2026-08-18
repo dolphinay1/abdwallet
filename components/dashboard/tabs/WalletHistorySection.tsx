@@ -92,8 +92,8 @@ export function WalletHistorySection({
                   </button>
                 </div>
 
-                {/* Action Button: Save (Dynamic Position: Top Left in Ext, Bottom Left in Web) */}
-                {!snap.isSaved && (
+                {/* Action Button: Save (only the active wallet has recoverable key material) */}
+                {isCurrent && !snap.isSaved && (
                   <div 
                     style={{ 
                       position: 'absolute', 

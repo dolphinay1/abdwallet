@@ -23,8 +23,7 @@ Designed for: throwaway addresses, anonymous DeFi interactions, dApp testing, ai
 - **Multi-chain** — Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom and all EVM networks
 - **WalletConnect v2** — connect to any dApp (Uniswap, Aave, OpenSea, etc.)
 - **Send & receive** — ETH and all ERC-20 tokens with live fee estimation
-- **Persistent vault** — optionally encrypt and save your wallet with a passphrase + PNG key file
-- **Session restore** — wallet survives page refresh when session lock is enabled
+- **Optional Saved Vaults** — mark a wallet as saved to keep it encrypted (AES-GCM, session-derived key) in this browser; delete anytime
 - **QR code scanner** — scan recipient addresses with your camera
 - **Mobile friendly** — works on iOS Safari and Android Chrome, no app needed
 - **Free** — no fees, no ads, no subscription
@@ -35,8 +34,8 @@ Designed for: throwaway addresses, anonymous DeFi interactions, dApp testing, ai
 
 1. Open [abdwallet.app](https://abdwallet.app) — wallet is generated instantly
 2. Use it to receive or send crypto, connect to dApps via WalletConnect
-3. Close the tab — everything is wiped from memory
-4. **Optional:** click *Persist Current Session* → set a passphrase → a PNG key file is downloaded. Drop the PNG + passphrase next time to restore your wallet
+3. Close the tab — everything is wiped from memory (unless you explicitly saved the wallet to Saved Vaults)
+4. **Optional:** click the save icon on a wallet in Wallet History → it's stored encrypted in this browser only. Switch back to it anytime from history
 
 ---
 
@@ -48,7 +47,7 @@ Designed for: throwaway addresses, anonymous DeFi interactions, dApp testing, ai
 - Memory vault uses scattered shards to resist heap inspection
 - No analytics, no cookies, no fingerprinting
 - Integrity watchers wipe the vault on tampering detection
-- `beforeunload` handler clears all in-memory state on tab close
+- In-memory key material is cleared on tab close; nothing is written to disk unless you save a vault
 
 ---
 
@@ -58,7 +57,6 @@ Designed for: throwaway addresses, anonymous DeFi interactions, dApp testing, ai
 - [ethers.js v6](https://ethers.org)
 - [Reown WalletKit](https://reown.com) (WalletConnect v2)
 - [CryptoJS](https://github.com/brix/crypto-js) — AES-256 encryption
-- [Supabase](https://supabase.com) — asset storage + kill-switch
 - [jsQR](https://github.com/cozmo/jsQR) — QR code scanning fallback
 - TypeScript · Tailwind CSS · Framer Motion
 
@@ -76,8 +74,6 @@ Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_WC_PROJECT_ID=your_walletconnect_project_id
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXT_PUBLIC_EXTERNAL_LINK=https://abdwallet.app
 ```
 

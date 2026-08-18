@@ -117,6 +117,9 @@ export function addToHistory(snapshot: Omit<WalletSnapshot, 'createdAt'>): Walle
     createdAt: Date.now(),
   };
   const updated = [full, ...filtered].slice(0, MAX_HISTORY);
+  filtered
+    .filter(s => !s.isSaved && !updated.some(u => u.id === s.id))
+    .forEach(s => deleteSavedVault(s.id));
   save(updated);
   return updated;
 }
@@ -152,6 +155,11 @@ export function clearHistory(): void {
   const history = load();
   history.forEach(s => deleteSavedVault(s.id));
   try { localStorage.removeItem(HISTORY_KEY); } catch {}
+}
+
+export function clearUnsavedBlobs(): void {
+  const history = load();
+  history.forEach(s => { if (!s.isSaved) deleteSavedVault(s.id); });
 }
 
 export function findSnapshot(id: string): WalletSnapshot | undefined {

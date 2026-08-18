@@ -16,7 +16,6 @@ import {
   removeFromHistory,
   deleteSavedVault,
   updateSnapshotChain,
-  storeVaultBlob,
   type WalletSnapshot,
 } from '@/lib/wallet-history';
 import { loadCustomChains, type CustomChain } from '@/lib/custom-chains';
@@ -25,7 +24,6 @@ import { loadCustomAPIs, type CustomAPI } from '@/lib/custom-apis';
 import { ephemeralSign } from '@/lib/signer';
 import { ledgerSign, type LedgerEntry } from '@/lib/ledger';
 import { getProvider } from '@/lib/provider';
-import { clearShadow } from '@/lib/session-lock';
 
 import { NON_EVM_META, type Tab } from '@/components/dashboard/types';
 import { useExtensionBridge } from '@/hooks/useExtensionBridge';
@@ -144,7 +142,7 @@ export function useDashboardState() {
   const displayAddress = selectedNonEvm && nonEvmAddr ? nonEvmAddr : address;
   const shortAddr = displayAddress ? `${displayAddress.slice(0, 6)}...${displayAddress.slice(-4)}` : '—';
 
-  // History tracking
+  // History tracking — metadata only; vault blobs are written exclusively via the Save action
   useEffect(() => {
     if (!wallet.isUnlocked || !wallet.activeAddress) return;
     const history = getHistory();
@@ -160,17 +158,11 @@ export function useDashboardState() {
     if (existing) {
       setCurrentHistoryId(existing.id);
       setWalletHistory(history);
-      wallet.getMnemonicForExport().then((m) => {
-        if (m) storeVaultBlob(existing.id, m);
-      }).catch(() => {});
     } else {
       const snap = makeSnapshot(wallet.activeAddress, wallet.mode as 'EPHEMERAL' | 'PERSISTENT', chainInfo);
       addToHistory(snap);
       setCurrentHistoryId(snap.id);
       setWalletHistory(getHistory());
-      wallet.getMnemonicForExport().then((m) => {
-        if (m) storeVaultBlob(snap.id, m);
-      }).catch(() => {});
     }
   }, [wallet.isUnlocked, wallet.activeAddress, selectedChain, wallet]);
 
@@ -398,14 +390,12 @@ export function useDashboardState() {
     setShowWipeWarning(false);
     wallet.disableSessionLock();
     wallet.wipeABDWallet();
-    clearShadow();
   };
 
   const handleConfirmNewWallet = () => {
     setShowNewWalletWarning(false);
     wallet.disableSessionLock();
     wallet.wipeABDWallet();
-    clearShadow();
     setTimeout(() => wallet.createABDWallet(), 80);
   };
 

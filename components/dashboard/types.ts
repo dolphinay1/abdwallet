@@ -15,8 +15,6 @@ export interface NonEvmMeta {
   logoUrl?: string;
 }
 
-export const KNOWN_SPENDERS_COUNT = 7;
-
 export const NON_EVM_META: Record<string, NonEvmMeta> = {
   BTC: {
     coin: 'BTC',

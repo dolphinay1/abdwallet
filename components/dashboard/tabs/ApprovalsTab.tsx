@@ -3,7 +3,7 @@
 import React from 'react';
 import type { Chain } from '@/lib/chains';
 import type { TokenApproval } from '@/lib/approvals';
-import { KNOWN_SPENDERS_COUNT } from '../types';
+import { getSpenders } from '@/lib/approval-registry';
 
 export function ApprovalsTab({
   selectedChain,
@@ -54,7 +54,7 @@ export function ApprovalsTab({
         </span>
         <p className="text-[#8a8f98] font-black text-xs uppercase tracking-widest">No active approvals found</p>
         <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.25)', textAlign: 'center' }}>
-          Scanned {KNOWN_SPENDERS_COUNT} common DEX/bridge spenders on {selectedChain.name}
+          Scanned {getSpenders(selectedChain.id).length} common DEX/bridge spenders on {selectedChain.name}
         </p>
       </div>
     );

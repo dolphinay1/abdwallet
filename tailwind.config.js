@@ -29,8 +29,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-space-grotesk)', 'Inter', 'sans-serif'],
-        display: ['var(--font-space-grotesk)', 'Inter', 'sans-serif'],
+        sans: ['var(--font-roboto)', "'Helvetica Neue'", 'Helvetica', 'Arial', 'sans-serif'],
+        display: ['var(--font-satoshi)', "'Helvetica Neue'", 'Helvetica', 'sans-serif'],
       },
       boxShadow: {
         'glow': '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',

@@ -118,7 +118,7 @@ ${mnemonic}
       <div 
         className={`w-full max-w-[560px] relative select-none animate-in zoom-in-95 duration-200 ${isExt ? 'rounded-[28px] p-5' : 'rounded-[32px] sm:rounded-[36px] p-6 sm:p-8'}`}
         style={{
-          fontFamily: "'Russo One', sans-serif",
+          fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
           backgroundColor: '#EFF2F7',
           color: '#1E232D',
           boxShadow: `
@@ -142,10 +142,10 @@ ${mnemonic}
               <KeyRound className={`text-slate-700 stroke-[2.2] ${isExt ? 'w-4 h-4' : 'w-5 h-5'}`} />
             </div>
             <div>
-              <h2 className={`uppercase tracking-wider text-slate-800 ${isExt ? 'text-[13px] leading-tight' : 'text-lg sm:text-xl'}`} style={{ fontFamily: "'Russo One', sans-serif" }}>
+              <h2 className={`uppercase tracking-wider text-slate-800 ${isExt ? 'text-[13px] leading-tight' : 'text-lg sm:text-xl'}`} style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}>
                 12-Word Recovery Phrase
               </h2>
-              <p className={`text-slate-500 tracking-wide uppercase mt-0.5 ${isExt ? 'text-[9px]' : 'text-[11px]'}`} style={{ fontFamily: "'Russo One', sans-serif" }}>
+              <p className={`text-slate-500 tracking-wide uppercase mt-0.5 ${isExt ? 'text-[9px]' : 'text-[11px]'}`} style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}>
                 Offline & Secure Local Entropy
               </p>
             </div>
@@ -186,7 +186,7 @@ ${mnemonic}
                 >
                   <span 
                     className={`text-slate-400 ${isExt ? 'text-[9px]' : 'text-[10px]'}`}
-                    style={{ fontFamily: "'Russo One', sans-serif" }}
+                    style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}
                   >
                     #{(index + 1).toString().padStart(2, '0')}
                   </span>
@@ -208,7 +208,7 @@ ${mnemonic}
             onClick={generateNewMnemonic}
             className={`flex items-center justify-center flex-1 uppercase tracking-wider text-slate-700 hover:text-slate-900 transition-all cursor-pointer ${isExt ? 'gap-1.5 px-3 py-2 rounded-full text-[9px]' : 'gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-full text-[11px] sm:text-xs'}`}
             style={{
-              fontFamily: "'Russo One', sans-serif",
+              fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
               backgroundColor: '#EFF2F7',
               boxShadow: '4px 4px 8px #D1D8E4, -4px -4px 8px #FFFFFF'
             }}
@@ -222,7 +222,7 @@ ${mnemonic}
             onClick={handleCopy}
             className={`flex items-center justify-center flex-1 uppercase tracking-wider text-slate-700 hover:text-slate-900 transition-all cursor-pointer ${isExt ? 'gap-1.5 px-3 py-2 rounded-full text-[9px]' : 'gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-full text-[11px] sm:text-xs'}`}
             style={{
-              fontFamily: "'Russo One', sans-serif",
+              fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
               backgroundColor: '#EFF2F7',
               boxShadow: '4px 4px 8px #D1D8E4, -4px -4px 8px #FFFFFF'
             }}
@@ -245,7 +245,7 @@ ${mnemonic}
         <div 
           className={`flex items-start leading-relaxed ${isExt ? 'p-2.5 rounded-xl mb-4 gap-2 text-[9px]' : 'p-3 sm:p-4 rounded-2xl mb-5 gap-3 text-[11px] sm:text-xs'}`}
           style={{
-            fontFamily: "'Russo One', sans-serif",
+            fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
             backgroundColor: '#FEF3F2',
             border: '1px solid #FECDCA',
             color: '#B42318'
@@ -265,7 +265,7 @@ ${mnemonic}
             onClick={handleDownload}
             className={`w-full rounded-full uppercase tracking-widest flex items-center justify-center cursor-pointer text-slate-900 hover:opacity-95 active:scale-[0.99] transition-all ${isExt ? 'py-2.5 px-4 text-[10px] gap-2' : 'py-3.5 px-6 text-xs gap-2.5'}`}
             style={{
-              fontFamily: "'Russo One', sans-serif",
+              fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
               backgroundColor: '#EFF2F7',
               boxShadow: '6px 6px 12px #CAD2DF, -6px -6px 12px #FFFFFF',
               border: '1px solid rgba(255, 255, 255, 0.9)'
@@ -281,7 +281,7 @@ ${mnemonic}
             onClick={handleUseAndCreate}
             disabled={isCreating}
             className={`w-full rounded-full uppercase tracking-widest flex items-center justify-center cursor-pointer text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] transition-all shadow-lg shadow-slate-900/20 ${isExt ? 'py-2.5 px-4 text-[10px] gap-2' : 'py-3.5 px-6 text-xs gap-2.5'}`}
-            style={{ fontFamily: "'Russo One', sans-serif" }}
+            style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}
           >
             <ShieldCheck className={`stroke-[2.2] ${isExt ? 'w-3.5 h-3.5' : 'w-4 h-4'}`} />
             <span>{isCreating ? 'CREATING WALLET...' : 'CREATE WALLET WITH THIS PHRASE'}</span>

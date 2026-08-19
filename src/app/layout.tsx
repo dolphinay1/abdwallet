@@ -1,13 +1,27 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Roboto } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import { HeroUIProvider } from "@heroui/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const spaceGrotesk = Space_Grotesk({
+const roboto = Roboto({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  weight: ["400", "500", "700", "900"],
+  display: "swap",
+  variable: "--font-roboto",
+});
+
+const satoshi = localFont({
+  src: [
+    { path: "./fonts/satoshi-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/satoshi-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/satoshi-700.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/satoshi-900.woff2", weight: "900", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-satoshi",
 });
 
 export const metadata: Metadata = {
@@ -26,15 +40,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap"
           rel="stylesheet"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
         />
       </head>
-      <body className={`${spaceGrotesk.variable} font-sans bg-abd-black text-abd-white min-h-screen`}>
+      <body className={`${roboto.variable} ${satoshi.variable} font-sans bg-abd-black text-abd-white min-h-screen`}>
         <HeroUIProvider>
           <WalletProvider>
             <ErrorBoundary>

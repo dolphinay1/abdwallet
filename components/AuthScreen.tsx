@@ -86,7 +86,7 @@ export function AuthScreen() {
               onClick={handleCreate}
               className="w-full py-4 px-6 rounded-full font-bold text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-white shadow-lg"
               style={{
-                fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
                 backgroundColor: '#181B22',
                 backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
                 boxShadow: '6px 6px 16px rgba(166, 177, 198, 0.6), -4px -4px 10px #FFFFFF, inset 0 1px 1px rgba(255, 255, 255, 0.25)',
@@ -117,7 +117,7 @@ export function AuthScreen() {
               }}
               className="w-full py-4 px-6 rounded-full font-bold text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-slate-800"
               style={{
-                fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
                 backgroundColor: '#FFFFFF',
                 backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EFF2F7 100%)',
                 boxShadow: '6px 6px 16px #CAD2DF, -6px -6px 16px #FFFFFF, inset 1px 1px 1px #FFFFFF',
@@ -134,7 +134,7 @@ export function AuthScreen() {
                 type="button"
                 onClick={() => setIsModalOpen(true)}
                 className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-2 py-2 px-4 rounded-full bg-slate-200/50 hover:bg-slate-200 cursor-pointer"
-                style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
+                style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}
               >
                 <Dices className="w-3.5 h-3.5 text-slate-600" />
                 <span>Generate 12-Word Recovery Phrase</span>
@@ -177,7 +177,7 @@ export function AuthScreen() {
                 }}
                 className="flex-1 font-bold tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-slate-600"
                 style={{
-                  fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                  fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
                   backgroundColor: '#EFF2F7',
                   boxShadow: '4px 4px 10px #CAD2DF, -4px -4px 10px #FFFFFF',
                   border: '1px solid rgba(255,255,255,0.85)'
@@ -191,7 +191,7 @@ export function AuthScreen() {
                 onClick={handleImport}
                 className="flex-[2] font-bold tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-white flex items-center justify-center gap-2"
                 style={{
-                  fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                  fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
                   backgroundColor: '#181B22',
                   backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
                   boxShadow: '6px 6px 14px rgba(166, 177, 198, 0.6), -3px -3px 8px #FFFFFF',
@@ -213,7 +213,7 @@ export function AuthScreen() {
 
         {/* Footer Security Badge */}
         <div className="mt-8 pt-6 border-t border-slate-200/60 w-full flex justify-center text-center">
-          <p className="text-[8.5px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 leading-relaxed" style={{ fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}>
+          <p className="text-[8.5px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 leading-relaxed" style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}>
             100% Non-Custodial & Client-Side • Zero Logs • Keys never leave your device
           </p>
         </div>

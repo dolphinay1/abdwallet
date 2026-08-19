@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForWallet, attachConsoleLogger, SEL } from './helpers';
+import { waitForWallet, attachConsoleLogger, enableAdvancedMode, SEL } from './helpers';
 
 test.describe('Advanced Mode', () => {
 
@@ -48,28 +48,19 @@ test.describe('Advanced Mode', () => {
     await page.waitForLoadState('networkidle');
     await waitForWallet(page);
 
-    const advBtn = page.getByRole('button', { name: /settings.*Advanced/i }).first();
-    await advBtn.click();
-    await page.waitForTimeout(600);
-
-    await page.locator(SEL.addChainBtn).click();
-    await page.waitForTimeout(400);
+    await enableAdvancedMode(page);
+    await page.locator(SEL.addChainBtn).first().click();
+    await page.waitForTimeout(500);
     await page.screenshot({ path: 'test-results/05-chain-modal.png', fullPage: true });
 
-    // Fill form by placeholder
-    const fill = async (placeholder: string, value: string) => {
-      const inp = page.locator(`input[placeholder*="${placeholder}" i]`).first();
-      if (await inp.isVisible({ timeout: 2000 }).catch(() => false)) await inp.fill(value);
-    };
-    await fill('chain id', '137');
-    await fill('name', 'Polygon');
-    await fill('symbol', 'MATIC');
-    await fill('rpc', 'https://polygon-rpc.com');
-    await fill('explorer', 'https://polygonscan.com');
+    const byPlaceholder = (ph: string) => page.locator(`input[placeholder*="${ph}" i]`);
+    await byPlaceholder('e.g. 2020').first().fill('137');
+    await byPlaceholder('e.g. Ronin').first().fill('Polygon');
+    await byPlaceholder('e.g. RON').first().fill('MATIC');
+    await byPlaceholder('https://').first().fill('https://polygon-rpc.com');
+    await byPlaceholder('https://').nth(1).fill('https://polygonscan.com');
 
-    // Submit
-    const submitBtn = page.locator('button:has-text("Save"), button:has-text("Add"), button[type="submit"]').last();
-    await submitBtn.click().catch(() => {});
+    await page.locator(SEL.saveChainBtn).first().click();
     await page.waitForTimeout(1500);
 
     const chains = await page.evaluate(() => {

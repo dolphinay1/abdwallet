@@ -3,7 +3,7 @@
  * Target: https://abdwallet.app (live deployment)
  */
 import { test, expect, Page } from '@playwright/test';
-import { waitForWallet, attachConsoleLogger } from './helpers';
+import { waitForWallet, attachConsoleLogger, enableAdvancedMode } from './helpers';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -351,6 +351,7 @@ test.describe('10. NFTs', () => {
 
   test('10-a: nfts tab empty state or list', async ({ page }) => {
     await boot(page, '[10a]');
+    await enableAdvancedMode(page);
     await page.locator('button').filter({ hasText: /^NFTs$/i }).first().click();
     await page.waitForTimeout(2000);
     await ss(page, '08-10a-nfts');
@@ -373,6 +374,7 @@ test.describe('10. NFTs', () => {
       });
     });
     await boot(page, '[10b]');
+    await enableAdvancedMode(page);
     await page.locator('button').filter({ hasText: /^NFTs$/i }).first().click();
     await page.waitForTimeout(2000);
     await ss(page, '08-10b-nft-floor');
@@ -415,12 +417,14 @@ test.describe('11. Approvals', () => {
     await page.route('**/api/approvals**', async route => {
       await route.fulfill({
         status: 200, contentType: 'application/json',
-        body: JSON.stringify([{
-          token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          symbol: 'USDC', decimals: 6,
-          spender: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
-          spenderName: 'Permit2', allowance: 'Unlimited', unlimited: true,
-        }]),
+        body: JSON.stringify({
+          approvals: [{
+            token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            tokenSymbol: 'USDC', decimals: 6,
+            spender: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+            spenderName: 'Permit2', allowance: 'Unlimited', isUnlimited: true,
+          }],
+        }),
       });
     });
     await boot(page, '[11c]');
@@ -543,12 +547,14 @@ test.describe('14. Ledger', () => {
 
   test('14-a: ledger button in action grid', async ({ page }) => {
     await boot(page, '[14a]');
+    await enableAdvancedMode(page);
     await expect(page.locator('button').filter({ hasText: /LEDGER/i }).first()).toBeVisible({ timeout: 8000 });
     console.log('[ok] Ledger button visible');
   });
 
   test('14-b: ledger modal opens with connect instructions', async ({ page }) => {
     await boot(page, '[14b]');
+    await enableAdvancedMode(page);
     await page.locator('button').filter({ hasText: /LEDGER/i }).first().click();
     await page.waitForTimeout(700);
     await ss(page, '08-14b-ledger');
@@ -648,6 +654,7 @@ test.describe('19. Lightning Tab', () => {
       Object.defineProperty(window, 'webln', { get: () => undefined, configurable: true });
     });
     await boot(page, '[19a]');
+    await enableAdvancedMode(page);
     await page.locator('button').filter({ hasText: /Lightning/i }).first().click();
     await page.waitForTimeout(600);
     await ss(page, '08-19a-lightning');
@@ -702,8 +709,8 @@ test.describe('21. Mobile', () => {
 // ─── 22. HTTP SECURITY HEADERS ───────────────────────────────────────────────
 test.describe('22. Security Headers', () => {
 
-  test('22-a: critical security headers present', async ({ request }) => {
-    const res = await request.get('https://abdwallet.app/');
+  test('22-a: critical security headers present', async ({ request, baseURL }) => {
+    const res = await request.get(baseURL ?? 'http://localhost:3000');
     const h = res.headers();
     const checks: [string, RegExp, string][] = [
       ['x-frame-options', /DENY/i, 'X-Frame-Options: DENY'],

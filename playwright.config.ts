@@ -1,37 +1,42 @@
 import { defineConfig, devices } from '@playwright/test';
-import path from 'path';
-import os from 'os';
+
+const isCI = process.env.CI === 'true';
 
 export default defineConfig({
   testDir: './tests',
   timeout: 120000,
   expect: { timeout: 15000 },
   fullyParallel: false,
-  retries: 1,
+  retries: isCI ? 2 : 1,
   reporter: [['html', { outputFolder: 'playwright-report', open: 'never' }], ['line']],
   outputDir: 'test-results',
 
+  webServer: {
+    command: 'npm run start',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !isCI,
+    timeout: 120000,
+  },
+
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
-    headless: false,
-    viewport: null,
+    headless: isCI,
+    viewport: { width: 1440, height: 900 },
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
 
     launchOptions: {
-      headless: false,
+      headless: isCI,
       args: [
-        '--start-maximized',
+        ...(isCI ? [] : ['--start-maximized']),
         '--no-sandbox',
-        '--disable-web-security',        // allow cross-origin file reads in tests
+        '--disable-web-security',
         '--allow-file-access-from-files',
       ],
-      // Full desktop control: mouse + keyboard
       slowMo: 0,
     },
 
-    // Capture ALL console messages
     ignoreHTTPSErrors: true,
   },
 

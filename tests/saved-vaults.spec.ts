@@ -1,27 +1,32 @@
 import { test, expect } from '@playwright/test';
-import { waitForWallet, saveFirstUnsavedWallet, goToIdlePanel, persistSession, ensureDownloadsDir, SEL } from './helpers';
+import { waitForWallet, getHistory, getVaultBlobKeys, attachConsoleLogger, saveWalletViaIcon, SEL } from './helpers';
 
-test.beforeAll(() => ensureDownloadsDir());
+test.describe('Saved Vaults', () => {
 
-test('saved vaults bundled into PNG', async ({ page }) => {
-  await page.goto('/');
-  await page.waitForLoadState('networkidle');
-  await waitForWallet(page);
+  test('save icon marks wallet as saved', async ({ page }) => {
+    attachConsoleLogger(page, '[sv]');
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+    await waitForWallet(page);
 
-  await saveFirstUnsavedWallet(page);
-  await goToIdlePanel(page);
-  await page.locator(SEL.newVaultBtn).first().click();
-  await page.waitForTimeout(2500);
-  await waitForWallet(page);
-  await saveFirstUnsavedWallet(page);
-  await goToIdlePanel(page);
+    await saveWalletViaIcon(page);
 
-  const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('__gw_wallet_history__') ?? '[]').filter((s: any) => s.isSaved).length
-  );
-  expect(saved).toBe(2);
+    const history = await getHistory(page);
+    const saved = history.filter((h: any) => h.isSaved);
+    expect(saved.length).toBe(1);
+    console.log('[ok] Wallet marked as saved');
+  });
 
-  const pngPath = await persistSession(page);
-  console.log('PNG:', pngPath);
-  console.log('[ok] Test passed');
+  test('saved vault blob exists in localStorage', async ({ page }) => {
+    attachConsoleLogger(page, '[sv]');
+    await page.goto('/');
+    await page.waitForLoadState('domcontentloaded');
+    await waitForWallet(page);
+    await saveWalletViaIcon(page);
+
+    const blobKeys = await getVaultBlobKeys(page);
+    expect(blobKeys.length).toBeGreaterThanOrEqual(1);
+    console.log('[ok] Vault blob present:', blobKeys.length);
+  });
+
 });

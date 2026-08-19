@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { waitForWallet, attachConsoleLogger } from './helpers';
+import { waitForWallet, attachConsoleLogger, enableAdvancedMode } from './helpers';
 
 test.describe('Ledger + Security Scan', () => {
 
@@ -11,6 +11,7 @@ test.describe('Ledger + Security Scan', () => {
     await page.waitForLoadState('networkidle');
     await waitForWallet(page);
     await page.waitForTimeout(1500);
+    await enableAdvancedMode(page);
 
     // Action grid button labelled "LEDGER" or "Ledger"
     const ledgerBtn = page.locator('button').filter({ hasText: /^usb\s*LEDGER$/i })
@@ -25,6 +26,7 @@ test.describe('Ledger + Security Scan', () => {
     await page.waitForLoadState('networkidle');
     await waitForWallet(page);
     await page.waitForTimeout(1500);
+    await enableAdvancedMode(page);
 
     const ledgerBtn = page.locator('button').filter({ hasText: /LEDGER/i }).first();
     if (!await ledgerBtn.isVisible({ timeout: 6000 }).catch(() => false)) {
@@ -47,8 +49,8 @@ test.describe('Ledger + Security Scan', () => {
     const pathInput = page.locator('input[value*="44"]').or(page.locator('input[placeholder*="derivation" i]')).first();
     await expect(pathInput).toBeVisible({ timeout: 4000 });
 
-    // Close
-    await page.keyboard.press('Escape');
+    // Close via X button (modal does not listen to Escape)
+    await page.locator('button:has(svg.lucide-x)').first().click();
     await page.waitForTimeout(400);
     await expect(connectText).not.toBeVisible({ timeout: 4000 });
     console.log('[ok] Ledger modal opens/closes');
@@ -70,6 +72,7 @@ test.describe('Ledger + Security Scan', () => {
     await page.waitForLoadState('networkidle');
     await waitForWallet(page);
     await page.waitForTimeout(1500);
+    await enableAdvancedMode(page);
 
     const ledgerBtn = page.locator('button').filter({ hasText: /LEDGER/i }).first();
     if (!await ledgerBtn.isVisible({ timeout: 6000 }).catch(() => false)) {

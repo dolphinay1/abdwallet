@@ -329,7 +329,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                 <Check size={28} style={{ color: '#2b2d33' }} />
               </div>
               <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 20, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Swap Sent!</span>
-              <span style={{ color: '#23262b', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>{txHash}</span>
+              <span style={{ color: '#23262b', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center' }}>{txHash}</span>
               <a href={`${fromChain.explorerUrl}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"
                 style={{ color: '#2b2d33', fontSize: 12, fontWeight: 700 }}>
                 View on Explorer ↗

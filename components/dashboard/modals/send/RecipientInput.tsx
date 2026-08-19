@@ -131,7 +131,7 @@ export function RecipientInput({
               }}
             >
               <span style={{ fontSize: 12, fontWeight: 700, color: '#23262b' }}>{c.name}</span>
-              <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                 {c.address.slice(0, 10)}…{c.address.slice(-6)}
               </span>
             </button>

@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
           >
             <h2
               className="text-xl font-black uppercase mb-3 text-slate-800 tracking-widest"
-              style={{ fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif" }}
+              style={{ fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif" }}
             >
               Something went wrong
             </h2>
@@ -64,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
               onClick={this.handleRetry}
               className="px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest text-white cursor-pointer transition-all"
               style={{
-                fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
+                fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
                 backgroundColor: '#181B22',
                 backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
                 boxShadow: '6px 6px 16px rgba(166, 177, 198, 0.6), -4px -4px 10px #FFFFFF',

@@ -152,7 +152,7 @@ export function AddressBookModal({
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <input style={inp} placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-              <input style={{ ...inp, fontFamily: 'monospace' }} placeholder="0x… address" value={address} onChange={(e) => setAddress(e.target.value)} />
+              <input style={{ ...inp, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }} placeholder="0x… address" value={address} onChange={(e) => setAddress(e.target.value)} />
               <input style={inp} placeholder="Note (optional)" value={note} onChange={(e) => setNote(e.target.value)} />
               {err && <p style={{ color: '#b91c1c', fontSize: 11, margin: 0 }}>{err}</p>}
               <div style={{ display: 'flex', gap: 8 }}>
@@ -224,7 +224,7 @@ export function AddressBookModal({
                     style={{
                       color: '#8a8f98',
                       fontSize: 10,
-                      fontFamily: 'monospace',
+                      fontFamily: "var(--font-sf-mono), 'SF Mono', monospace",
                       margin: '2px 0 0',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',

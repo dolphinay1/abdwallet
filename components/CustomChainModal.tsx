@@ -31,7 +31,7 @@ export function CustomChainModal({ onClose, onSaved }: Props) {
   };
   const lbl: React.CSSProperties = {
     color: '#8a8f98', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
-    letterSpacing: '0.1em', marginBottom: 4, display: 'block', fontFamily: "var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif",
+    letterSpacing: '0.1em', marginBottom: 4, display: 'block', fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
   };
 
   const handleTest = async () => {

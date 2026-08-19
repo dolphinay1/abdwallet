@@ -181,7 +181,7 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
           <p style={{ fontSize: 13, fontWeight: 900, color: '#23262b', margin: 0 }}>Staking Transaction Sent</p>
           {stakeTxHash && (
             <a href={`https://etherscan.io/tx/${stakeTxHash}`} target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 10, color: 'rgba(166,177,198,0.4)', fontFamily: 'monospace' }}>
+              style={{ fontSize: 10, color: 'rgba(166,177,198,0.4)', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
               {stakeTxHash.slice(0, 16)}…{stakeTxHash.slice(-8)} ↗
             </a>
           )}

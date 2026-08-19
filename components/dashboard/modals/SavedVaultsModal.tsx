@@ -145,7 +145,7 @@ export function SavedVaultsModal({
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: isCurrent ? '#2b2d33' : '#23262b', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: 'monospace' }}>
+                    <p style={{ color: isCurrent ? '#2b2d33' : '#23262b', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                       {snap.shortAddress}
                     </p>
                     <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>

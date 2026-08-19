@@ -170,7 +170,7 @@ export function DashboardActionGrid({
             </span>
             <div>
               <p style={{ color: '#8a8f98', fontSize: 12, fontWeight: 700, margin: 0 }}>Ledger Active</p>
-              <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: 'monospace', margin: '1px 0 0' }}>
+              <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: '1px 0 0' }}>
                 {activeLedger.address.slice(0, 10)}...{activeLedger.address.slice(-6)}
               </p>
             </div>

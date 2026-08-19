@@ -106,7 +106,7 @@ export function NFTsTab({
                 {nft.collectionName}
               </p>
             )}
-            <p style={{ color: '#8a8f98', fontSize: 9, fontFamily: 'monospace', margin: '4px 0 0' }}>#{nft.tokenId.slice(0, 10)}</p>
+            <p style={{ color: '#8a8f98', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: '4px 0 0' }}>#{nft.tokenId.slice(0, 10)}</p>
             {nft.floorPrice != null && (
               <p style={{ color: '#2b2d33', fontSize: 9, fontWeight: 700, margin: '3px 0 0' }}>
                 Floor {nft.floorPrice < 0.001 ? '< 0.001' : nft.floorPrice.toFixed(3)} {nft.floorPriceCurrency ?? 'ETH'}

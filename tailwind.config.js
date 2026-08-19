@@ -29,8 +29,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-roboto)', "'Helvetica Neue'", 'Helvetica', 'Arial', 'sans-serif'],
-        display: ['var(--font-satoshi)', "'Helvetica Neue'", 'Helvetica', 'sans-serif'],
+        sans: ['var(--font-sf-compact)', "'SF Compact Text'", 'system-ui', 'sans-serif'],
+        display: ['var(--font-sf-rounded)', "'SF Pro Rounded'", 'sans-serif'],
+        mono: ['var(--font-sf-mono)', "'SF Mono'", 'monospace'],
       },
       boxShadow: {
         'glow': '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',

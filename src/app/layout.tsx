@@ -1,27 +1,26 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import { HeroUIProvider } from "@heroui/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
+const sfMono = localFont({
+  src: [{ path: "./fonts/sf-mono-bold.otf", weight: "700", style: "normal" }],
   display: "swap",
-  variable: "--font-roboto",
+  variable: "--font-sf-mono",
 });
 
-const satoshi = localFont({
-  src: [
-    { path: "./fonts/satoshi-400.woff2", weight: "400", style: "normal" },
-    { path: "./fonts/satoshi-500.woff2", weight: "500", style: "normal" },
-    { path: "./fonts/satoshi-700.woff2", weight: "700", style: "normal" },
-    { path: "./fonts/satoshi-900.woff2", weight: "900", style: "normal" },
-  ],
+const sfCompact = localFont({
+  src: [{ path: "./fonts/sf-compact-text-regular.otf", weight: "400", style: "normal" }],
   display: "swap",
-  variable: "--font-satoshi",
+  variable: "--font-sf-compact",
+});
+
+const sfProRounded = localFont({
+  src: [{ path: "./fonts/sf-pro-rounded-regular.otf", weight: "400", style: "normal" }],
+  display: "swap",
+  variable: "--font-sf-rounded",
 });
 
 export const metadata: Metadata = {
@@ -44,7 +43,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
         />
       </head>
-      <body className={`${roboto.variable} ${satoshi.variable} font-sans bg-abd-black text-abd-white min-h-screen`}>
+      <body className={`${sfMono.variable} ${sfCompact.variable} ${sfProRounded.variable} font-sans bg-abd-black text-abd-white min-h-screen`}>
         <HeroUIProvider>
           <WalletProvider>
             <ErrorBoundary>

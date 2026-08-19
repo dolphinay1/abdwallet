@@ -85,7 +85,7 @@ export function QRModal({ address, onClose }: { address: string; onClose: () => 
         <div style={{ background: '#23262b', borderRadius: '1rem', padding: 16 }}>
           <QRCodeSVG value={address} size={200} level="M" />
         </div>
-        <p style={{ color: '#23262b', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
+        <p style={{ color: '#23262b', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
           {address}
         </p>
         <button

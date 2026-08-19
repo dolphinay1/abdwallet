@@ -312,7 +312,7 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
           {/* Your address */}
           <div style={{ padding: '10px 14px', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '0.75rem', marginBottom: 20 }}>
             <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 4 }}>Your Address</p>
-            <p style={{ color: '#2b2d33', fontSize: 11, fontFamily: 'monospace', wordBreak: 'break-all' }}>{wallet.activeAddress}</p>
+            <p style={{ color: '#2b2d33', fontSize: 11, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all' }}>{wallet.activeAddress}</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -383,7 +383,7 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
               {/* Params preview */}
               <div style={{ padding: '10px 14px', background: '#e4e6ee', boxShadow: 'inset 4px 4px 8px rgba(166,177,198,0.5), inset -4px -4px 8px rgba(255,255,255,0.9)', borderRadius: '0.75rem', marginBottom: 16, maxHeight: 160, overflowY: 'auto' }}>
                 <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6 }}>Details</p>
-                <pre style={{ color: '#8a8f98', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', whiteSpace: 'pre-wrap', margin: 0 }}>
+                <pre style={{ color: '#8a8f98', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', whiteSpace: 'pre-wrap', margin: 0 }}>
                   {paramsStr.length > 600 ? paramsStr.slice(0, 600) + '\n...' : paramsStr}
                 </pre>
               </div>

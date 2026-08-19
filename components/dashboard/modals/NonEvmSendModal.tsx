@@ -179,7 +179,7 @@ export function NonEvmSendModal({
             >
               Sent!
             </p>
-            <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: 'monospace', margin: 0, wordBreak: 'break-all' }}>{txid}</p>
+            <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: 0, wordBreak: 'break-all' }}>{txid}</p>
             {meta?.explorerBase && (
               <a
                 href={`${meta.explorerBase}/${txid}`}
@@ -230,7 +230,7 @@ export function NonEvmSendModal({
               >
                 From
               </p>
-              <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: 'monospace', wordBreak: 'break-all', margin: 0 }}>{fromAddress}</p>
+              <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', margin: 0 }}>{fromAddress}</p>
             </div>
             <div>
               <p
@@ -314,7 +314,7 @@ export function NonEvmSendModal({
                         }}
                       >
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#23262b' }}>{c.name}</span>
-                        <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                           {c.address.slice(0, 10)}...{c.address.slice(-6)}
                         </span>
                       </button>

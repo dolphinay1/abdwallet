@@ -131,7 +131,7 @@ export function SendModal({
             >
               Broadcast!
             </span>
-            <span style={{ color: '#23262b', fontSize: 9, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center' }}>
+            <span style={{ color: '#23262b', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center' }}>
               {f.txHash}
             </span>
             <a

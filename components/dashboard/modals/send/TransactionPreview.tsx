@@ -51,7 +51,7 @@ export function TransactionPreview({
         <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Sending
         </span>
-        <span style={{ fontSize: 13, color: '#23262b', fontWeight: 900, fontFamily: 'monospace' }}>
+        <span style={{ fontSize: 13, color: '#23262b', fontWeight: 900, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
           {amountStr} {tokenSymbol}
         </span>
       </div>
@@ -59,7 +59,7 @@ export function TransactionPreview({
         <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           To
         </span>
-        <span style={{ fontSize: 10, color: '#23262b', fontWeight: 700, fontFamily: 'monospace' }}>
+        <span style={{ fontSize: 10, color: '#23262b', fontWeight: 700, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
           {to.slice(0, 10)}…{to.slice(-6)}
         </span>
       </div>
@@ -81,7 +81,7 @@ export function TransactionPreview({
           </p>
           {simResult.changes.slice(0, 4).map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
-              <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                 {c.changeType === 'TRANSFER'
                   ? c.from?.toLowerCase() === activeAddress?.toLowerCase()
                     ? '↑ Out'

@@ -157,7 +157,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                         <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#8a8f98' }}>account_balance_wallet</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ color: '#23262b', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ color: '#23262b', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {snap.shortAddress}
                         </p>
                         <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0' }}>
@@ -178,7 +178,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                 {/* Target reminder */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(166,177,198,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(166,177,198,0.06)' }}>
                   <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>To:</span>
-                  <span style={{ fontSize: 11, color: '#23262b', fontFamily: 'monospace' }}>{target?.shortAddress}</span>
+                  <span style={{ fontSize: 11, color: '#23262b', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>{target?.shortAddress}</span>
                 </div>
 
                 <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Select coin</p>
@@ -227,7 +227,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                 {/* Summary bar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(166,177,198,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(166,177,198,0.06)', fontSize: 10, color: '#8a8f98' }}>
                   <span style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>To</span>
-                  <span style={{ fontFamily: 'monospace', color: '#23262b' }}>{target?.shortAddress}</span>
+                  <span style={{ fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", color: '#23262b' }}>{target?.shortAddress}</span>
                   <span style={{ margin: '0 4px' }}>·</span>
                   <span style={{ fontWeight: 700, color: 'var(--theme-accent)' }}>{selectedToken?.symbol}</span>
                 </div>
@@ -291,7 +291,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                   <Check size={24} style={{ color: 'var(--theme-accent)' }} />
                 </div>
                 <p className="russo-one-regular" style={{ color: '#23262b', fontWeight: 400, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>Transferred!</p>
-                <p style={{ color: '#8a8f98', fontSize: 11, fontFamily: 'monospace', wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
+                <p style={{ color: '#8a8f98', fontSize: 11, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
                   {txHash.slice(0, 20)}…{txHash.slice(-8)}
                 </p>
                 <a href={`${explorerUrl}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"

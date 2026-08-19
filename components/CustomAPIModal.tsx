@@ -122,7 +122,7 @@ export function CustomAPIModal({ activeAddress, onClose, onSaved }: Props) {
                 <textarea value={sendBodyTemplate} onChange={e => setSendBodyTemplate(e.target.value)}
                   rows={3}
                   placeholder='{"from":"{from}","to":"{to}","amount":"{amount}"}'
-                  style={{ ...inp, resize: 'vertical', fontFamily: 'monospace', fontSize: 11 }} />
+                  style={{ ...inp, resize: 'vertical', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", fontSize: 11 }} />
               </div>
               <p style={{ color: '#8a8f98', fontSize: 10, marginTop: 4 }}>🔒 Private keys are never transmitted over the network.</p>
             </div>

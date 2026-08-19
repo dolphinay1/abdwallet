@@ -104,7 +104,7 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
                 style={{
                   background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', border: 'none',
                   borderRadius: 8, padding: '8px 12px', color: '#23262b', width: '100%',
-                  fontSize: 13, fontFamily: 'monospace', boxSizing: 'border-box',
+                  fontSize: 13, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", boxSizing: 'border-box',
                 }}
               />
             </div>
@@ -133,7 +133,7 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
             <CheckCircle size={40} color="#23262b" style={{ marginBottom: 12 }} />
             <div style={{ fontWeight: 600, color: '#23262b', marginBottom: 6 }}>Ledger Connected</div>
-            <div style={{ fontSize: 12, color: '#8a8f98', fontFamily: 'monospace', marginBottom: 20 }}>
+            <div style={{ fontSize: 12, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", marginBottom: 20 }}>
               {connectedEntry.address.slice(0, 10)}...{connectedEntry.address.slice(-8)}
             </div>
             <button style={btn('#23262b')} onClick={handleConfirm}>

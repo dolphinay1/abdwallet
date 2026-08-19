@@ -112,7 +112,7 @@ export function ApprovalsTab({
               </div>
               <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.4)', margin: '2px 0 0', fontWeight: 700 }}>→ {a.spenderName}</p>
               {!a.unlimited && (
-                <p style={{ fontSize: 9, color: 'rgba(166,177,198,0.25)', margin: '1px 0 0', fontFamily: 'monospace' }}>
+                <p style={{ fontSize: 9, color: 'rgba(166,177,198,0.25)', margin: '1px 0 0', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                   {parseFloat(a.allowance).toLocaleString()} {a.symbol}
                 </p>
               )}

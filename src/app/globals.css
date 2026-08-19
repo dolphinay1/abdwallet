@@ -33,7 +33,7 @@
 body {
   background-color: #e4e6ee;
   color: #23262b;
-  font-family: var(--font-roboto), 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-sf-compact), 'SF Compact Text', system-ui, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -203,9 +203,9 @@ button, a, input, select {
   animation: scan-line 1.8s ease-in-out infinite;
 }
 
-/* ── Display / Label Fonts (Google Fonts, loaded in layout.tsx) ───────────── */
+/* ── Display / Label Fonts (local SF fonts, loaded in layout.tsx) ─────────── */
 .russo-one-regular {
-  font-family: var(--font-satoshi), 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: var(--font-sf-rounded), 'SF Pro Rounded', sans-serif;
   font-weight: 700;
   font-style: normal;
 }

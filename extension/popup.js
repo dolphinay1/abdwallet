@@ -58,17 +58,29 @@ async function init() {
 
 // ── Dashboard ──────────────────────────────────────────────────────────────
 
+function renderDashBalance(valText, isError = false) {
+  const el = $('dashBalance');
+  if (!el) return;
+  el.textContent = '';
+  const text = isError ? 'Error ' : valText + ' ';
+  el.appendChild(document.createTextNode(text));
+  const symSpan = document.createElement('span');
+  symSpan.id = 'dashSymbol';
+  symSpan.textContent = CHAIN_META[_currentChainId]?.symbol || 'ETH';
+  el.appendChild(symSpan);
+}
+
 async function loadDashboard(address) {
   _currentAddress = address;
   $('dashAddr').textContent = address || '—';
   $('receiveAddr').textContent = address || '—';
-  $('dashBalance').innerHTML = '…<span id="dashSymbol">' + (CHAIN_META[_currentChainId]?.symbol || 'ETH') + '</span>';
+  renderDashBalance('…');
   $('dashBalanceUsd').textContent = 'Fetching…';
   updateChainDropdown();
 
   if (address) {
     fetchBalance(address).catch(() => {
-      $('dashBalance').innerHTML = '<span style="color:#ff6b6b">Error</span><span id="dashSymbol">' + (CHAIN_META[_currentChainId]?.symbol || 'ETH') + '</span>';
+      renderDashBalance('Error', true);
       $('dashBalanceUsd').textContent = '';
     });
   }
@@ -86,9 +98,8 @@ async function fetchBalance(address) {
   const data = await resp.json();
   const wei = BigInt(data.result || '0x0');
   const eth = Number(wei) / 1e18;
-  const symbol = CHAIN_META[_currentChainId]?.symbol || 'ETH';
   const displayVal = eth < 0.000001 ? eth.toExponential(2) : eth.toFixed(eth < 0.01 ? 6 : 4);
-  $('dashBalance').innerHTML = displayVal + '<span id="dashSymbol">' + symbol + '</span>';
+  renderDashBalance(displayVal);
 
   try {
     const cgId = CHAIN_META[_currentChainId]?.coingeckoId || 'ethereum';
@@ -161,7 +172,14 @@ function showPendingRequest(payload) {
   $('pendingSection').style.display = '';
   $('dashMain').style.display = 'none';
 
-  if (payload.type === 'personal_sign') {
+  if ($('pendingOrigin')) {
+    $('pendingOrigin').textContent = payload.origin ? `Origin: ${payload.origin}` : 'Origin: Unknown Web Page';
+  }
+
+  if (payload.type === 'connect') {
+    $('pendingTitle').textContent = 'Connect Request';
+    $('pendingDetail').textContent = `The site at ${payload.origin || 'this origin'} is requesting connection to your ABD Wallet (${payload.address || ''}).`;
+  } else if (payload.type === 'personal_sign') {
     $('pendingTitle').textContent = 'Signature Request';
     let msg = payload.message || '';
     if (msg.startsWith('0x')) {
@@ -177,7 +195,7 @@ function showPendingRequest(payload) {
     const weiVal = tx.value ? BigInt(tx.value) : 0n;
     const ethVal = (Number(weiVal) / 1e18).toFixed(6);
     $('pendingDetail').textContent =
-      `To: ${tx.to || '?'}\nValue: ${ethVal} ETH\nData: ${tx.data && tx.data !== '0x' ? tx.data.slice(0, 42) + '…' : 'none'}`;
+      `To: ${tx.to || '?'}\nValue: ${ethVal} ETH\nChain ID: ${payload.chainId || tx.chainId || '?'}\nData: ${tx.data && tx.data !== '0x' ? tx.data.slice(0, 42) + '…' : 'none'}`;
   }
 }
 

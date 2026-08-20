@@ -42,9 +42,10 @@
   // ── EIP-1193 provider ───────────────────────────────────────────────────
 
   const provider = {
-    isMetaMask: true,  // legacy compat — many dApps check this
     isABDWallet: true,
-    chainId: _chainId,
+    get chainId() {
+      return _chainId;
+    },
 
     async request({ method, params = [] }) {
       switch (method) {
@@ -78,12 +79,8 @@
         }
 
         case 'eth_sign': {
-          // eth_sign(account, message) — order reversed vs personal_sign
-          const [_from, message] = params;
-          const reqId = String(Date.now());
-          const r = await sendToBackground({ type: 'CW_PERSONAL_SIGN', message, requestId: reqId });
-          if (r.error) throw new Error(r.error);
-          return r.result;
+          // Reject legacy blind signing for user protection
+          throw new Error('eth_sign is disabled for security reasons. Please use personal_sign or eth_signTypedData_v4.');
         }
 
         case 'eth_signTypedData':
@@ -113,8 +110,10 @@
 
         case 'wallet_switchEthereumChain': {
           const [{ chainId }] = params;
+          if (!chainId || typeof chainId !== 'string' || !chainId.startsWith('0x')) {
+            throw new Error('Invalid chainId parameter. Expected 0x-prefixed hex string.');
+          }
           _chainId = chainId;
-          provider.chainId = chainId;
           emit('chainChanged', chainId);
           return null;
         }
@@ -123,7 +122,6 @@
           const [chainParams] = params;
           if (chainParams?.chainId) {
             _chainId = chainParams.chainId;
-            provider.chainId = chainParams.chainId;
             emit('chainChanged', chainParams.chainId);
           }
           return null;
@@ -188,11 +186,10 @@
   rpcCall('eth_chainId', []).then(r => {
     if (r?.result) {
       _chainId = r.result;
-      provider.chainId = r.result;
     }
   }).catch(() => {});
 
-  // ── Set window.ethereum (Frozen / Immutable) ──────────────────────────
+  // ── Set window.ethereum (Frozen / Immutable with dynamic getter) ───────
 
   try {
     Object.defineProperty(window, 'ethereum', {

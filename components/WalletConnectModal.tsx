@@ -40,6 +40,21 @@ interface PendingRequest {
 
 import { DAPPS, METHOD_LABELS, TAG_COLORS, TAG_STYLES } from './walletconnect/dapps';
 
+const TAG_ORDER = [
+  'Perps',
+  'Aggreg.',
+  'DEX',
+  'NFT',
+  'Lending',
+  'Yield',
+  'Staking',
+  'Bridge',
+  'Portfolio',
+  'Explorer',
+  'Govern.',
+  'Multisig',
+  'DAO',
+];
 
 function DappIcon({ icon, name, color }: { icon: string; name: string; color: string }) {
   const [failed, setFailed] = React.useState(false);
@@ -72,6 +87,20 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
   const [dappFilter, setDappFilter] = useState('');
   const [dappRisk, setDappRisk] = useState<DAppRisk | null>(null);
   const [dappRiskDismissed, setDappRiskDismissed] = useState(false);
+
+  const filteredDapps = useMemo(() => {
+    const list = dappFilter
+      ? DAPPS.filter(d => d.name.toLowerCase().includes(dappFilter.toLowerCase()) || d.tag.toLowerCase().includes(dappFilter.toLowerCase()))
+      : [...DAPPS];
+    return list.sort((a, b) => {
+      const orderA = TAG_ORDER.indexOf(a.tag);
+      const orderB = TAG_ORDER.indexOf(b.tag);
+      const idxA = orderA === -1 ? 999 : orderA;
+      const idxB = orderB === -1 ? 999 : orderB;
+      if (idxA !== idxB) return idxA - idxB;
+      return a.name.localeCompare(b.name);
+    });
+  }, [dappFilter]);
 
   const refreshSessions = useCallback(async () => {
     try {
@@ -441,37 +470,6 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
       </div>
     );
   }
-
-  // ── Main Connect Modal ─────────────────────────────────────────────────────
-  const TAG_ORDER = [
-    'Perps',
-    'Aggreg.',
-    'DEX',
-    'NFT',
-    'Lending',
-    'Yield',
-    'Staking',
-    'Bridge',
-    'Portfolio',
-    'Explorer',
-    'Govern.',
-    'Multisig',
-    'DAO',
-  ];
-
-  const filteredDapps = useMemo(() => {
-    const list = dappFilter
-      ? DAPPS.filter(d => d.name.toLowerCase().includes(dappFilter.toLowerCase()) || d.tag.toLowerCase().includes(dappFilter.toLowerCase()))
-      : [...DAPPS];
-    return list.sort((a, b) => {
-      const orderA = TAG_ORDER.indexOf(a.tag);
-      const orderB = TAG_ORDER.indexOf(b.tag);
-      const idxA = orderA === -1 ? 999 : orderA;
-      const idxB = orderB === -1 ? 999 : orderB;
-      if (idxA !== idxB) return idxA - idxB;
-      return a.name.localeCompare(b.name);
-    });
-  }, [dappFilter]);
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}

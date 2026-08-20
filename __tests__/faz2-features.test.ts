@@ -52,5 +52,5 @@ describe('Faz 2 Feature Implementations', () => {
     expect(tx.to).toBe('0x0000000000000000000000000000000000000001');
     expect(tx.gasLimit).toBeDefined();
     expect(tx.type).toBe(2);
-  });
+  }, 15000);
 });

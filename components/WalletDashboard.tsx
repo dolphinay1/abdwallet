@@ -44,44 +44,84 @@ export function WalletDashboard() {
     );
   }
 
+  const currentSnap = d.walletHistory.find((s) => s.id === d.currentHistoryId);
+  const isCurrentSaved = currentSnap?.isSaved ?? (d.frozenMode === 'PERSISTENT');
+
+  const handleQuickSave = async () => {
+    if (isCurrentSaved) {
+      d.setShowSavedVaults(true);
+      return;
+    }
+    if (!currentSnap) return;
+    d.setIsSavingVault(true);
+    try {
+      if (d.selectedNonEvm && NON_EVM_META[d.selectedNonEvm]) {
+        const m = NON_EVM_META[d.selectedNonEvm];
+        updateSnapshotChain(currentSnap.id, {
+          chainName: m.name,
+          chainColor: m.color,
+          chainLogo: m.logoUrl,
+          coinSymbol: m.symbol,
+          isNonEvm: true,
+          chainId: undefined,
+        });
+      } else {
+        updateSnapshotChain(currentSnap.id, {
+          chainId: d.selectedChain.id,
+          chainName: d.selectedChain.name,
+          chainColor: d.selectedChain.color,
+          chainLogo: d.selectedChain.logoUrl,
+          coinSymbol: d.selectedChain.symbol,
+          isNonEvm: false,
+        });
+      }
+      await d.wallet.persistCurrentWallet(currentSnap.id);
+      d.setWalletHistory(getHistory());
+    } catch {
+      alert('Failed to save vault.');
+    } finally {
+      d.setIsSavingVault(false);
+    }
+  };
+
   return (
     <>
       <NetworkOfflineBanner onRetry={d.handleRefresh} />
       <DashboardModals
-        showSend={d.showSend}
-        setShowSend={d.setShowSend}
-        showSwap={d.showSwap}
-        setShowSwap={d.setShowSwap}
-        showLedger={d.showLedger}
-        setShowLedger={d.setShowLedger}
+        tokens={d.tokens}
+        prices={d.prices}
         showNetworks={d.showNetworks}
         setShowNetworks={d.setShowNetworks}
-        showQR={d.showQR}
-        setShowQR={d.setShowQR}
         showWC={d.showWC}
         setShowWC={d.setShowWC}
+        showSend={d.showSend}
+        setShowSend={d.setShowSend}
         showNonEvmSend={d.showNonEvmSend}
         setShowNonEvmSend={d.setShowNonEvmSend}
+        showQR={d.showQR}
+        setShowQR={d.setShowQR}
+        showSwap={d.showSwap}
+        setShowSwap={d.setShowSwap}
         showTransfer={d.showTransfer}
         setShowTransfer={d.setShowTransfer}
+        showLedger={d.showLedger}
+        setShowLedger={d.setShowLedger}
         showAddressBook={d.showAddressBook}
         setShowAddressBook={d.setShowAddressBook}
         showSavedVaults={d.showSavedVaults}
         setShowSavedVaults={d.setShowSavedVaults}
-        showPassphraseModal={d.showPassphraseModal}
-        setShowPassphraseModal={d.setShowPassphraseModal}
         showCustomChainModal={d.showCustomChainModal}
         setShowCustomChainModal={d.setShowCustomChainModal}
         showCustomTokenModal={d.showCustomTokenModal}
         setShowCustomTokenModal={d.setShowCustomTokenModal}
         showCustomAPIModal={d.showCustomAPIModal}
         setShowCustomAPIModal={d.setShowCustomAPIModal}
+        showPassphraseModal={d.showPassphraseModal}
+        setShowPassphraseModal={d.setShowPassphraseModal}
         showWipeWarning={d.showWipeWarning}
         setShowWipeWarning={d.setShowWipeWarning}
         showNewWalletWarning={d.showNewWalletWarning}
         setShowNewWalletWarning={d.setShowNewWalletWarning}
-        tokens={d.tokens}
-        prices={d.prices}
         selectedChain={d.selectedChain}
         setSelectedChain={d.setSelectedChain}
         setManualChain={d.setManualChain}
@@ -137,6 +177,9 @@ export function WalletDashboard() {
             isRefreshing={d.isRefreshing}
             displayAddress={d.displayAddress}
             shortAddr={d.shortAddr}
+            onSaveVault={handleQuickSave}
+            isSaved={isCurrentSaved}
+            isSavingVault={d.isSavingVault}
           />
 
           <DashboardActionGrid

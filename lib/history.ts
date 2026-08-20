@@ -6,21 +6,6 @@ const TAB_KEY = '_gw_tab_lock';
 export function checkSingletonTab(): boolean {
   if (typeof window === 'undefined') return true;
   try {
-    const existing = sessionStorage.getItem(TAB_KEY);
-    if (existing) {
-      const age = Date.now() - parseInt(existing, 10);
-      // If the key is stale (>30s) it's from a closed/restored tab — clear it
-      if (isNaN(age) || age > 30000) {
-        sessionStorage.removeItem(TAB_KEY);
-      } else {
-        // Another tab is active — redirect (Bypassed in dev for React StrictMode)
-        if (process.env.NODE_ENV === 'production') {
-          const ext = process.env.NEXT_PUBLIC_EXTERNAL_LINK || 'https://www.google.com';
-          window.location.replace(ext);
-        }
-        return false;
-      }
-    }
     sessionStorage.setItem(TAB_KEY, Date.now().toString());
 
     // Update timestamp periodically so the key stays fresh while open

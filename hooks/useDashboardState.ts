@@ -392,11 +392,10 @@ export function useDashboardState() {
     wallet.wipeABDWallet();
   };
 
-  const handleConfirmNewWallet = () => {
+  const handleConfirmNewWallet = async () => {
     setShowNewWalletWarning(false);
     wallet.disableSessionLock();
-    wallet.wipeABDWallet();
-    setTimeout(() => wallet.createABDWallet(), 80);
+    await wallet.createABDWallet();
   };
 
   const handleConfirmPassphrase = async (passphrase: string) => {

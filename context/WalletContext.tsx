@@ -173,6 +173,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       mnemonicRef.current = mnemonic;
       scatteredKeyRef.current = scatterStore(privateKey);
 
+      if (sessionTimer.current) clearTimeout(sessionTimer.current);
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+
       setState(prev => ({
         ...prev,
         _u_ap: address,

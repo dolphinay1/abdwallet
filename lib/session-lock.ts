@@ -129,35 +129,33 @@ function getBrowserFingerprint(): string {
   }
 }
 
-function getOrCreateBrowserKey(): string {
-  let masterSeed: string | null = null;
-  try {
-    masterSeed = localStorage.getItem(_BK);
-  } catch {}
+let _inMemoryTabSeed: string | null = null;
 
-  if (!masterSeed) {
+// One-time cleanup of legacy insecure master seed and key material from localStorage
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem(_BK);
+    localStorage.removeItem('__gw_hs_key__');
+  } catch {}
+}
+
+function getOrCreateBrowserKey(): string {
+  // Use in-memory ephemeral seed (never stored in localStorage)
+  if (!_inMemoryTabSeed) {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint8Array(32);
       crypto.getRandomValues(array);
-      masterSeed = Array.from(array)
+      _inMemoryTabSeed = Array.from(array)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
-      try {
-        localStorage.setItem(_BK, masterSeed);
-      } catch {}
     } else {
       throw new Error('No secure random generator available');
     }
   }
 
-  // Derive the actual key safely without persisting it
+  // Derive the session key in-memory safely with fingerprint salt
   const salt = "abdwallet_salt_" + getBrowserFingerprint();
-  const derivedKey = hmacSha256(masterSeed, salt);
-  
-  // Zero-fill or obscure local string copies as best as possible in JS
-  let scrub = masterSeed;
-  scrub = "";
-  
+  const derivedKey = hmacSha256(_inMemoryTabSeed, salt);
   return derivedKey;
 }
 

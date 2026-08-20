@@ -77,4 +77,17 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
       expect(loadSession()).toBeNull();
     });
   });
+
+  describe('Zero Plaintext Key Storage in LocalStorage (G2)', () => {
+    it('ensures localStorage contains zero key derivation material or master seeds', () => {
+      expect(localStorage.getItem('__gwvs_bk__')).toBeNull();
+      expect(localStorage.getItem('__gw_hs_key__')).toBeNull();
+      
+      // Ensure no vault keys exist in localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        expect(key?.startsWith('__gw_vault_')).toBeFalsy();
+      }
+    });
+  });
 });

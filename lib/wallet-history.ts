@@ -1,13 +1,9 @@
-// Wallet history — session-based auto-tracking + encrypted persist.
-// Uses session-derived ephemeral keying without plaintext key storage in localStorage.
-
-import { getTabKey } from './session-lock';
+import { persistVault, loadPersistedVault, nukePersistedVault } from './persistent-vault';
 
 const HISTORY_KEY = '__gw_wallet_history__';
 const MAX_HISTORY = 5;
 const NON_EVM_WARNED_KEY = '__gw_non_evm_warned__';
 const VAULT_PREFIX = '__gw_vault_';
-const LEGACY_KEY_MATERIAL = '__gw_hs_key__';
 
 export interface WalletSnapshot {
   id: string;
@@ -25,66 +21,48 @@ export interface WalletSnapshot {
   isNonEvm?: boolean;
 }
 
-// ── AES-GCM helpers using session-derived ephemeral key ─────────────────────────
-async function getAppKey(): Promise<CryptoKey> {
-  // Wipe any legacy plaintext key material from localStorage
-  try { localStorage.removeItem(LEGACY_KEY_MATERIAL); } catch {}
-
-  const keyHex = getTabKey();
-  const rawBytes = new Uint8Array(keyHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
-  return crypto.subtle.importKey('raw', rawBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-}
-
-async function encryptMnemonic(mnemonic: string): Promise<string> {
-  const iv  = crypto.getRandomValues(new Uint8Array(12));
-  const key = await getAppKey();
-  const ct  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(mnemonic));
-  const buf = new Uint8Array(12 + ct.byteLength);
-  buf.set(iv, 0);
-  buf.set(new Uint8Array(ct), 12);
-  return btoa(String.fromCharCode(...buf));
-}
-
-async function decryptMnemonic(blob: string): Promise<string> {
-  const buf = Uint8Array.from(atob(blob), c => c.charCodeAt(0));
-  const iv  = buf.slice(0, 12);
-  const ct  = buf.slice(12);
-  const key = await getAppKey();
-  const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
-  return new TextDecoder().decode(dec);
-}
-
-// ── Saved vault storage ───────────────────────────────────────────────────────
-function vaultKey(id: string): string { return `${VAULT_PREFIX}${id}__`; }
-
-export async function storeVaultBlob(id: string, mnemonic: string): Promise<void> {
-  const blob = await encryptMnemonic(mnemonic);
-  try { localStorage.setItem(vaultKey(id), blob); } catch {}
+// ── One-time migration & legacy cleanup ───────────────────────────────────────
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('__gw_hs_key__');
+    localStorage.removeItem('__gwvs_bk__');
+    // Clear any legacy plaintext or weakly keyed vault blobs from localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(VAULT_PREFIX)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch {}
 }
 
 export function markWalletSaved(id: string): void {
   const history = load();
-  const updated = history.map(s => s.id === id ? { ...s, isSaved: true } : s);
+  const updated = history.map(s => s.id === id ? { ...s, isSaved: true, vaultMode: 'PERSISTENT' as const } : s);
   save(updated);
 }
 
-export async function persistWallet(id: string, mnemonic: string): Promise<void> {
-  await storeVaultBlob(id, mnemonic);
+export async function persistWallet(id: string, mnemonic: string, passphrase?: string): Promise<void> {
+  if (passphrase) {
+    await persistVault(mnemonic, passphrase, id);
+  }
   markWalletSaved(id);
 }
 
-export async function loadSavedMnemonic(id: string): Promise<string> {
-  const blob = localStorage.getItem(vaultKey(id));
-  if (!blob) throw new Error('Vault not found');
-  return decryptMnemonic(blob);
+export async function loadSavedMnemonic(id: string, passphrase?: string): Promise<string> {
+  if (!passphrase) throw new Error('Passphrase required to unlock saved vault');
+  return loadPersistedVault(passphrase, id);
 }
 
-export function deleteSavedVault(id: string): void {
-  try { localStorage.removeItem(vaultKey(id)); } catch {}
+export async function deleteSavedVault(id: string): Promise<void> {
+  await nukePersistedVault(id);
+  const history = load();
+  const updated = history.map(s => s.id === id ? { ...s, isSaved: false, vaultMode: 'EPHEMERAL' as const } : s);
+  save(updated);
 }
 
 export function getSavedVaults(): WalletSnapshot[] {
-  return load().filter(s => s.isSaved && !!localStorage.getItem(vaultKey(s.id)));
+  return load().filter(s => s.isSaved);
 }
 
 // ── History CRUD ──────────────────────────────────────────────────────────────

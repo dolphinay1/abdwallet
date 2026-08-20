@@ -74,7 +74,7 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Usb size={20} color="#8a8f98" />
-            <span style={{ fontWeight: 700, fontSize: 17, color: '#23262b' }}>Connect Ledger</span>
+            <span className="sf-display-black" style={{ fontWeight: 900, fontSize: 18, color: '#1e293b', letterSpacing: '0.02em', textTransform: 'uppercase' }}>Connect Ledger</span>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', padding: 4 }}>
             <X size={18} />

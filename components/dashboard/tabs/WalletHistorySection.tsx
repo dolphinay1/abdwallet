@@ -25,12 +25,34 @@ export function WalletHistorySection({
   selectedNonEvm: string | null;
   selectedChain: Chain;
   isSavingVault: boolean;
-  onSwitch: (snap: WalletSnapshot) => void;
+  onSwitch: (snap: WalletSnapshot) => Promise<void> | void;
   onSave: (snap: WalletSnapshot, isCurrent: boolean) => void;
   onDelete: (id: string) => void;
   onOpenAdvanced: () => void;
 }) {
+  const [failingIds, setFailingIds] = React.useState<Record<string, boolean>>({});
+
   if (walletHistory.length === 0) return null;
+
+  const handleCardClick = async (snap: WalletSnapshot) => {
+    const isCurrent = snap.id === currentHistoryId;
+    if (isCurrent || failingIds[snap.id]) return;
+    try {
+      await onSwitch(snap);
+    } catch {
+      // 1. Trigger soft red feedback & slow fade-out
+      setFailingIds((prev) => ({ ...prev, [snap.id]: true }));
+      // 2. Remove after slow feedback duration, smoothly gliding remaining items in slow-motion
+      setTimeout(() => {
+        onDelete(snap.id);
+        setFailingIds((prev) => {
+          const next = { ...prev };
+          delete next[snap.id];
+          return next;
+        });
+      }, 700);
+    }
+  };
 
   return (
     <div style={{ paddingTop: 16 }}>
@@ -41,39 +63,61 @@ export function WalletHistorySection({
         <div style={{ flex: 1, height: 1, background: 'rgba(166,177,198,0.06)' }} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {walletHistory.map((snap, i) => {
             const isCurrent = snap.id === currentHistoryId;
+            const isFailed = !!failingIds[snap.id];
             const liveNonEvm: NonEvmMeta | null = isCurrent && selectedNonEvm ? NON_EVM_META[selectedNonEvm] : null;
             const liveChain: Chain | null = isCurrent && !selectedNonEvm ? selectedChain : null;
             const dispLogo = liveNonEvm?.logoUrl ?? liveChain?.logoUrl ?? snap.chainLogo;
             const dispName = liveNonEvm?.name ?? liveChain?.name ?? snap.chainName ?? '';
             
-            const badgeText = isCurrent ? 'Active' : (snap.isSaved ? 'Saved' : 'Temp');
-            const badgeColor = isCurrent ? '#059669' : (snap.isSaved ? '#3b82f6' : '#8a8f98');
+            const badgeText = isFailed ? 'Expired' : isCurrent ? 'Active' : (snap.isSaved ? 'Saved' : 'Temp');
 
             return (
               <motion.div
                 key={snap.id}
-                className="dapp-tile"
+                layout
+                className={isCurrent ? 'neu-inset' : 'dapp-tile'}
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ ...springs.smooth, delay: i * 0.03 }}
+                animate={
+                  isFailed
+                    ? {
+                        opacity: 0,
+                        scale: 0.8,
+                        filter: 'blur(3px)',
+                        backgroundColor: '#fae8e8',
+                        boxShadow: 'inset 3px 3px 6px rgba(220, 140, 140, 0.45), inset -3px -3px 6px #ffffff',
+                        transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+                      }
+                    : {
+                        opacity: 1,
+                        scale: 1,
+                        filter: 'blur(0px)',
+                        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                      }
+                }
+                exit={{
+                  opacity: 0,
+                  scale: 0.75,
+                  filter: 'blur(5px)',
+                  transition: { duration: 0.75, ease: [0.16, 1, 0.3, 1] },
+                }}
+                transition={{
+                  layout: { duration: 0.95, ease: [0.16, 1, 0.3, 1] },
+                }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: 6,
                   padding: '12px 6px',
-                  background: isCurrent ? 'rgba(43,45,51,0.04)' : 'transparent',
-                  borderRadius: '1rem',
-                  cursor: isCurrent ? 'default' : 'pointer',
+                  borderRadius: '1.25rem',
+                  cursor: isCurrent ? 'default' : isFailed ? 'not-allowed' : 'pointer',
                   position: 'relative',
+                  overflow: 'hidden',
                 }}
-                onClick={() => {
-                  if (!isCurrent) onSwitch(snap);
-                }}
+                onClick={() => handleCardClick(snap)}
               >
                 {/* Action Button: Delete (Top Right) */}
                 <div style={{ position: 'absolute', top: 4, right: 4, display: 'flex', gap: 4 }}>
@@ -143,40 +187,50 @@ export function WalletHistorySection({
                   )}
                 </div>
 
-                {/* Name & Badge */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: '100%' }}>
+                {/* Name & Status Indicator */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: '100%' }}>
                   <span
-                    className="russo-one-regular"
+                    className="sf-display-black"
                     style={{
-                      color: '#23262b',
-                      fontSize: 10,
-                      fontWeight: 400,
+                      color: isFailed ? '#b91c1c' : '#23262b',
+                      fontSize: 11,
+                      fontWeight: 800,
                       textAlign: 'center',
                       lineHeight: 1.2,
                       width: '100%',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      letterSpacing: '0.02em'
+                      letterSpacing: '-0.01em',
+                      transition: 'color 0.2s',
                     }}
                     title={snap.shortAddress}
                   >
                     {dispName || snap.shortAddress}
                   </span>
-                  <span
-                    className="russo-one-regular"
+
+                  {/* Refined Soft Dark SWITCH Status Capsule */}
+                  <div
+                    className={
+                      isFailed
+                        ? 'neu-pill-inset-red'
+                        : isCurrent
+                        ? 'neu-pill-active'
+                        : snap.isSaved
+                        ? 'neu-pill-saved'
+                        : 'neu-pill-temp'
+                    }
                     style={{
-                      fontSize: 7,
-                      fontWeight: 400,
-                      padding: '2px 7px',
-                      borderRadius: 99,
-                      background: `${badgeColor}14`,
-                      color: badgeColor,
-                      letterSpacing: '0.06em'
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '3px 10px',
+                      fontSize: 9,
+                      transition: 'all 0.2s',
                     }}
                   >
-                    {badgeText}
-                  </span>
+                    <span>{badgeText}</span>
+                  </div>
                 </div>
               </motion.div>
             );

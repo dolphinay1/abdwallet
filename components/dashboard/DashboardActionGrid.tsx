@@ -74,9 +74,8 @@ export function DashboardActionGrid({
           whileTap={{ scale: 0.98 }}
           className="w-full group bg-[#2b2d33] hover:bg-[#3a3d45] text-[#f5f6fa] p-5 md:p-7 rounded-full flex justify-between items-center transition-all shadow-[0_8px_30px_rgba(43,45,51,0.15)] active:scale-[0.98]"
         >
-          <div className="flex items-center gap-4">
-            <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
-            <span className="text-sm russo-one-regular tracking-widest uppercase">
+          <div className="flex items-center">
+            <span className="text-sm sf-display-black font-black tracking-widest uppercase text-[#f5f6fa]">
               {savedVaultsCount} Saved Vault{savedVaultsCount > 1 ? 's' : ''}
             </span>
           </div>
@@ -85,13 +84,12 @@ export function DashboardActionGrid({
       )}
 
       {/* Extension banners */}
-      {extPresent && !extAttached && walletUnlocked && typeof window !== 'undefined' && window.self === window.top && (
+      {extPresent && !extAttached && typeof window !== 'undefined' && window.self === window.top && (
         <div
+          className="neu-pill-inset"
           style={{
-            background: 'rgba(138,143,152,0.07)',
-            border: '1px solid rgba(138,143,152,0.2)',
             borderRadius: 9999,
-            padding: '14px 18px',
+            padding: '12px 20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -99,51 +97,50 @@ export function DashboardActionGrid({
           }}
         >
           <div>
-            <p style={{ color: '#8a8f98', fontSize: 12, fontWeight: 700, margin: 0 }}>ABD Wallet Extension detected</p>
-            <p style={{ color: '#8a8f98', fontSize: 11, margin: '2px 0 0' }}>Connect to use it as a browser wallet for dApps</p>
+            <p className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>ABD Wallet Extension detected</p>
+            <p className="sf-bold" style={{ color: '#64748b', fontSize: 10.5, fontWeight: 700, margin: '2px 0 0' }}>Connect to use it as a browser wallet for dApps</p>
           </div>
           <button
             onClick={() => setShowPassphraseModal(true)}
             disabled={extAttaching}
+            className="sf-display-black"
             style={{
-              background: '#8a8f98',
+              background: '#1e293b',
               border: 'none',
-              borderRadius: 999,
-              color: '#23262b',
+              borderRadius: 9999,
+              color: '#ffffff',
               fontSize: 11,
-              fontWeight: 400,
-              padding: '8px 16px',
+              fontWeight: 900,
+              padding: '9px 18px',
               cursor: extAttaching ? 'not-allowed' : 'pointer',
               opacity: extAttaching ? 0.6 : 1,
               flexShrink: 0,
               textTransform: 'uppercase',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
+              boxShadow: '2px 2px 6px rgba(166, 177, 198, 0.4)',
+              transition: 'all 0.15s',
             }}
-            className="russo-one-regular"
           >
             {extAttaching ? 'Attaching…' : 'Connect Extension'}
           </button>
         </div>
       )}
       {extError && extPresent && !extAttached && typeof window !== 'undefined' && window.self === window.top && (
-        <p style={{ color: '#b91c1c', fontSize: 11, margin: '-4px 0 4px', padding: '0 4px' }}>{extError}</p>
+        <p className="sf-bold" style={{ color: '#b91c1c', fontSize: 11, margin: '-4px 0 4px', padding: '0 4px', fontWeight: 700 }}>{extError}</p>
       )}
       {extAttached && walletUnlocked && typeof window !== 'undefined' && window.self === window.top && (
         <div
+          className="neu-pill-inset"
           style={{
-            background: 'rgba(43,45,51,0.05)',
-            border: '1px solid rgba(43,45,51,0.15)',
-            borderRadius: 9999,
-            padding: '12px 18px',
+            padding: '10px 18px',
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            justifyContent: 'center',
           }}
         >
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2b2d33', boxShadow: '0 0 6px rgba(43,45,51,0.6)', flexShrink: 0 }} />
           <p
-            className="russo-one-regular"
-            style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}
+            className="sf-display-black"
+            style={{ color: '#64748b', fontSize: 10.5, fontWeight: 800, margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'center' }}
           >
             Extension connected — browser dApps can now use this wallet
           </p>
@@ -153,11 +150,10 @@ export function DashboardActionGrid({
       {/* Ledger Active Banner */}
       {activeLedger && (
         <div
+          className="neu-pill-inset"
           style={{
-            background: 'rgba(138,143,152,0.08)',
-            border: '1px solid rgba(138,143,152,0.25)',
             borderRadius: 9999,
-            padding: '12px 18px',
+            padding: '12px 20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -165,31 +161,30 @@ export function DashboardActionGrid({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#8a8f98' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#1e293b' }}>
               usb
             </span>
             <div>
-              <p style={{ color: '#8a8f98', fontSize: 12, fontWeight: 700, margin: 0 }}>Ledger Active</p>
-              <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: '1px 0 0' }}>
+              <p className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 900, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Ledger Active</p>
+              <p className="sf-mono-bold" style={{ color: '#64748b', fontSize: 10.5, fontWeight: 700, margin: '1px 0 0' }}>
                 {activeLedger.address.slice(0, 10)}...{activeLedger.address.slice(-6)}
               </p>
             </div>
           </div>
           <button
             onClick={() => setActiveLedger(null)}
+            className="sf-display-black neu-badge-inset"
             style={{
-              background: '#e4e6ee',
-              boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)',
-              borderRadius: 999,
-              padding: '6px 14px',
+              borderRadius: 9999,
+              padding: '7px 14px',
               cursor: 'pointer',
-              color: '#8a8f98',
-              fontSize: 11,
-              fontWeight: 400,
+              color: '#b91c1c',
+              fontSize: 10,
+              fontWeight: 900,
               textTransform: 'uppercase',
-              letterSpacing: '0.06em',
+              letterSpacing: '0.08em',
+              border: 'none',
             }}
-            className="russo-one-regular"
           >
             Disconnect
           </button>
@@ -226,10 +221,10 @@ export function DashboardActionGrid({
             whileTap={{ scale: item.disabled ? 1 : 0.96 }}
             transition={springs.snappy}
             style={{ opacity: item.disabled ? 0.35 : 1 }}
-            className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-1.5 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group border border-transparent cursor-pointer"
+            className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-2 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group border border-transparent cursor-pointer"
           >
             <span className="material-symbols-outlined text-3xl md:text-5xl group-hover:scale-110 transition-transform">{item.icon}</span>
-            <span className="russo-one-regular uppercase tracking-widest text-[0.6rem]">{item.label}</span>
+            <span className="sf-display-black font-extrabold uppercase tracking-wider text-[0.7rem] sm:text-xs text-[#23262b] group-hover:text-[#f5f6fa] text-center">{item.label}</span>
           </motion.button>
         ))}
 
@@ -261,10 +256,10 @@ export function DashboardActionGrid({
                 whileHover={{ scale: item.disabled ? 1 : 1.03 }}
                 whileTap={{ scale: item.disabled ? 1 : 0.96 }}
                 style={{ opacity: item.disabled ? 0.35 : 1 }}
-                className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-1.5 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group border border-transparent cursor-pointer"
+                className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-2 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group border border-transparent cursor-pointer"
               >
                 <span className="material-symbols-outlined text-2xl md:text-5xl group-hover:scale-110 transition-transform">{item.icon}</span>
-                <span className="russo-one-regular uppercase tracking-widest text-[0.55rem] md:text-[0.6rem]">{item.label}</span>
+                <span className="sf-display-black font-extrabold uppercase tracking-wider text-[0.65rem] sm:text-xs text-[#23262b] group-hover:text-[#f5f6fa] text-center">{item.label}</span>
               </motion.button>
             ))}
         </AnimatePresence>
@@ -276,10 +271,10 @@ export function DashboardActionGrid({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             transition={springs.snappy}
-            className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-1.5 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group active:scale-95 border border-transparent col-span-2 cursor-pointer"
+            className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-2 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group active:scale-95 border border-transparent col-span-2 cursor-pointer"
           >
             <span className="material-symbols-outlined text-3xl md:text-5xl group-hover:scale-110 transition-transform">swap_horiz</span>
-            <span className="russo-one-regular uppercase tracking-widest text-[0.6rem]">Transfer Between Wallets</span>
+            <span className="sf-display-black font-extrabold uppercase tracking-wider text-[0.7rem] sm:text-xs text-[#23262b] group-hover:text-[#f5f6fa]">Transfer Between Wallets</span>
           </motion.button>
         )}
       </div>

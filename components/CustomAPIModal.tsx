@@ -75,7 +75,7 @@ export function CustomAPIModal({ activeAddress, onClose, onSaved }: Props) {
       style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(228,230,238,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ background: '#e4e6ee', boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)', borderRadius: '1.5rem', width: 460, maxWidth: '95vw', maxHeight: '92vh', overflowY: 'auto', padding: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 18, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Add Custom API</span>
+          <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 18, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Add Custom Coin / API</span>
           <button onClick={onClose} style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}>
             <X size={16} />
           </button>
@@ -124,7 +124,7 @@ export function CustomAPIModal({ activeAddress, onClose, onSaved }: Props) {
                   placeholder='{"from":"{from}","to":"{to}","amount":"{amount}"}'
                   style={{ ...inp, resize: 'vertical', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", fontSize: 11 }} />
               </div>
-              <p style={{ color: '#8a8f98', fontSize: 10, marginTop: 4 }}>🔒 Private keys are never transmitted over the network.</p>
+              <p className="sf-bold" style={{ color: '#8a8f98', fontSize: 10, marginTop: 4, fontWeight: 600 }}>Private keys are never transmitted over the network.</p>
             </div>
 
           {/* API Key (optional) */}

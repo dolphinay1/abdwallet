@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useWallet } from '@/context/WalletContext';
-import { Zap, KeyRound, Dices, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Zap, Dices, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { ABDCapsule } from '@/components/ABDCapsule';
 import { AbdLogo } from '@/components/AbdLogo';
 import { MnemonicGeneratorModal } from '@/components/MnemonicGeneratorModal';
@@ -52,19 +52,19 @@ export function AuthScreen() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-[#E2E6EE] text-slate-800 flex flex-col items-center justify-center p-4 sm:p-6 relative selection:bg-slate-300 font-sans">
+    <main className="min-h-screen w-full bg-[#e4e6ee] text-[#23262b] flex flex-col items-center justify-center p-4 sm:p-6 relative selection:bg-slate-300 font-sans">
       {/* ── Elevated Pure Neumorphic Master Card ── */}
       <div 
         className="w-full max-w-[560px] mx-auto rounded-[32px] sm:rounded-[40px] p-8 sm:p-12 relative z-10 my-auto"
         style={{
-          backgroundColor: '#E4E3E8',
-          boxShadow: '16px 16px 40px #C5C3CA, -16px -16px 40px #FFFFFF, inset 1px 1px 2px #FFFFFF',
+          backgroundColor: '#e4e6ee',
+          boxShadow: '9px 9px 18px rgba(166, 177, 198, 0.55), -9px -9px 18px rgba(255, 255, 255, 0.9)',
           border: '1px solid rgba(255, 255, 255, 0.6)'
         }}
       >
         {/* 3D Embossed Natural White Theme ABD Logo */}
         <div className="flex justify-center mb-6 pt-1">
-          <AbdLogo size={180} className="cursor-pointer hover:scale-[1.03] transition-transform duration-300" />
+          <AbdLogo width={220} className="cursor-pointer hover:scale-[1.03] transition-transform duration-300" />
         </div>
 
         {/* Error Notification */}
@@ -78,65 +78,64 @@ export function AuthScreen() {
         {/* Actions Section */}
         {!isImporting ? (
           <div className="space-y-4">
-            {/* 1. Primary Action: CREATE NEW WALLET (High Contrast Charcoal Pill) */}
-            <button
-              id="create-new-wallet-btn"
-              type="button"
-              disabled={isCreating}
-              onClick={handleCreate}
-              className="w-full py-4 px-6 rounded-full font-bold text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-white shadow-lg"
-              style={{
-                fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
-                backgroundColor: '#181B22',
-                backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
-                boxShadow: '6px 6px 16px rgba(166, 177, 198, 0.6), -4px -4px 10px #FFFFFF, inset 0 1px 1px rgba(255, 255, 255, 0.25)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                opacity: isCreating ? 0.85 : 1,
-              }}
-            >
-              {isCreating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>CREATING SECURE VAULT...</span>
-                </>
-              ) : (
-                <>
-                  <span>CREATE NEW WALLET</span>
-                </>
-              )}
-            </button>
+            {/* 1. Primary Action: CREATE NEW WALLET (Inset Monolith Capsule Pill) */}
+            <div className="neu-pill-inset p-1.5 rounded-full">
+              <button
+                id="create-new-wallet-btn"
+                type="button"
+                disabled={isCreating}
+                onClick={handleCreate}
+                className="sf-display-black w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-white shadow-md"
+                style={{
+                  backgroundColor: '#181B22',
+                  backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
+                  boxShadow: '4px 4px 10px rgba(166, 177, 198, 0.4), -2px -2px 6px #FFFFFF',
+                  opacity: isCreating ? 0.85 : 1,
+                }}
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>CREATING SECURE VAULT...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>CREATE NEW WALLET</span>
+                  </>
+                )}
+              </button>
+            </div>
 
-            {/* 2. Secondary Action: IMPORT EXISTING (Clean Neumorphic White Pill) */}
-            <button
-              id="import-existing-wallet-btn"
-              type="button"
-              disabled={isCreating}
-              onClick={() => {
-                setError('');
-                setIsImporting(true);
-              }}
-              className="w-full py-4 px-6 rounded-full font-bold text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-slate-800"
-              style={{
-                fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
-                backgroundColor: '#FFFFFF',
-                backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EFF2F7 100%)',
-                boxShadow: '6px 6px 16px #CAD2DF, -6px -6px 16px #FFFFFF, inset 1px 1px 1px #FFFFFF',
-                border: '1px solid rgba(255, 255, 255, 0.95)'
-              }}
-            >
-              <KeyRound className="w-4 h-4 text-slate-700 stroke-[2.2]" />
-              <span>IMPORT EXISTING</span>
-            </button>
+            {/* 2. Secondary Action: IMPORT EXISTING (Inset Monolith Capsule Pill) */}
+            <div className="neu-pill-inset p-1.5 rounded-full">
+              <button
+                id="import-existing-wallet-btn"
+                type="button"
+                disabled={isCreating}
+                onClick={() => {
+                  setError('');
+                  setIsImporting(true);
+                }}
+                className="sf-display-black w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-[#1e293b] hover:opacity-95"
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #EFF2F7 100%)',
+                  boxShadow: '4px 4px 10px rgba(166, 177, 198, 0.4), -4px -4px 10px #FFFFFF',
+                  border: '1px solid rgba(255, 255, 255, 0.95)'
+                }}
+              >
+                <span>IMPORT EXISTING</span>
+              </button>
+            </div>
 
-            {/* 3. Helper: Generate 12-Word Mnemonic Modal Trigger */}
+            {/* 3. Helper: Generate 12-Word Mnemonic Modal Trigger (Inset Monolith Capsule) */}
             <div className="pt-2 flex justify-center">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors flex items-center gap-2 py-2 px-4 rounded-full bg-slate-200/50 hover:bg-slate-200 cursor-pointer"
-                style={{ fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif" }}
+                className="neu-pill-inset sf-bold text-xs font-bold text-slate-700 hover:text-slate-950 transition-colors flex items-center gap-2 py-2.5 px-5 rounded-full cursor-pointer hover:opacity-85"
               >
-                <Dices className="w-3.5 h-3.5 text-slate-600" />
+                <Dices className="w-3.5 h-3.5 text-slate-700" />
                 <span>Generate 12-Word Recovery Phrase</span>
               </button>
             </div>
@@ -145,7 +144,7 @@ export function AuthScreen() {
           /* ── Import Mnemonic Sub-view ── */
           <div className="space-y-4 animate-in fade-in duration-200">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              <span className="sf-display-black text-xs font-black uppercase tracking-wider text-slate-700">
                 Enter Seed Phrase
               </span>
               <button
@@ -154,7 +153,7 @@ export function AuthScreen() {
                   setError('');
                   setIsImporting(false);
                 }}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
+                className="sf-bold text-xs font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -175,9 +174,8 @@ export function AuthScreen() {
                   setError('');
                   setIsImporting(false);
                 }}
-                className="flex-1 font-bold tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-slate-600"
+                className="sf-display-black flex-1 font-black tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-slate-700"
                 style={{
-                  fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
                   backgroundColor: '#EFF2F7',
                   boxShadow: '4px 4px 10px #CAD2DF, -4px -4px 10px #FFFFFF',
                   border: '1px solid rgba(255,255,255,0.85)'
@@ -189,9 +187,8 @@ export function AuthScreen() {
                 type="button"
                 disabled={isRestoring}
                 onClick={handleImport}
-                className="flex-[2] font-bold tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-white flex items-center justify-center gap-2"
+                className="sf-display-black flex-[2] font-black tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-white flex items-center justify-center gap-2"
                 style={{
-                  fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
                   backgroundColor: '#181B22',
                   backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
                   boxShadow: '6px 6px 14px rgba(166, 177, 198, 0.6), -3px -3px 8px #FFFFFF',
@@ -213,7 +210,7 @@ export function AuthScreen() {
 
         {/* Footer Security Badge */}
         <div className="mt-8 pt-6 border-t border-slate-200/60 w-full flex justify-center text-center">
-          <p className="text-[8.5px] sm:text-[9px] font-semibold text-slate-400 uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 leading-relaxed" style={{ fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif" }}>
+          <p className="sf-bold text-[8.5px] sm:text-[9.5px] font-bold text-slate-500 uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 leading-relaxed">
             100% Non-Custodial & Client-Side • Zero Logs • Keys never leave your device
           </p>
         </div>

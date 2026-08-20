@@ -119,17 +119,26 @@ function TokenPicker({ chainId, value, onChange, label }: {
           borderRadius: '1rem', marginTop: 8, maxHeight: 280, overflow: 'hidden',
           display: 'flex', flexDirection: 'column',
         }}>
-          <div style={{ padding: '8px 10px', borderBottom: '1px solid rgba(166,177,198,0.06)' }}>
-            <Input
-              autoFocus
-              size="sm"
-              variant="bordered"
-              radius="lg"
-              value={search}
-              onValueChange={setSearch}
-              placeholder="Search symbol or name…"
-              classNames={{ input: 'text-[12px]' }}
-            />
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(166,177,198,0.06)' }}>
+            <div className="neu-pill-inset" style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', borderRadius: 9999 }}>
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search symbol or name…"
+                className="sf-bold"
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: '#1e293b',
+                }}
+              />
+            </div>
           </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {filtered.length === 0 && (
@@ -312,8 +321,8 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '22px 24px 16px', borderBottom: '1px solid rgba(166,177,198,0.07)', flexShrink: 0 }}>
           <div>
-            <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 22, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Swap</span>
-            <span style={{ color: '#8a8f98', fontSize: 10, fontWeight: 700, marginLeft: 10, letterSpacing: '0.06em' }}>via LiFi</span>
+            <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 22, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Swap</span>
+            <span className="sf-bold" style={{ color: '#64748b', fontSize: 11, fontWeight: 700, marginLeft: 10, letterSpacing: '0.06em' }}>via LiFi</span>
           </div>
           <Button isIconOnly size="sm" variant="flat" radius="lg" isDisabled={isBusy} onPress={onClose} className="text-[#23262b]">
             <X size={18} />

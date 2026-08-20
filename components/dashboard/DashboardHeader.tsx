@@ -79,20 +79,26 @@ export function DashboardHeader({
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-0.5">
-          <h2 className="text-xl md:text-5xl russo-one-regular tracking-[0.02em] text-[#23262b] leading-tight whitespace-nowrap">
+          <h2
+            className="text-2xl md:text-5xl sf-display-black font-black tracking-tight text-[#1e293b] leading-tight whitespace-nowrap"
+            style={{
+              fontWeight: 900,
+              letterSpacing: '-0.03em',
+              WebkitTextStroke: '0.5px #1e293b',
+            }}
+          >
             {upperEn(frozenMode === 'PERSISTENT' ? 'Persistent Session' : 'New Session')}
           </h2>
-          <p className="text-[#8a8f98] russo-one-regular tracking-[0.15em] uppercase text-[0.6rem] opacity-80">
+          <p className="text-[#8a8f98] sf-bold font-bold tracking-wider uppercase text-[0.65rem] opacity-90">
             {frozenMode === 'PERSISTENT' ? 'Encrypted · Saved in this browser' : 'Ephemeral — nothing stored unless you save it'}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0 mt-1">
           <button
             onClick={() => setShowNetworks(true)}
-            className="neu-inset px-3 py-1.5 rounded-full flex items-center gap-2 border border-transparent hover:border-transparent transition-colors"
+            className="neu-inset px-3.5 py-1.5 rounded-full flex items-center gap-2 border border-transparent hover:border-transparent transition-colors cursor-pointer"
           >
-            <div className="w-2 h-2 bg-[#2b2d33] rounded-full animate-pulse shadow-[0_0_12px_rgba(43,45,51,0.8)]" />
-            <span className="text-[0.6rem] russo-one-regular tracking-[0.15em] uppercase text-[#23262b] truncate max-w-[72px] md:max-w-none">
+            <span className="text-[0.65rem] md:text-xs sf-display-black font-extrabold tracking-wider uppercase text-[#23262b] truncate max-w-[80px] md:max-w-none">
               {meta?.name ?? (manualChain ? manualChain.name : 'Network')}
             </span>
             <span className="material-symbols-outlined text-[#8a8f98]" style={{ fontSize: 14 }}>
@@ -105,8 +111,8 @@ export function DashboardHeader({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 4,
-              padding: '6px 10px',
+              gap: 5,
+              padding: '6px 12px',
               borderRadius: 9999,
               border: `1px solid ${mode === 'advanced' ? 'rgba(43,45,51,0.3)' : 'rgba(166,177,198,0.1)'}`,
               background: mode === 'advanced' ? 'rgba(43,45,51,0.08)' : 'rgba(166,177,198,0.04)',
@@ -114,7 +120,7 @@ export function DashboardHeader({
               transition: 'border-color 0.25s, background 0.25s',
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 13, color: '#2b2d33' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#2b2d33' }}>
               {mode === 'advanced' ? 'arrow_back' : 'settings'}
             </span>
             <AnimatePresence mode="wait">
@@ -124,8 +130,8 @@ export function DashboardHeader({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.15 }}
-                className="russo-one-regular"
-                style={{ fontSize: 9, fontWeight: 400, color: '#2b2d33', textTransform: 'uppercase', letterSpacing: '0.08em' }}
+                className="sf-display-black"
+                style={{ fontSize: 10, fontWeight: 800, color: '#2b2d33', textTransform: 'uppercase', letterSpacing: '0.08em' }}
               >
                 {mode === 'simple' ? 'Advanced' : 'Simple'}
               </motion.span>
@@ -136,7 +142,7 @@ export function DashboardHeader({
 
       {/* Balance card */}
       <div className="space-y-3 md:space-y-6">
-        <p className="text-[#8a8f98] russo-one-regular tracking-[0.2em] uppercase text-xs opacity-60">Selected Chain Balance</p>
+        <p className="text-[#8a8f98] sf-display-black tracking-[0.15em] uppercase text-xs font-bold opacity-75">Selected Chain Balance</p>
         <div className="flex items-end gap-4">
           <h1 className="text-[2.6rem] md:text-[9rem] font-black tracking-tighter leading-none text-[#23262b]">
             {isLoadingTotal ? (
@@ -192,6 +198,7 @@ export function DashboardHeader({
         {/* Address pill */}
         <div
           className="neu-pill-inset text-[#23262b] p-5 md:p-7 rounded-full flex justify-between items-center group cursor-pointer hover:opacity-80 transition-all"
+          style={{ background: '#e4e6ee' }}
           onClick={handleCopy}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -201,7 +208,7 @@ export function DashboardHeader({
               <ChainIcon chain={selectedChain} size={40} />
             )}
             <div className="flex flex-col min-w-0">
-              <span className="text-[0.65rem] russo-one-regular uppercase tracking-widest opacity-60 mb-1">
+              <span className="text-[0.65rem] sf-display-black font-extrabold uppercase tracking-widest opacity-70 mb-1">
                 {meta ? `${meta.name} Address` : 'Active Monolith Address'}
               </span>
               <span className="text-base md:text-3xl font-black tracking-tighter font-mono truncate">{shortAddr}</span>

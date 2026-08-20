@@ -32,10 +32,11 @@ export function AllNetworksModal({
           onSelect(c);
           onClose();
         }}
+        className={isActive ? 'neu-inset' : ''}
         style={{
-          background: isActive ? 'rgba(43,45,51,0.07)' : 'rgba(166,177,198,0.03)',
-          border: isActive ? '1.5px solid rgba(43,45,51,0.4)' : '1px solid rgba(166,177,198,0.04)',
-          borderRadius: '1.5rem',
+          background: isActive ? undefined : 'rgba(166,177,198,0.03)',
+          border: isActive ? undefined : '1px solid rgba(166,177,198,0.06)',
+          borderRadius: '1.25rem',
           padding: '12px 8px',
           display: 'flex',
           flexDirection: 'column',
@@ -47,66 +48,47 @@ export function AllNetworksModal({
           width: '100%',
         }}
       >
-        {isActive && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: '#2b2d33',
-              boxShadow: '0 0 10px #2b2d33',
-            }}
-          />
-        )}
         <ChainIcon chain={c} size={44} inset />
-        <span style={{ color: '#23262b', fontSize: 12, fontWeight: 700 }}>{c.symbol}</span>
-        <span style={{ color: '#8a8f98', fontSize: 10 }}>{c.name}</span>
+        <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 900, letterSpacing: '-0.01em' }}>{c.symbol}</span>
+        <span className="sf-bold" style={{ color: '#64748b', fontSize: 10, fontWeight: 700 }}>{c.name}</span>
         {c.isTestnet ? (
           <span
-            className="russo-one-regular"
+            className="neu-badge-inset sf-display-black"
             style={{
-              background: '#8a8f9822',
-              color: '#8a8f98',
-              fontSize: 9,
+              color: '#475569',
+              fontSize: 8.5,
               padding: '3px 8px',
-              borderRadius: '8px',
-              fontWeight: 400,
-              letterSpacing: '0.05em',
-              boxShadow: '0 0 10px rgba(138,143,152,0.15)',
+              borderRadius: 9999,
+              fontWeight: 900,
+              letterSpacing: '0.06em',
             }}
           >
             TESTNET
           </span>
         ) : c.isAlchemy ? (
           <span
-            className="russo-one-regular"
+            className="neu-badge-inset sf-display-black"
             style={{
-              background: 'rgba(43,45,51,0.12)',
-              color: '#2b2d33',
-              fontSize: 9,
+              color: '#047857',
+              fontSize: 8.5,
               padding: '3px 8px',
-              borderRadius: '8px',
-              fontWeight: 400,
-              letterSpacing: '0.05em',
-              boxShadow: '0 0 10px rgba(43,45,51,0.2)',
+              borderRadius: 9999,
+              fontWeight: 900,
+              letterSpacing: '0.06em',
             }}
           >
             GASLESS
           </span>
         ) : (
           <span
-            className="russo-one-regular"
+            className="neu-badge-inset sf-display-black"
             style={{
-              background: 'rgba(166,177,198,0.06)',
-              color: '#8a8f98',
-              fontSize: 9,
+              color: '#334155',
+              fontSize: 8.5,
               padding: '3px 8px',
-              borderRadius: '8px',
-              fontWeight: 400,
-              letterSpacing: '0.05em',
+              borderRadius: 9999,
+              fontWeight: 900,
+              letterSpacing: '0.06em',
             }}
           >
             EOA
@@ -156,11 +138,11 @@ export function AllNetworksModal({
           }}
         >
           <span
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
+              color: '#1e293b',
               fontSize: 20,
-              fontWeight: 400,
+              fontWeight: 900,
               fontStyle: 'normal',
               textTransform: 'uppercase',
               letterSpacing: '0.02em',
@@ -186,12 +168,12 @@ export function AllNetworksModal({
         </div>
         <div style={{ overflowY: 'auto', padding: '16px 24px', flex: 1 }}>
           <p
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
-              fontSize: 9,
-              letterSpacing: '0.15em',
-              fontWeight: 400,
+              color: '#475569',
+              fontSize: 10,
+              letterSpacing: '0.1em',
+              fontWeight: 800,
               marginBottom: 12,
               textTransform: 'uppercase',
             }}
@@ -204,12 +186,12 @@ export function AllNetworksModal({
             ))}
           </div>
           <p
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
-              fontSize: 9,
-              letterSpacing: '0.15em',
-              fontWeight: 400,
+              color: '#475569',
+              fontSize: 10,
+              letterSpacing: '0.1em',
+              fontWeight: 800,
               marginBottom: 12,
               textTransform: 'uppercase',
             }}
@@ -222,12 +204,12 @@ export function AllNetworksModal({
             ))}
           </div>
           <p
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
-              fontSize: 9,
-              letterSpacing: '0.15em',
-              fontWeight: 400,
+              color: '#475569',
+              fontSize: 10,
+              letterSpacing: '0.1em',
+              fontWeight: 800,
               marginBottom: 12,
               textTransform: 'uppercase',
             }}
@@ -253,61 +235,50 @@ export function AllNetworksModal({
             Non-EVM Chains
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
-            {Object.values(NON_EVM_META).map((m) => (
-              <button
-                key={m.coin}
-                onClick={() => {
-                  onSelectNonEvm(m.coin);
-                  onClose();
-                }}
-                style={{
-                  background: selectedNonEvm === m.coin ? 'rgba(43,45,51,0.08)' : 'rgba(166,177,198,0.03)',
-                  border: selectedNonEvm === m.coin ? '1.5px solid rgba(43,45,51,0.4)' : '1px solid rgba(166,177,198,0.04)',
-                  borderRadius: '1.5rem',
-                  padding: '12px 8px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 6,
-                  cursor: 'pointer',
-                  position: 'relative',
-                  transition: 'all 0.15s',
-                  width: '100%',
-                }}
-              >
-                {selectedNonEvm === m.coin && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: '#2b2d33',
-                      boxShadow: '0 0 10px rgba(43,45,51,0.4)',
-                    }}
-                  />
-                )}
-                <CoinIcon symbol={m.symbol} color={m.color} logoUrl={m.logoUrl} size={44} inset />
-                <span style={{ color: '#23262b', fontSize: 12, fontWeight: 700 }}>{m.symbol}</span>
-                <span style={{ color: '#8a8f98', fontSize: 10 }}>{m.name}</span>
-                <span
-                  className="russo-one-regular"
+            {Object.values(NON_EVM_META).map((m) => {
+              const isActive = selectedNonEvm === m.coin;
+              return (
+                <button
+                  key={m.coin}
+                  onClick={() => {
+                    onSelectNonEvm(m.coin);
+                    onClose();
+                  }}
+                  className={isActive ? 'neu-inset' : ''}
                   style={{
-                    background: 'rgba(166,177,198,0.06)',
-                    color: '#8a8f98',
-                    fontSize: 9,
-                    padding: '3px 8px',
-                    borderRadius: '8px',
-                    fontWeight: 400,
-                    letterSpacing: '0.05em',
+                    background: isActive ? undefined : 'rgba(166,177,198,0.03)',
+                    border: isActive ? undefined : '1px solid rgba(166,177,198,0.06)',
+                    borderRadius: '1.25rem',
+                    padding: '12px 8px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 6,
+                    cursor: 'pointer',
+                    position: 'relative',
+                    transition: 'all 0.15s',
+                    width: '100%',
                   }}
                 >
-                  NON-EVM
-                </span>
-              </button>
-            ))}
+                  <CoinIcon symbol={m.symbol} color={m.color} logoUrl={m.logoUrl} size={44} inset />
+                  <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 900, letterSpacing: '-0.01em' }}>{m.symbol}</span>
+                  <span className="sf-bold" style={{ color: '#64748b', fontSize: 10, fontWeight: 700 }}>{m.name}</span>
+                  <span
+                    className="neu-badge-inset sf-display-black"
+                    style={{
+                      color: '#475569',
+                      fontSize: 8.5,
+                      padding: '3px 8px',
+                      borderRadius: 9999,
+                      fontWeight: 900,
+                      letterSpacing: '0.06em',
+                    }}
+                  >
+                    NON-EVM
+                  </span>
+                </button>
+              );
+            })}
           </div>
           <p style={{ color: '#8a8f98', fontSize: 9, textAlign: 'center' }}>
             {CHAINS.length} EVM + {Object.keys(NON_EVM_META).length} non-EVM networks

@@ -54,11 +54,11 @@ export function QRModal({ address, onClose }: { address: string; onClose: () => 
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <span
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
+              color: '#1e293b',
               fontSize: 20,
-              fontWeight: 400,
+              fontWeight: 900,
               fontStyle: 'normal',
               textTransform: 'uppercase',
               letterSpacing: '0.02em',
@@ -85,41 +85,41 @@ export function QRModal({ address, onClose }: { address: string; onClose: () => 
         <div style={{ background: '#23262b', borderRadius: '1rem', padding: 16 }}>
           <QRCodeSVG value={address} size={200} level="M" />
         </div>
-        <p style={{ color: '#23262b', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
+        <p className="sf-mono-bold" style={{ color: '#1e293b', fontSize: 10, fontWeight: 700, wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
           {address}
         </p>
         <button
           onClick={copy}
-          className="russo-one-regular"
+          className="sf-display-black"
           style={{
             background: copied ? 'rgba(43,45,51,0.1)' : 'rgba(166,177,198,0.06)',
             border: `1px solid ${copied ? 'rgba(43,45,51,0.3)' : 'rgba(166,177,198,0.1)'}`,
             borderRadius: '1rem',
             padding: '10px 20px',
-            fontSize: 10,
-            color: copied ? '#2b2d33' : '#23262b',
+            fontSize: 11,
+            color: copied ? '#059669' : '#1e293b',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 6,
-            fontWeight: 400,
+            fontWeight: 800,
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
           }}
         >
           {copied ? (
             <>
-              <Check size={12} /> Copied!
+              <Check size={14} /> Copied!
             </>
           ) : (
             <>
-              <Copy size={12} /> Copy Address
+              <Copy size={14} /> Copy Address
             </>
           )}
         </button>
         <p
-          className="russo-one-regular"
-          style={{ color: '#8a8f98', fontSize: 9, textAlign: 'center', margin: 0, fontWeight: 400, letterSpacing: '0.02em' }}
+          className="sf-bold"
+          style={{ color: '#64748b', fontSize: 10, textAlign: 'center', margin: 0, fontWeight: 600 }}
         >
           Send only EVM-compatible assets to this address
         </p>

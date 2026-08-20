@@ -123,8 +123,8 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p className="russo-one-regular" style={{ color: '#23262b', fontWeight: 400, fontSize: 18, margin: 0, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Transfer</p>
-              <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 10, margin: 0, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Between saved wallets</p>
+              <p className="sf-display-black" style={{ color: '#1e293b', fontWeight: 900, fontSize: 18, margin: 0, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Transfer</p>
+              <p className="sf-bold" style={{ color: '#64748b', fontSize: 10, margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Between saved wallets</p>
             </div>
             <Button isIconOnly size="sm" variant="flat" radius="lg" onPress={onClose} className="text-[#8a8f98]">
               <X size={16} />

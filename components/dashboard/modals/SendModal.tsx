@@ -87,8 +87,8 @@ export function SendModal({
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <span
-            className="russo-one-regular"
-            style={{ color: '#23262b', fontSize: 22, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em' }}
+            className="sf-display-black"
+            style={{ color: '#1e293b', fontSize: 22, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}
           >
             Send
           </span>
@@ -291,6 +291,7 @@ export function SendModal({
                     (f.tokenRisk?.level === 'danger' && f.tokenRisk.flags.length > 0));
                 return (
                   <button
+                    className="sf-display-black"
                     onClick={f.handleSend}
                     disabled={isProcessing || hasBlockingRisk}
                     style={{

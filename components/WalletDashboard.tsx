@@ -300,11 +300,7 @@ export function WalletDashboard() {
                 selectedChain={d.selectedChain}
                 isSavingVault={d.isSavingVault}
                 onSwitch={async (snap) => {
-                  try {
-                    await d.switchToSnap(snap);
-                  } catch {
-                    alert('Vault data not found.');
-                  }
+                  await d.switchToSnap(snap);
                 }}
                 onSave={async (snap, isCurrent) => {
                   d.setIsSavingVault(true);

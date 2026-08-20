@@ -65,18 +65,18 @@ export function TransactionsTab({
                 {isOut ? <ArrowUpRight size={20} className="text-red-400" /> : <ArrowDownLeft size={20} className="text-[#8a8f98]" />}
               </div>
               <div>
-                <p className="font-black text-[#23262b] text-lg">{isOut ? 'Sent' : 'Received'}</p>
-                <p className="text-[0.65rem] text-[#8a8f98] uppercase tracking-widest font-bold font-mono">
+                <p className="sf-display-black font-black text-[#1e293b] text-lg">{isOut ? 'Sent' : 'Received'}</p>
+                <p className="sf-mono-bold text-[0.7rem] text-[#64748b] uppercase tracking-wider font-bold">
                   {tx.hash.slice(0, 10)}...{tx.hash.slice(-4)}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className={`font-black text-lg ${isOut ? 'text-red-400' : 'text-[#8a8f98]'}`}>
+              <p className={`sf-mono-bold font-bold text-lg ${isOut ? 'text-red-500' : 'text-emerald-600'}`}>
                 {isOut ? '-' : '+'}
                 {tx.value} {tx.asset}
               </p>
-              <p className="text-[0.65rem] text-[#8a8f98] tracking-widest font-bold">
+              <p className="sf-bold text-[0.7rem] text-[#64748b] tracking-wider font-bold">
                 {date}
                 {time ? ` · ${time}` : ''}
               </p>

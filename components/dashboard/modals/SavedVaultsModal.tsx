@@ -69,11 +69,11 @@ export function SavedVaultsModal({
           }}
         >
           <span
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
+              color: '#1e293b',
               fontSize: 20,
-              fontWeight: 400,
+              fontWeight: 900,
               fontStyle: 'normal',
               textTransform: 'uppercase',
               letterSpacing: '0.02em',
@@ -99,7 +99,7 @@ export function SavedVaultsModal({
         </div>
         <div style={{ padding: '12px 16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {saved.length === 0 ? (
-            <p style={{ color: '#8a8f98', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>
+            <p className="sf-bold" style={{ color: '#64748b', fontSize: 13, fontWeight: 600, textAlign: 'center', padding: '24px 0' }}>
               No saved vaults yet.
               <br />
               Use Save on a wallet in the history section.
@@ -145,25 +145,28 @@ export function SavedVaultsModal({
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: isCurrent ? '#2b2d33' : '#23262b', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
+                    <p className="sf-mono-bold" style={{ color: isCurrent ? '#1e293b' : '#334155', fontSize: 12, fontWeight: 700, margin: 0 }}>
                       {snap.shortAddress}
                     </p>
-                    <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ margin: '3px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
                       {dispName && (
-                        <span style={{ color: isCurrent ? '#2b2d33' : '#8a8f98', fontWeight: 900, textTransform: 'uppercase', fontSize: 8, letterSpacing: '0.08em' }}>
+                        <span className="neu-pill-chain" style={{ fontSize: 8.5, padding: '2px 7px' }}>
                           {dispName}
                         </span>
                       )}
-                      <span>{snap.vaultMode === 'PERSISTENT' ? 'Persistent' : 'Ephemeral'}</span>
+                      <span className={snap.vaultMode === 'PERSISTENT' ? 'neu-pill-saved' : 'neu-pill-temp'} style={{ fontSize: 8.5, padding: '2px 7px' }}>
+                        {snap.vaultMode === 'PERSISTENT' ? 'Persistent' : 'Ephemeral'}
+                      </span>
                       {isCurrent && (
-                        <span style={{ color: '#2b2d33', fontWeight: 900, textTransform: 'uppercase', fontSize: 8, letterSpacing: '0.1em' }}>
-                          · Active
+                        <span className="neu-pill-active" style={{ fontSize: 8.5, padding: '2px 7px' }}>
+                          Active
                         </span>
                       )}
-                    </p>
+                    </div>
                   </div>
                   {!isCurrent && (
                     <button
+                      className="sf-display-black"
                       onClick={() => onSwitch(snap)}
                       style={{
                         flexShrink: 0,
@@ -171,7 +174,7 @@ export function SavedVaultsModal({
                         border: 'none',
                         borderRadius: 999,
                         padding: '6px 14px',
-                        color: '#e4e6ee',
+                        color: '#f8fafc',
                         fontSize: 11,
                         fontWeight: 900,
                         cursor: 'pointer',

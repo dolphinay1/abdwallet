@@ -98,11 +98,11 @@ export function AddressBookModal({
           }}
         >
           <span
-            className="russo-one-regular"
+            className="sf-display-black"
             style={{
-              color: '#23262b',
+              color: '#1e293b',
               fontSize: 20,
-              fontWeight: 400,
+              fontWeight: 900,
               fontStyle: 'normal',
               textTransform: 'uppercase',
               letterSpacing: '0.02em',

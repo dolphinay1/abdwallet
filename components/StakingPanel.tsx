@@ -148,28 +148,34 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
 
       {/* ── Protocol selector ── */}
       <div style={{ display: 'flex', gap: 8 }}>
-        {STAKING_PROTOCOLS.map(p => (
-          <button key={p.id} onClick={() => { setSelectedProtocol(p.id); setStakeStatus('idle'); setStakeError(''); }}
-            style={{
-              flex: 1, padding: '12px 10px', borderRadius: 12, border: `2px solid ${selectedProtocol === p.id ? '#2b2d33' : 'rgba(166,177,198,0.08)'}`,
-              background: selectedProtocol === p.id ? 'rgba(43,45,51,0.08)' : 'rgba(166,177,198,0.03)', cursor: 'pointer', transition: 'all 0.15s',
-            }}>
-            <p style={{ fontWeight: 900, color: selectedProtocol === p.id ? '#2b2d33' : '#8a8f98', fontSize: 13, margin: 0 }}>{p.name}</p>
-            <p style={{ fontSize: 10, color: selectedProtocol === p.id ? 'rgba(43,45,51,0.7)' : 'rgba(166,177,198,0.3)', margin: '2px 0 0' }}>{p.token}</p>
-            {apys[p.id] ? (
-              <p style={{ fontSize: 11, fontWeight: 900, color: '#23262b', margin: '4px 0 0' }}>{apys[p.id].toFixed(2)}% APY</p>
-            ) : (
-              <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.2)', margin: '4px 0 0' }}>Loading APY…</p>
-            )}
-          </button>
-        ))}
+        {STAKING_PROTOCOLS.map(p => {
+          const isSel = selectedProtocol === p.id;
+          return (
+            <button key={p.id} onClick={() => { setSelectedProtocol(p.id); setStakeStatus('idle'); setStakeError(''); }}
+              className={isSel ? 'neu-inset' : ''}
+              style={{
+                flex: 1, padding: '14px 12px', borderRadius: '1.25rem',
+                border: isSel ? undefined : '1px solid rgba(166,177,198,0.08)',
+                background: isSel ? undefined : 'rgba(166,177,198,0.03)',
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}>
+              <p className="sf-display-black" style={{ fontWeight: 900, color: isSel ? '#1e293b' : '#64748b', fontSize: 14, margin: 0, letterSpacing: '-0.01em' }}>{p.name}</p>
+              <p className="sf-bold" style={{ fontSize: 11, fontWeight: 700, color: isSel ? '#334155' : '#94a3b8', margin: '2px 0 0' }}>{p.token}</p>
+              {apys[p.id] ? (
+                <p className="sf-display-black" style={{ fontSize: 12, fontWeight: 900, color: '#0f172a', margin: '6px 0 0', letterSpacing: '-0.01em' }}>{apys[p.id].toFixed(2)}% APY</p>
+              ) : (
+                <p className="sf-bold" style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', margin: '6px 0 0' }}>Loading APY…</p>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ── Protocol info ── */}
-      <div style={{ padding: '12px 14px', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 10 }}>
-        <p style={{ fontSize: 11, color: 'rgba(166,177,198,0.45)', margin: 0, lineHeight: 1.5 }}>{proto.description}</p>
+      <div style={{ padding: '14px 16px', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 12 }}>
+        <p className="sf-bold" style={{ fontSize: 12, fontWeight: 600, color: '#475569', margin: 0, lineHeight: 1.5 }}>{proto.description}</p>
         {apy && (
-          <p style={{ fontSize: 10, color: '#23262b', fontWeight: 700, margin: '6px 0 0' }}>
+          <p className="sf-display-black" style={{ fontSize: 11.5, color: '#0f172a', fontWeight: 800, margin: '8px 0 0', letterSpacing: '-0.01em' }}>
             Staking 1 ETH → ~{(apy / 100).toFixed(4)} ETH/year
           </p>
         )}
@@ -178,26 +184,27 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
       {/* ── Stake form ── */}
       {stakeStatus === 'done' ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '24px 16px', background: 'rgba(43,45,51,0.05)', border: '1px solid rgba(43,45,51,0.2)', borderRadius: 12 }}>
-          <p style={{ fontSize: 13, fontWeight: 900, color: '#23262b', margin: 0 }}>Staking Transaction Sent</p>
+          <p className="sf-display-black" style={{ fontSize: 14, fontWeight: 900, color: '#1e293b', margin: 0 }}>Staking Transaction Sent</p>
           {stakeTxHash && (
             <a href={`https://etherscan.io/tx/${stakeTxHash}`} target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 10, color: 'rgba(166,177,198,0.4)', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
+              className="sf-mono-bold"
+              style={{ fontSize: 11, color: '#334155', fontWeight: 700 }}>
               {stakeTxHash.slice(0, 16)}…{stakeTxHash.slice(-8)} ↗
             </a>
           )}
-          <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.3)', margin: 0 }}>You will receive {proto.token} tokens representing your staked ETH.</p>
-          <button className="russo-one-regular" onClick={() => setStakeStatus('idle')}
-            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 8, color: '#23262b', fontSize: 11, fontWeight: 400, padding: '8px 20px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <p className="sf-bold" style={{ fontSize: 11, color: '#64748b', fontWeight: 600, margin: 0 }}>You will receive {proto.token} tokens representing your staked ETH.</p>
+          <button className="sf-display-black" onClick={() => setStakeStatus('idle')}
+            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 8, color: '#23262b', fontSize: 11, fontWeight: 800, padding: '10px 22px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Stake More
           </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-            <p className="russo-one-regular" style={{ fontSize: 10, fontWeight: 400, color: 'rgba(166,177,198,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Amount to Stake</p>
+            <p className="sf-display-black" style={{ fontSize: 11, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Amount to Stake</p>
             {ethBalance && (
-              <button className="russo-one-regular" onClick={() => setStakeAmount((ethBal * 0.999).toFixed(6))}
-                style={{ fontSize: 9, fontWeight: 400, color: '#2b2d33', background: 'transparent', border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              <button className="sf-display-black" onClick={() => setStakeAmount((ethBal * 0.999).toFixed(6))}
+                style={{ fontSize: 10, fontWeight: 800, color: '#1e293b', background: 'transparent', border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 MAX ({parseFloat(ethBalance).toFixed(4)} ETH)
               </button>
             )}
@@ -210,28 +217,28 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
               onChange={e => { setStakeAmount(e.target.value); setStakeError(''); }}
               style={{ ...inp, paddingRight: 48 }}
             />
-            <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 11, fontWeight: 900, color: 'rgba(166,177,198,0.4)' }}>ETH</span>
+            <span className="sf-display-black" style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 12, fontWeight: 900, color: '#475569' }}>ETH</span>
           </div>
           {stakeAmount && parseFloat(stakeAmount) > 0 && apy && (
-            <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.3)', margin: 0 }}>
+            <p className="sf-bold" style={{ fontSize: 11, color: '#64748b', fontWeight: 600, margin: 0 }}>
               Est. annual yield: ~{(parseFloat(stakeAmount) * apy / 100).toFixed(6)} ETH ({formatUSD(parseFloat(stakeAmount) * apy / 100 * ethPrice)})
             </p>
           )}
-          {stakeError && <p style={{ fontSize: 11, color: '#b91c1c', margin: 0 }}>{stakeError}</p>}
+          {stakeError && <p className="sf-bold" style={{ fontSize: 12, color: '#b91c1c', fontWeight: 700, margin: 0 }}>{stakeError}</p>}
           <button
-            className="russo-one-regular"
+            className="sf-display-black"
             onClick={handleStake}
             disabled={stakeStatus === 'signing' || stakeStatus === 'sending' || !stakeAmount || parseFloat(stakeAmount) <= 0}
             style={{
               background: stakeStatus === 'idle' || stakeStatus === 'error' ? '#2b2d33' : 'rgba(166,177,198,0.06)',
-              color: stakeStatus === 'idle' || stakeStatus === 'error' ? '#e4e6ee' : '#8a8f98',
-              border: 'none', borderRadius: 12, padding: '14px 20px', fontWeight: 400, fontSize: 13,
+              color: stakeStatus === 'idle' || stakeStatus === 'error' ? '#f8fafc' : '#8a8f98',
+              border: 'none', borderRadius: 12, padding: '14px 20px', fontWeight: 900, fontSize: 13,
               textTransform: 'uppercase', letterSpacing: '0.08em', cursor: stakeStatus === 'idle' || stakeStatus === 'error' ? 'pointer' : 'not-allowed',
               opacity: !stakeAmount || parseFloat(stakeAmount) <= 0 ? 0.4 : 1, transition: 'all 0.15s',
             }}>
             {stakeStatus === 'signing' ? 'Signing…' : stakeStatus === 'sending' ? 'Broadcasting…' : `Stake ETH via ${proto.name}`}
           </button>
-          <p style={{ fontSize: 9, color: 'rgba(166,177,198,0.2)', textAlign: 'center', margin: 0 }}>
+          <p className="sf-bold" style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, textAlign: 'center', margin: 0 }}>
             Only available on Ethereum Mainnet · Smart contract interaction
           </p>
         </div>

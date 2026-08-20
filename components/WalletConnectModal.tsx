@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { X, Link, Wifi, WifiOff, Check, AlertTriangle, Zap } from 'lucide-react';
-import { Button, Input } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { upperEn } from '@/lib/text';
 import { useWallet } from '@/context/WalletContext';
 import { CHAINS } from '@/lib/chains';
@@ -38,7 +38,7 @@ interface PendingRequest {
   dAppName: string;
 }
 
-import { DAPPS, METHOD_LABELS, TAG_COLORS } from './walletconnect/dapps';
+import { DAPPS, METHOD_LABELS, TAG_COLORS, TAG_STYLES } from './walletconnect/dapps';
 
 
 function DappIcon({ icon, name, color }: { icon: string; name: string; color: string }) {
@@ -289,20 +289,20 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
             const display = [...new Set(known)];
             return (
               <div style={{ marginBottom: 16 }}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 8 }}>Requested Chains</p>
+                <p className="sf-display-black" style={{ color: '#64748b', fontSize: 9.5, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>Requested Chains</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {display.map(name => (
-                    <span key={name} style={{ background: 'rgba(43,45,51,0.08)', border: '1px solid rgba(43,45,51,0.2)', borderRadius: 6, padding: '3px 8px', fontSize: 10, color: '#2b2d33', fontWeight: 700 }}>
+                    <span key={name} className="neu-pill-chain" style={{ padding: '3px 9px', fontSize: 9.5 }}>
                       {name}
                     </span>
                   ))}
                   {unknownCount > 0 && (
-                    <span style={{ background: 'rgba(166,177,198,0.04)', border: '1px solid rgba(166,177,198,0.08)', borderRadius: 6, padding: '3px 8px', fontSize: 10, color: '#8a8f98', fontWeight: 700 }}>
+                    <span className="neu-pill-chain" style={{ padding: '3px 9px', fontSize: 9.5 }}>
                       +{unknownCount} more
                     </span>
                   )}
                   {display.length === 0 && (
-                    <span style={{ fontSize: 10, color: '#8a8f98', fontWeight: 700 }}>Any EVM chain</span>
+                    <span className="neu-pill-chain" style={{ padding: '3px 9px', fontSize: 9.5 }}>Any EVM chain</span>
                   )}
                 </div>
               </div>
@@ -310,9 +310,9 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
           })()}
 
           {/* Your address */}
-          <div style={{ padding: '10px 14px', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '0.75rem', marginBottom: 20 }}>
-            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 4 }}>Your Address</p>
-            <p style={{ color: '#2b2d33', fontSize: 11, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all' }}>{wallet.activeAddress}</p>
+          <div className="neu-pill-inset" style={{ padding: '12px 16px', borderRadius: '1.25rem', marginBottom: 20 }}>
+            <p className="sf-display-black" style={{ color: '#64748b', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>Your Address</p>
+            <p className="sf-mono-bold" style={{ color: '#1e293b', fontSize: 11, fontWeight: 700, wordBreak: 'break-all', margin: 0 }}>{wallet.activeAddress}</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -367,7 +367,6 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
             <>
               {/* From dApp */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#23262b', flexShrink: 0 }} />
                 <p style={{ color: '#23262b', fontSize: 12, fontWeight: 700 }}>
                   <span style={{ color: '#23262b' }}>{pendingRequest.dAppName}</span> is requesting
                 </p>
@@ -444,9 +443,35 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
   }
 
   // ── Main Connect Modal ─────────────────────────────────────────────────────
-  const filteredDapps = dappFilter
-    ? DAPPS.filter(d => d.name.toLowerCase().includes(dappFilter.toLowerCase()) || d.tag.toLowerCase().includes(dappFilter.toLowerCase()))
-    : DAPPS;
+  const TAG_ORDER = [
+    'Perps',
+    'Aggreg.',
+    'DEX',
+    'NFT',
+    'Lending',
+    'Yield',
+    'Staking',
+    'Bridge',
+    'Portfolio',
+    'Explorer',
+    'Govern.',
+    'Multisig',
+    'DAO',
+  ];
+
+  const filteredDapps = useMemo(() => {
+    const list = dappFilter
+      ? DAPPS.filter(d => d.name.toLowerCase().includes(dappFilter.toLowerCase()) || d.tag.toLowerCase().includes(dappFilter.toLowerCase()))
+      : [...DAPPS];
+    return list.sort((a, b) => {
+      const orderA = TAG_ORDER.indexOf(a.tag);
+      const orderB = TAG_ORDER.indexOf(b.tag);
+      const idxA = orderA === -1 ? 999 : orderA;
+      const idxB = orderB === -1 ? 999 : orderB;
+      if (idxA !== idxB) return idxA - idxB;
+      return a.name.localeCompare(b.name);
+    });
+  }, [dappFilter]);
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose(); }}
@@ -456,7 +481,7 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 20, fontWeight: 400, fontStyle: 'normal', textTransform: 'uppercase', letterSpacing: '0.02em' }}>WalletConnect</span>
+          <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 20, fontWeight: 900, fontStyle: 'normal', textTransform: 'uppercase', letterSpacing: '0.02em' }}>WalletConnect</span>
           <button onClick={onClose} style={{ color: '#23262b', background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}>
             <X size={16} />
           </button>
@@ -466,7 +491,7 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
         {!wcIsConfigured() && (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px', borderRadius: '0.9rem', background: 'rgba(185,28,28,0.07)', border: '1px solid rgba(185,28,28,0.25)' }}>
             <AlertTriangle size={14} style={{ color: '#b91c1c', flexShrink: 0, marginTop: 1 }} />
-            <p className="russo-one-regular" style={{ color: '#b91c1c', fontSize: 9, margin: 0, lineHeight: 1.6, fontWeight: 400, letterSpacing: '0.02em' }}>
+            <p className="sf-bold" style={{ color: '#b91c1c', fontSize: 10, margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
               WalletConnect Project ID not configured. Get a free ID at cloud.reown.com and add
               NEXT_PUBLIC_WC_PROJECT_ID to .env.local, then restart the dev server.
             </p>
@@ -475,57 +500,101 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
 
         {/* URI Input */}
         <div>
-          <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 8 }}>
+          <p className="sf-display-black" style={{ color: '#475569', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Paste WalletConnect URI
           </p>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <Input
-              size="sm"
-              variant="bordered"
-              radius="full"
-              placeholder="wc:abc123...@2?relay-protocol=irn&symKey=..."
-              value={uri}
-              onValueChange={setUri}
-              onKeyDown={e => { if (e.key === 'Enter') handlePair(); }}
-              classNames={{ base: 'flex-1', input: 'font-mono text-[11px]' }}
-            />
-            <Button
-              size="sm"
-              radius="full"
-              color="primary"
-              isLoading={pairLoading}
-              onPress={handlePair}
-              className="shrink-0 russo-one-regular tracking-wider text-[11px] h-9"
+            <div className="neu-pill-inset" style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '9px 16px', borderRadius: 9999 }}>
+              <input
+                type="text"
+                placeholder="wc:abc123...@2?relay-protocol=irn&symKey=..."
+                value={uri}
+                onChange={e => setUri(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handlePair(); }}
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontFamily: "var(--font-sf-mono), 'SF Mono', monospace",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: '#1e293b',
+                }}
+              />
+            </div>
+            <button
+              disabled={pairLoading}
+              onClick={handlePair}
+              className="sf-display-black"
+              style={{
+                flexShrink: 0,
+                background: '#1e293b',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: 9999,
+                padding: '0 18px',
+                height: 38,
+                fontSize: 11,
+                fontWeight: 900,
+                letterSpacing: '0.08em',
+                cursor: pairLoading ? 'not-allowed' : 'pointer',
+                opacity: pairLoading ? 0.7 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '2px 2px 6px rgba(166, 177, 198, 0.4)',
+                transition: 'all 0.15s',
+              }}
             >
-              {upperEn('Pair')}
-            </Button>
+              {pairLoading ? '...' : upperEn('Pair')}
+            </button>
           </div>
-          {pairError && <p className="russo-one-regular" style={{ color: '#b91c1c', fontSize: 10, marginTop: 6, fontWeight: 400 }}>{pairError}</p>}
-          <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, marginTop: 6, fontWeight: 400, letterSpacing: '0.02em' }}>
+          {pairError && <p className="sf-bold" style={{ color: '#b91c1c', fontSize: 11, marginTop: 6, fontWeight: 700 }}>{pairError}</p>}
+          <p className="sf-bold" style={{ color: '#64748b', fontSize: 10, marginTop: 6, fontWeight: 600 }}>
             Go to a dApp → click &quot;Connect Wallet&quot; → choose WalletConnect → copy the URI
           </p>
         </div>
 
         {/* dApp Browser */}
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>dApp Browser</p>
-            <Input
-              size="sm"
-              variant="bordered"
-              radius="full"
-              placeholder="Search..."
-              value={dappFilter}
-              onValueChange={setDappFilter}
-              classNames={{ base: 'w-[130px]', input: 'text-[10px]' }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <p className="sf-display-black" style={{ color: '#475569', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>dApp Browser</p>
+            <div className="neu-pill-inset" style={{ width: 145, display: 'flex', alignItems: 'center', padding: '6px 14px', borderRadius: 9999 }}>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={dappFilter}
+                onChange={e => setDappFilter(e.target.value)}
+                className="sf-bold"
+                style={{
+                  width: '100%',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: '#1e293b',
+                }}
+              />
+            </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {filteredDapps.map(d => (
               <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="dapp-tile">
                 <DappIcon icon={d.icon} name={d.name} color={d.color} />
-                <span className="russo-one-regular" style={{ color: '#23262b', fontSize: 9, fontWeight: 400, textAlign: 'center', lineHeight: 1.2, wordBreak: 'break-word', letterSpacing: '0.02em' }}>{d.name}</span>
-                <span className="russo-one-regular" style={{ fontSize: 7, fontWeight: 400, padding: '2px 7px', borderRadius: 99, background: (TAG_COLORS[d.tag] ?? '#8a8f98') + '14', color: TAG_COLORS[d.tag] ?? '#8a8f98', letterSpacing: '0.06em' }}>{d.tag}</span>
+                <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 10, fontWeight: 800, textAlign: 'center', lineHeight: 1.2, wordBreak: 'break-word', letterSpacing: '-0.01em' }}>{d.name}</span>
+                <span
+                  className="neu-pill-dark"
+                  style={{
+                    fontSize: 8,
+                    padding: '2.5px 7px',
+                    background: TAG_STYLES[d.tag]?.bg || 'rgba(43, 45, 51, 0.76)',
+                    color: TAG_STYLES[d.tag]?.color || '#f8fafc',
+                  }}
+                >
+                  {d.tag}
+                </span>
               </a>
             ))}
           </div>
@@ -534,18 +603,18 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
         {/* Active sessions */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, letterSpacing: '0.02em', margin: 0 }}>
+            <p className="sf-display-black" style={{ color: '#475569', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', margin: 0 }}>
               {upperEn('Active Sessions')}
             </p>
-            <button className="russo-one-regular" onClick={refreshSessions} style={{ background: 'none', border: 'none', color: '#8a8f98', fontSize: 9, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 400 }}>
+            <button className="sf-display-black" onClick={refreshSessions} style={{ background: 'none', border: 'none', color: '#475569', fontSize: 10, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800 }}>
               Refresh
             </button>
           </div>
 
           {sessions.length === 0 ? (
-            <div style={{ padding: '24px', border: '1px dashed rgba(166,177,198,0.06)', borderRadius: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <div style={{ padding: '24px', border: '1px dashed rgba(166,177,198,0.15)', borderRadius: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               <WifiOff size={20} style={{ color: '#8a8f98' }} />
-              <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 10, fontWeight: 400, letterSpacing: '0.04em' }}>No active connections</p>
+              <p className="sf-bold" style={{ color: '#64748b', fontSize: 11, fontWeight: 700 }}>No active connections</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -561,11 +630,11 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
                     </div>
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p className="russo-one-regular" style={{ color: '#23262b', fontSize: 12, fontWeight: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '0.02em' }}>{s.name}</p>
-                    <p style={{ color: '#8a8f98', fontSize: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.url}</p>
+                    <p className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>{s.name}</p>
+                    <p className="sf-bold" style={{ color: '#64748b', fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.url}</p>
                   </div>
                   <Button size="sm" variant="bordered" radius="md" onPress={() => handleDisconnect(s.topic)}
-                    className="shrink-0 h-7 min-w-0 px-3 text-[9px] russo-one-regular tracking-wider text-[#23262b]">
+                    className="shrink-0 h-8 min-w-0 px-3.5 text-[10px] sf-display-black font-black tracking-wider text-[#23262b]">
                     {upperEn('Disconnect')}
                   </Button>
                 </div>

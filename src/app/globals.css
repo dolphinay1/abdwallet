@@ -76,15 +76,83 @@ button, a, input, select {
 }
 
 .neu-inset {
-  background: var(--neu-bg);
+  background: #d8dbe6;
   border-radius: 16px;
-  box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+  box-shadow: inset 3px 3px 6px rgba(150, 162, 185, 0.55), inset -3px -3px 6px var(--neu-shadow-light);
 }
 
 .neu-pill-inset {
-  background: var(--neu-bg);
+  background: #d8dbe6;
   border-radius: 9999px;
-  box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+  box-shadow: inset 3px 3px 6px rgba(150, 162, 185, 0.55), inset -3px -3px 6px var(--neu-shadow-light);
+}
+
+.neu-badge-inset {
+  background: #ccd1df;
+  border-radius: 9999px;
+  box-shadow: inset 2px 2px 4px rgba(145, 157, 180, 0.65), inset -2px -2px 4px rgba(255, 255, 255, 0.95);
+}
+
+.neu-pill-inset-red {
+  background: #fae8e8;
+  border-radius: 9999px;
+  box-shadow: inset 3px 3px 6px rgba(220, 140, 140, 0.45), inset -3px -3px 6px rgba(255, 255, 255, 0.95);
+  color: #b91c1c;
+}
+
+.neu-pill-dark {
+  background: rgba(43, 45, 51, 0.76);
+  color: #f8fafc;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-sf-rounded), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.neu-pill-active {
+  background: rgba(16, 120, 80, 0.78);
+  color: #ecfdf5;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-sf-rounded), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.neu-pill-saved {
+  background: rgba(37, 75, 145, 0.78);
+  color: #eff6ff;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-sf-rounded), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.neu-pill-temp {
+  background: rgba(71, 85, 105, 0.76);
+  color: #f8fafc;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-sf-rounded), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.neu-pill-chain {
+  background: rgba(51, 65, 85, 0.74);
+  color: #f8fafc;
+  border-radius: 9999px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-sf-rounded), sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .neu-btn {
@@ -203,11 +271,29 @@ button, a, input, select {
   animation: scan-line 1.8s ease-in-out infinite;
 }
 
-/* ── Display / Label Fonts (local SF fonts, loaded in layout.tsx) ─────────── */
+/* ── Display / Label Fonts (SF Pro family) ─────────────────────────── */
 .russo-one-regular {
-  font-family: var(--font-sf-rounded), 'SF Pro Rounded', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-sf-rounded), 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-weight: 800;
   font-style: normal;
+}
+
+.sf-display-black {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Rounded', var(--font-sf-rounded), 'Segoe UI', system-ui, sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: -0.025em;
+}
+
+.sf-bold {
+  font-family: var(--font-sf-compact), 'SF Compact Text', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-weight: 700;
+}
+
+.sf-mono-bold {
+  font-family: var(--font-sf-mono), 'SF Mono', monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Legacy classes remapped to neumorphic surfaces */

@@ -42,8 +42,7 @@ export function BalanceTab({
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 px-1 mb-2">
-          <div style={{ width: 6, height: 6, borderRadius: '50%', background: meta?.color ?? '#8a8f98' }} />
-          <span style={{ fontSize: 9, fontWeight: 900, color: meta?.color ?? '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+          <span className="sf-display-black" style={{ fontSize: 9.5, fontWeight: 900, color: meta?.color ?? '#64748b', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
             Current Network — {meta?.name ?? selectedNonEvm}
           </span>
         </div>
@@ -101,8 +100,7 @@ export function BalanceTab({
       {manualChain && (
         <div className="slide-up mb-1">
           <div className="flex items-center gap-2 px-1 mb-2">
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2b2d33' }} />
-            <span style={{ fontSize: 9, fontWeight: 900, color: '#2b2d33', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+            <span className="sf-display-black" style={{ fontSize: 9.5, fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
               Current Network — {manualChain.name}
             </span>
           </div>
@@ -233,19 +231,19 @@ export function BalanceTab({
                         </div>
                       )}
                       <div>
-                        <p className="font-black text-[#23262b] text-lg">{token.symbol}</p>
-                        <p className="text-[0.65rem] text-[#8a8f98] uppercase tracking-widest font-bold">{c.name}</p>
+                        <p className="sf-display-black font-black text-[#1e293b] text-lg tracking-tight">{token.symbol}</p>
+                        <p className="sf-bold text-[0.7rem] text-[#64748b] uppercase tracking-wider font-bold">{c.name}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-black text-[#23262b] text-lg">
+                      <p className="sf-mono-bold font-bold text-[#1e293b] text-lg">
                         {parseFloat(token.balance) < 0.000001
                           ? '< 0.000001'
                           : new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(parseFloat(token.balance))}
                       </p>
-                      <p className="text-[0.65rem] text-[#8a8f98] tracking-widest font-bold">{price > 0 ? formatUSD(usdVal) : '—'}</p>
+                      <p className="sf-bold text-[0.7rem] text-[#64748b] tracking-wider font-bold">{price > 0 ? formatUSD(usdVal) : '—'}</p>
                       {chg !== null && (
-                        <p style={{ fontSize: 9, fontWeight: 700, color: chg >= 0 ? '#23262b' : '#b91c1c' }}>
+                        <p className="sf-mono-bold font-bold text-[10px]" style={{ color: chg >= 0 ? '#059669' : '#b91c1c' }}>
                           {chg >= 0 ? '▲' : '▼'} {Math.abs(chg).toFixed(2)}%
                         </p>
                       )}
@@ -286,19 +284,19 @@ export function BalanceTab({
                     </div>
                   )}
                   <div>
-                    <p className="font-black text-[#23262b] text-lg">{token.symbol}</p>
-                    <p className="text-[0.65rem] text-[#8a8f98] uppercase tracking-widest font-bold">{token.name}</p>
+                    <p className="sf-display-black font-black text-[#1e293b] text-lg tracking-tight">{token.symbol}</p>
+                    <p className="sf-bold text-[0.7rem] text-[#64748b] uppercase tracking-wider font-bold">{token.name}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-[#23262b] text-lg">
+                  <p className="sf-mono-bold font-bold text-[#1e293b] text-lg">
                     {parseFloat(token.balance) < 0.000001
                       ? '< 0.000001'
                       : new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(parseFloat(token.balance))}
                   </p>
-                  <p className="text-[0.65rem] text-[#8a8f98] tracking-widest font-bold">{price > 0 ? formatUSD(usdVal) : '—'}</p>
+                  <p className="sf-bold text-[0.7rem] text-[#64748b] tracking-wider font-bold">{price > 0 ? formatUSD(usdVal) : '—'}</p>
                   {chg !== null && (
-                    <p style={{ fontSize: 9, fontWeight: 700, color: chg >= 0 ? '#23262b' : '#b91c1c' }}>
+                    <p className="sf-mono-bold font-bold text-[10px]" style={{ color: chg >= 0 ? '#059669' : '#b91c1c' }}>
                       {chg >= 0 ? '▲' : '▼'} {Math.abs(chg).toFixed(2)}%
                     </p>
                   )}

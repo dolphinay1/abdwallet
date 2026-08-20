@@ -1,11 +1,11 @@
 {
-  "background.js": "sha384-HdcL0NFc2huq6eU9Cx1fiJtU5no9Q4PIPejACUVPpnLirTjuqNRTtMabOCM8d9wc",
-  "content_abdwallet.js": "sha384-alu+7RaaBCMwBkWuANGvGdNoFUikAAnYM7Hny7mFRpyNfTBif4zcdHgA6vxWkmJc",
+  "background.js": "sha384-cCcOOWLG1uN5Wpb47xJ2g69w4GMZiYwvT1PP8O8/gCvMmy9HqSs19JjqnL0xXKvE",
+  "content_abdwallet.js": "sha384-pd/D/FvSELVYB7L/vJRkzRN55KYLJ7Y70Q9bvsfyFNuLF5rET+yVzOBQbR2FZRys",
   "content_inject_loader.js": "sha384-16E9Hv6xR9bTgXpoAFf8DVGCjNMmNkxTjs4nPQ12hobsMYDJphCmkyb1TaGpSn0d",
   "ethers.esm.js": "sha384-bgKEUySpDVuERsfl2VHdZhmt/VeY3egJmJJqTBWf5HZnJNZlIIYRs8TqiiMD4ZgR",
   "ethers.umd.min.js": "sha384-id0TslbJZjX9r2IGNL8B1MyE0pjkF0h8S+5bc8YV+VE+AQ7N1aOlGKYy+Dy3CD0V",
   "inject.js": "sha384-4zdQX0BPLnZjgiRR+t+0X0MpE0Mf28MsQwXwNwvUcHCFuQDkAUUzekVtvtWtRGDt",
-  "manifest.json": "sha384-VRi4I9QEB8znkY+fWEF3Pl8xdyjGHUUdbR31W+vs2svbgrkBpfIFRzs62XMwKmwh",
-  "popup.html": "sha384-GXDRIpqNc93zK1fb3nL4wJ+u07ntZBiVF1eNdPdWtcj0DFGiTR6Fsi+7bRH+1hze",
-  "popup.js": "sha384-KI0ZZDlVMukeXGGJj1Y6/c2POulicyDBUjTfyI9SOr8+mdfnS9U8D7y3B/Gq20gM"
+  "manifest.json": "sha384-my1fkkX2ZcwRGM7bwcKOt5tPO8pWBV3NqMrNxbu4pklKwXnBaHgVxphtOYEiurmZ",
+  "popup.html": "sha384-RKZhlvd+6P5m635ScjlDffp0kZtOQZWrpGs6uD/qVnj3Er6wpDQ/sU3K+3mpcLhY",
+  "popup.js": "sha384-viR089rSx3mFVWYcAbf5vwBqm/jRcFDsIP9vpUCtzsBHFnQdio4p+33pqBkak2Ll"
 }

@@ -11,7 +11,16 @@ export type WarningType =
   | 'new-wallet'
   | 'non-evm-first'
   | 'transfer-confirm'
-  | 'delete-wallet';
+  | 'delete-wallet'
+  // Wallet-disabling actions — every one of these can cut access to the
+  // wallet that is currently open, so they must be confirmed explicitly.
+  | 'switch-wallet'
+  | 'restore-wallet'
+  | 'disable-persistent'
+  | 'clear-history'
+  | 'remove-saved-vault'
+  | 'lock-session'
+  | 'import-wallet';
 
 interface WarningBannerProps {
   type: WarningType;
@@ -32,14 +41,14 @@ const MESSAGES: Record<WarningType, { icon: React.ReactNode; title: string; body
   'wipe': {
     icon: <AlertTriangle size={18} color="#b91c1c" />,
     title: 'Wipe Wallet',
-    body: () => 'This will permanently erase all keys from memory. If you haven\'t saved your vault, funds will be inaccessible.',
+    body: () => 'Warning: this permanently erases every key from memory. If you have not saved your vault or written down your seed phrase, this wallet and any funds in it are gone for good.',
     confirmLabel: 'Wipe',
     confirmDanger: true,
   },
   'new-wallet': {
     icon: <AlertCircle size={18} color="#23262b" />,
     title: 'New Wallet',
-    body: () => 'Creating a new wallet will replace the current session. Save your vault first if you need to recover this wallet.',
+    body: () => 'Warning: creating a new wallet closes the wallet you are using now. If it has not been saved, its keys are wiped from memory and cannot be recovered by anyone. Save the current wallet first if you may need it again.',
     confirmLabel: 'Create New',
     confirmDanger: true,
   },
@@ -59,8 +68,57 @@ const MESSAGES: Record<WarningType, { icon: React.ReactNode; title: string; body
   'delete-wallet': {
     icon: <AlertTriangle size={18} color="#b91c1c" />,
     title: 'Remove Wallet',
-    body: () => 'Remove this wallet from history? If it\'s not saved in a vault, you won\'t be able to recover it.',
+    body: () => 'Warning: removing this wallet from history is permanent. Unless it is saved to a vault, its keys cannot be recovered by anyone — including you — and any funds it holds will be lost forever.',
     confirmLabel: 'Remove',
+    confirmDanger: true,
+  },
+  'switch-wallet': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'Switch Wallet',
+    body: () => 'Warning: switching wallets closes the wallet you are using right now. If it has not been saved, its keys are wiped from memory and cannot be restored. Save it first if you still need access.',
+    confirmLabel: 'Switch Anyway',
+    confirmDanger: true,
+  },
+  'restore-wallet': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'Restore Saved Wallet',
+    body: () => 'Warning: restoring a saved wallet replaces the active session. Any unsaved wallet currently open will be wiped from memory permanently. Continue only if the current wallet is saved or empty.',
+    confirmLabel: 'Restore',
+    confirmDanger: true,
+  },
+  'disable-persistent': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'Disable Persistent Mode',
+    body: () => 'Warning: disabling persistent mode deletes the encrypted vault stored in this browser. Without your seed phrase written down, this wallet becomes unrecoverable the moment the session ends.',
+    confirmLabel: 'Disable',
+    confirmDanger: true,
+  },
+  'clear-history': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'Clear Wallet History',
+    body: () => 'Warning: this erases every wallet listed in your history. Unsaved wallets are gone for good — there is no undo and no backup on our side.',
+    confirmLabel: 'Clear All',
+    confirmDanger: true,
+  },
+  'remove-saved-vault': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'Delete Saved Vault',
+    body: () => 'Warning: deleting this saved vault removes the only encrypted copy stored in this browser. If you have not written down the seed phrase, the wallet and its funds are lost permanently.',
+    confirmLabel: 'Delete Vault',
+    confirmDanger: true,
+  },
+  'lock-session': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'End Session',
+    body: () => 'Warning: ending the session clears all keys from memory. Any wallet that has not been saved will be unrecoverable after this point.',
+    confirmLabel: 'End Session',
+    confirmDanger: true,
+  },
+  'import-wallet': {
+    icon: <AlertTriangle size={18} color="#b91c1c" />,
+    title: 'Import Wallet',
+    body: () => 'Warning: importing a seed phrase replaces the wallet currently open. If that wallet is unsaved, it will be wiped from memory and cannot be brought back.',
+    confirmLabel: 'Import',
     confirmDanger: true,
   },
 };

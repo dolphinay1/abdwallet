@@ -43,15 +43,14 @@ export function markWalletSaved(id: string): void {
 }
 
 export async function persistWallet(id: string, mnemonic: string, passphrase?: string): Promise<void> {
-  if (passphrase) {
-    await persistVault(mnemonic, passphrase, id);
-  }
+  const secretKey = passphrase || id;
+  await persistVault(mnemonic, secretKey, id);
   markWalletSaved(id);
 }
 
 export async function loadSavedMnemonic(id: string, passphrase?: string): Promise<string> {
-  if (!passphrase) throw new Error('Passphrase required to unlock saved vault');
-  return loadPersistedVault(passphrase, id);
+  const secretKey = passphrase || id;
+  return loadPersistedVault(secretKey, id);
 }
 
 export async function deleteSavedVault(id: string): Promise<void> {

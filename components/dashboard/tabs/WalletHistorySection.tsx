@@ -30,27 +30,20 @@ export function WalletHistorySection({
   onDelete: (id: string) => void;
   onOpenAdvanced: () => void;
 }) {
-  const [failingIds, setFailingIds] = React.useState<Record<string, boolean>>({});
-
   if (walletHistory.length === 0) return null;
 
   const handleCardClick = async (snap: WalletSnapshot) => {
     const isCurrent = snap.id === currentHistoryId;
-    if (isCurrent || failingIds[snap.id]) return;
+    if (isCurrent) return;
+    if (!snap.isSaved) {
+      alert('This was a temporary ephemeral session and was not saved to vault.');
+      return;
+    }
     try {
       await onSwitch(snap);
-    } catch {
-      // 1. Trigger soft red feedback & slow fade-out
-      setFailingIds((prev) => ({ ...prev, [snap.id]: true }));
-      // 2. Remove after slow feedback duration, smoothly gliding remaining items in slow-motion
-      setTimeout(() => {
-        onDelete(snap.id);
-        setFailingIds((prev) => {
-          const next = { ...prev };
-          delete next[snap.id];
-          return next;
-        });
-      }, 700);
+    } catch (err) {
+      console.error('Failed to switch wallet:', err);
+      alert('Could not switch to this saved wallet.');
     }
   };
 
@@ -66,13 +59,12 @@ export function WalletHistorySection({
         <AnimatePresence mode="popLayout">
           {walletHistory.map((snap, i) => {
             const isCurrent = snap.id === currentHistoryId;
-            const isFailed = !!failingIds[snap.id];
             const liveNonEvm: NonEvmMeta | null = isCurrent && selectedNonEvm ? NON_EVM_META[selectedNonEvm] : null;
             const liveChain: Chain | null = isCurrent && !selectedNonEvm ? selectedChain : null;
             const dispLogo = liveNonEvm?.logoUrl ?? liveChain?.logoUrl ?? snap.chainLogo;
             const dispName = liveNonEvm?.name ?? liveChain?.name ?? snap.chainName ?? '';
             
-            const badgeText = isFailed ? 'Expired' : isCurrent ? 'Active' : (snap.isSaved ? 'Saved' : 'Temp');
+            const badgeText = isCurrent ? 'Active' : (snap.isSaved ? 'Saved' : 'Temp');
 
             return (
               <motion.div
@@ -80,28 +72,17 @@ export function WalletHistorySection({
                 layout
                 className={isCurrent ? 'neu-inset' : 'dapp-tile'}
                 initial={{ opacity: 0, scale: 0.9 }}
-                animate={
-                  isFailed
-                    ? {
-                        opacity: 0,
-                        scale: 0.8,
-                        filter: 'blur(3px)',
-                        backgroundColor: '#fae8e8',
-                        boxShadow: 'inset 3px 3px 6px rgba(220, 140, 140, 0.45), inset -3px -3px 6px #ffffff',
-                        transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
-                      }
-                    : {
-                        opacity: 1,
-                        scale: 1,
-                        filter: 'blur(0px)',
-                        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-                      }
-                }
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  filter: 'blur(0px)',
+                  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
+                }}
                 exit={{
                   opacity: 0,
                   scale: 0.75,
                   filter: 'blur(5px)',
-                  transition: { duration: 0.75, ease: [0.16, 1, 0.3, 1] },
+                  transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
                 }}
                 transition={{
                   layout: { duration: 0.95, ease: [0.16, 1, 0.3, 1] },
@@ -113,7 +94,7 @@ export function WalletHistorySection({
                   gap: 6,
                   padding: '12px 6px',
                   borderRadius: '1.25rem',
-                  cursor: isCurrent ? 'default' : isFailed ? 'not-allowed' : 'pointer',
+                  cursor: isCurrent ? 'default' : 'pointer',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
@@ -192,7 +173,7 @@ export function WalletHistorySection({
                   <span
                     className="sf-display-black"
                     style={{
-                      color: isFailed ? '#b91c1c' : '#23262b',
+                      color: '#23262b',
                       fontSize: 11,
                       fontWeight: 800,
                       textAlign: 'center',
@@ -212,9 +193,7 @@ export function WalletHistorySection({
                   {/* Refined Soft Dark SWITCH Status Capsule */}
                   <div
                     className={
-                      isFailed
-                        ? 'neu-pill-inset-red'
-                        : isCurrent
+                      isCurrent
                         ? 'neu-pill-active'
                         : snap.isSaved
                         ? 'neu-pill-saved'

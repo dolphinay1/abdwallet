@@ -35,13 +35,7 @@ const nextConfig = {
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      },
-    ],
+    unoptimized: true,
   },
   async headers() {
     return [
@@ -56,7 +50,7 @@ const nextConfig = {
                 ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'"
                 : "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "connect-src 'self' https://*.supabase.co https://api.coingecko.com https://api.blockchair.com https://mempool.space https://api.blockcypher.com https://api.bitcore.io https://litecoinspace.org wss://relay.walletconnect.org wss://relay.walletconnect.com https://relay.walletconnect.org https://relay.walletconnect.com https://pulse.walletconnect.org https://pulse.walletconnect.com https://rpc.walletconnect.org https://rpc.walletconnect.com https://keys.walletconnect.org https://verify.walletconnect.org https://solana-rpc.publicnode.com https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://xrplcluster.com https://xrplcluster.com https://s1.ripple.com https://s2.ripple.com https://horizon.stellar.org https://fullnode.mainnet.sui.io https://api.mainnet.aptoslabs.com https://nanolooker.com https://api.nanolooker.com https://api.nano.to https://rpc.nano.to https://mainnet.hedera.com https://mirror.hedera.com https://mainnet-public.mirrornode.hedera.com https://mainnet.hashio.io https://mynano.ninja https://app.mynano.ninja https://api.trongrid.io",
+              "connect-src 'self' https://api.coingecko.com https://api.blockchair.com https://mempool.space https://api.blockcypher.com https://api.bitcore.io https://litecoinspace.org wss://relay.walletconnect.org wss://relay.walletconnect.com https://relay.walletconnect.org https://relay.walletconnect.com https://pulse.walletconnect.org https://pulse.walletconnect.com https://rpc.walletconnect.org https://rpc.walletconnect.com https://keys.walletconnect.org https://verify.walletconnect.org https://solana-rpc.publicnode.com https://api.mainnet-beta.solana.com https://api.devnet.solana.com wss://xrplcluster.com https://xrplcluster.com https://s1.ripple.com https://s2.ripple.com https://horizon.stellar.org https://fullnode.mainnet.sui.io https://api.mainnet.aptoslabs.com https://nanolooker.com https://api.nanolooker.com https://api.nano.to https://rpc.nano.to https://mainnet.hedera.com https://mirror.hedera.com https://mainnet-public.mirrornode.hedera.com https://mainnet.hashio.io https://mynano.ninja https://app.mynano.ninja https://api.trongrid.io",
               "img-src 'self' https: data: blob:",
               "font-src 'self' https://fonts.gstatic.com",
               "object-src 'none'",
@@ -76,7 +70,6 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
           { key: 'Pragma', value: 'no-cache' },
           { key: 'Expires', value: '0' },
-          { key: 'X-ABD-Status', value: 'Sovereign' },
         ],
       },
       // Static assets — long cache for performance (Core Web Vitals)

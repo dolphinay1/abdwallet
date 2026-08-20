@@ -87,6 +87,13 @@ export function useDashboardState() {
   const [showPassphraseModal, setShowPassphraseModal] = useState(false);
   const [showWipeWarning, setShowWipeWarning] = useState(false);
   const [showNewWalletWarning, setShowNewWalletWarning] = useState(false);
+  // Pending confirmations for wallet-disabling actions. Each one holds the target
+  // of the action until the user accepts the matching WarningBanner.
+  const [pendingRestoreSnap, setPendingRestoreSnap] = useState<WalletSnapshot | null>(null);
+  const [pendingSwitchSnap, setPendingSwitchSnap] = useState<WalletSnapshot | null>(null);
+  const [pendingDeleteVaultId, setPendingDeleteVaultId] = useState<string | null>(null);
+  const [pendingRemoveHistoryId, setPendingRemoveHistoryId] = useState<string | null>(null);
+  const [showLedgerDisconnectWarning, setShowLedgerDisconnectWarning] = useState(false);
   const [showCustomChainModal, setShowCustomChainModal] = useState(false);
   const [showCustomTokenModal, setShowCustomTokenModal] = useState(false);
   const [showCustomAPIModal, setShowCustomAPIModal] = useState(false);
@@ -398,6 +405,63 @@ export function useDashboardState() {
     await wallet.createABDWallet();
   };
 
+  // Wallet-disabling actions: request -> WarningBanner -> confirm.
+  const requestRestoreSnapshot = (snap: WalletSnapshot) => setPendingRestoreSnap(snap);
+  const cancelRestoreSnapshot = () => setPendingRestoreSnap(null);
+  const confirmRestoreSnapshot = async () => {
+    const snap = pendingRestoreSnap;
+    setPendingRestoreSnap(null);
+    if (!snap) return;
+    try {
+      await switchToSnap(snap);
+      setShowSavedVaults(false);
+    } catch {
+      alert('Vault data not found.');
+    }
+  };
+
+  const requestSwitchSnapshot = (snap: WalletSnapshot) => setPendingSwitchSnap(snap);
+  const cancelSwitchSnapshot = () => setPendingSwitchSnap(null);
+  const confirmSwitchSnapshot = async () => {
+    const snap = pendingSwitchSnap;
+    setPendingSwitchSnap(null);
+    if (!snap) return;
+    try {
+      await switchToSnap(snap);
+    } catch {
+      alert('Vault data not found.');
+    }
+  };
+
+  const requestDeleteSavedVault = (id: string) => setPendingDeleteVaultId(id);
+  const cancelDeleteSavedVault = () => setPendingDeleteVaultId(null);
+  const confirmDeleteSavedVault = () => {
+    const id = pendingDeleteVaultId;
+    setPendingDeleteVaultId(null);
+    if (!id) return;
+    deleteSavedVault(id);
+    removeFromHistory(id);
+    setWalletHistory(getHistory());
+  };
+
+  const requestRemoveFromHistory = (id: string) => setPendingRemoveHistoryId(id);
+  const cancelRemoveFromHistory = () => setPendingRemoveHistoryId(null);
+  const confirmRemoveFromHistory = () => {
+    const id = pendingRemoveHistoryId;
+    setPendingRemoveHistoryId(null);
+    if (!id) return;
+    deleteSavedVault(id);
+    removeFromHistory(id);
+    setWalletHistory(getHistory());
+  };
+
+  const requestLedgerDisconnect = () => setShowLedgerDisconnectWarning(true);
+  const cancelLedgerDisconnect = () => setShowLedgerDisconnectWarning(false);
+  const confirmLedgerDisconnect = () => {
+    setShowLedgerDisconnectWarning(false);
+    setActiveLedger(null);
+  };
+
   const handleConfirmPassphrase = async (passphrase: string) => {
     setShowPassphraseModal(false);
     const mnemonic = await wallet.getMnemonicForExport();
@@ -452,6 +516,11 @@ export function useDashboardState() {
     switchToSnap,
     handleConfirmWipe,
     handleConfirmNewWallet,
+    pendingRestoreSnap, requestRestoreSnapshot, confirmRestoreSnapshot, cancelRestoreSnapshot,
+    pendingSwitchSnap, requestSwitchSnapshot, confirmSwitchSnapshot, cancelSwitchSnapshot,
+    pendingDeleteVaultId, requestDeleteSavedVault, confirmDeleteSavedVault, cancelDeleteSavedVault,
+    pendingRemoveHistoryId, requestRemoveFromHistory, confirmRemoveFromHistory, cancelRemoveFromHistory,
+    showLedgerDisconnectWarning, requestLedgerDisconnect, confirmLedgerDisconnect, cancelLedgerDisconnect,
     handleConfirmPassphrase,
     hasTokensOnChain,
   };

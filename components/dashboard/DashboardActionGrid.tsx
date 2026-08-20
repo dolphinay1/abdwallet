@@ -6,6 +6,15 @@ import { springs } from '@/lib/animations';
 import type { LedgerEntry } from '@/lib/ledger';
 import type { WalletSnapshot } from '@/lib/wallet-history';
 
+interface ActionTile {
+  icon: string;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  /** Renders the tile with a faint red edge wash - used for wallet-disabling actions. */
+  danger?: boolean;
+}
+
 export function DashboardActionGrid({
   walletUnlocked,
   walletHistory,
@@ -16,7 +25,7 @@ export function DashboardActionGrid({
   extAttaching,
   setShowPassphraseModal,
   activeLedger,
-  setActiveLedger,
+  onRequestLedgerDisconnect,
   selectedNonEvm,
   setShowWC,
   setShowSend,
@@ -43,7 +52,7 @@ export function DashboardActionGrid({
   extAttaching: boolean;
   setShowPassphraseModal: (v: boolean) => void;
   activeLedger: LedgerEntry | null;
-  setActiveLedger: (entry: LedgerEntry | null) => void;
+  onRequestLedgerDisconnect: () => void;
   selectedNonEvm: string | null;
   setShowWC: (v: boolean) => void;
   setShowSend: (v: boolean) => void;
@@ -63,6 +72,27 @@ export function DashboardActionGrid({
 }) {
   const savedVaultsCount = walletHistory.filter((s) => s.isSaved).length;
   const hasOtherSaved = walletHistory.filter((s) => s.isSaved && s.id !== currentHistoryId).length >= 1;
+
+  const primaryActions: ActionTile[] = [
+    {
+      icon: 'power',
+      label: 'Connect',
+      onClick: () => {
+        if (!selectedNonEvm) setShowWC(true);
+      },
+      disabled: !!selectedNonEvm,
+    },
+    {
+      icon: 'north_east',
+      label: 'Send',
+      onClick: () => {
+        if (selectedNonEvm) setShowNonEvmSend(true);
+        else setShowSend(true);
+      },
+    },
+    { icon: 'qr_code_2', label: 'QR / Receive', onClick: () => setShowQR(true) },
+    { icon: 'add_card', label: 'Create New Wallet', onClick: () => setShowNewWalletWarning(true), danger: true },
+  ];
 
   return (
     <>
@@ -172,7 +202,7 @@ export function DashboardActionGrid({
             </div>
           </div>
           <button
-            onClick={() => setActiveLedger(null)}
+            onClick={onRequestLedgerDisconnect}
             className="sf-display-black neu-badge-inset"
             style={{
               borderRadius: 9999,
@@ -193,26 +223,7 @@ export function DashboardActionGrid({
 
       {/* Action Grid */}
       <div className="grid grid-cols-2 gap-3 md:gap-4">
-        {[
-          {
-            icon: 'power',
-            label: 'Connect',
-            onClick: () => {
-              if (!selectedNonEvm) setShowWC(true);
-            },
-            disabled: !!selectedNonEvm,
-          },
-          {
-            icon: 'north_east',
-            label: 'Send',
-            onClick: () => {
-              if (selectedNonEvm) setShowNonEvmSend(true);
-              else setShowSend(true);
-            },
-          },
-          { icon: 'qr_code_2', label: 'QR / Receive', onClick: () => setShowQR(true) },
-          { icon: 'add_card', label: 'Create New Wallet', onClick: () => setShowNewWalletWarning(true) },
-        ].map((item) => (
+        {primaryActions.map((item) => (
           <motion.button
             key={item.label}
             layout
@@ -220,11 +231,37 @@ export function DashboardActionGrid({
             whileHover={{ scale: item.disabled ? 1 : 1.03 }}
             whileTap={{ scale: item.disabled ? 1 : 0.96 }}
             transition={springs.snappy}
-            style={{ opacity: item.disabled ? 0.35 : 1 }}
-            className="neu-card-sm p-4 md:p-8 rounded-xl flex flex-col items-center gap-2 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group border border-transparent cursor-pointer"
+            style={{
+              opacity: item.disabled ? 0.35 : 1,
+              borderColor: item.danger ? 'rgba(185,28,28,0.22)' : 'transparent',
+            }}
+            className="neu-card-sm relative overflow-hidden p-4 md:p-8 rounded-xl flex flex-col items-center gap-2 md:gap-4 hover:bg-[#2b2d33] hover:text-[#f5f6fa] transition-colors group border cursor-pointer"
           >
-            <span className="material-symbols-outlined text-3xl md:text-5xl group-hover:scale-110 transition-transform">{item.icon}</span>
-            <span className="sf-display-black font-extrabold uppercase tracking-wider text-[0.7rem] sm:text-xs text-[#23262b] group-hover:text-[#f5f6fa] text-center">{item.label}</span>
+            {item.danger && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-xl transition-opacity group-hover:opacity-60"
+                style={{
+                  background:
+                    'radial-gradient(115% 115% at 50% 50%, rgba(185,28,28,0) 40%, rgba(185,28,28,0.05) 68%, rgba(185,28,28,0.13) 100%)',
+                  boxShadow: 'inset 0 0 18px rgba(185,28,28,0.10)',
+                }}
+              />
+            )}
+            <span
+              className={`material-symbols-outlined relative text-3xl md:text-5xl group-hover:scale-110 transition-transform ${
+                item.danger ? 'text-[#a12b2b] group-hover:text-[#f5f6fa]' : ''
+              }`}
+            >
+              {item.icon}
+            </span>
+            <span
+              className={`sf-display-black relative font-extrabold uppercase tracking-wider text-[0.7rem] sm:text-xs group-hover:text-[#f5f6fa] text-center ${
+                item.danger ? 'text-[#8f2727]' : 'text-[#23262b]'
+              }`}
+            >
+              {item.label}
+            </span>
           </motion.button>
         ))}
 

@@ -83,11 +83,23 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
       expect(localStorage.getItem('__gwvs_bk__')).toBeNull();
       expect(localStorage.getItem('__gw_hs_key__')).toBeNull();
       
-      // Ensure no vault keys exist in localStorage
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         expect(key?.startsWith('__gw_vault_')).toBeFalsy();
       }
+    });
+  });
+
+  describe('Proxy SSRF Hardening (G5)', () => {
+    it('blocks private IP and localhost targets with 403 status', async () => {
+      const { POST } = await import('../src/app/api/proxy/route');
+      const req = new Request('http://localhost:3000/api/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: 'http://127.0.0.1:8080/admin' }),
+      });
+      const res = await POST(req);
+      expect(res.status).toBe(403);
     });
   });
 });

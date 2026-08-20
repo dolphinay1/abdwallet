@@ -1,8 +1,75 @@
 import { NextResponse } from 'next/server';
+import dns from 'dns';
 import { resolveRpcUrl } from '@/lib/rpc-registry';
 import { checkRateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
+
+function isPrivateIp(ip: string): boolean {
+  // Check IPv4
+  if (ip.includes('.')) {
+    const parts = ip.split('.').map(Number);
+    if (parts.length !== 4 || parts.some(n => isNaN(n) || n < 0 || n > 255)) return true;
+    const [a, b, c] = parts;
+
+    // 0.0.0.0/8
+    if (a === 0) return true;
+    // 10.0.0.0/8 (Private)
+    if (a === 10) return true;
+    // 127.0.0.0/8 (Loopback)
+    if (a === 127) return true;
+    // 100.64.0.0/10 (CGNAT)
+    if (a === 100 && b >= 64 && b <= 127) return true;
+    // 169.254.0.0/16 (Link Local)
+    if (a === 169 && b === 254) return true;
+    // 172.16.0.0/12 (Private)
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    // 192.0.0.0/24 & 192.0.2.0/24 (TEST-NET-1)
+    if (a === 192 && b === 0 && (c === 0 || c === 2)) return true;
+    // 192.168.0.0/16 (Private)
+    if (a === 192 && b === 168) return true;
+    // 198.18.0.0/15 (Benchmark)
+    if (a === 198 && (b === 18 || b === 19)) return true;
+    // 198.51.100.0/24 (TEST-NET-2) & 203.0.113.0/24 (TEST-NET-3)
+    if (a === 198 && b === 51 && c === 100) return true;
+    if (a === 203 && b === 0 && c === 113) return true;
+    // Multicast & Reserved
+    if (a >= 224) return true;
+    return false;
+  }
+
+  // Check IPv6
+  const normalized = ip.toLowerCase();
+  if (normalized === '::1' || normalized === '::' || normalized === '0:0:0:0:0:0:0:1' || normalized === '0:0:0:0:0:0:0:0') return true;
+  // Unique Local Address (fc00::/7)
+  if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
+  // Link-local (fe80::/10)
+  if (/^fe[89ab]/i.test(normalized)) return true;
+  // IPv4-mapped IPv6 (::ffff:127.0.0.1)
+  if (normalized.includes('::ffff:')) {
+    const v4 = normalized.split('::ffff:')[1];
+    if (v4 && isPrivateIp(v4)) return true;
+  }
+
+  return false;
+}
+
+async function validateHostIsNotPrivate(hostname: string): Promise<boolean> {
+  try {
+    if (isPrivateIp(hostname)) return false;
+    const records = await dns.promises.lookup(hostname, { all: true });
+    if (!records || records.length === 0) return false;
+
+    for (const record of records) {
+      if (isPrivateIp(record.address)) {
+        return false;
+      }
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Proxy route — forwards RPC or external API requests server-side
@@ -30,6 +97,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ jsonrpc: '2.0', id: null, error: { code: -32601, message: `Unsupported chainId ${chainId}` } });
       }
 
+      // Verify resolved RPC URL host is public
+      try {
+        const rpcHost = new URL(rpcUrl).hostname;
+        const isSafe = await validateHostIsNotPrivate(rpcHost);
+        if (!isSafe) {
+          return NextResponse.json({ jsonrpc: '2.0', id: null, error: { code: -32603, message: 'Internal RPC safety rejection' } }, { status: 403 });
+        }
+      } catch {
+        return NextResponse.json({ jsonrpc: '2.0', id: null, error: { code: -32603, message: 'Invalid RPC target' } }, { status: 403 });
+      }
+
       // Single call vs ethers batch
       const rpcBody = Array.isArray(decoded.method)
         ? decoded.method.map((call, i) => ({ jsonrpc: '2.0', id: i + 1, method: call.method, params: call.params ?? [] }))
@@ -39,8 +117,14 @@ export async function POST(req: Request) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rpcBody),
+        redirect: 'manual',
         signal: AbortSignal.timeout(15_000),
       });
+
+      if (res.status >= 300 && res.status < 400) {
+        return NextResponse.json({ jsonrpc: '2.0', id: null, error: { code: -32603, message: 'RPC redirect blocked' } }, { status: 403 });
+      }
+
       const data = await res.json();
       return NextResponse.json(data);
     }
@@ -52,17 +136,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'url is required' }, { status: 400 });
     }
 
-    // Block private/reserved networks (SSRF protection)
-    const blocklist = [
-      'localhost', '127.0.0.1', '0.0.0.0', '169.254.',
-      '10.', '172.16.', '172.17.', '172.18.', '172.19.',
-      '172.20.', '172.21.', '172.22.', '172.23.', '172.24.',
-      '172.25.', '172.26.', '172.27.', '172.28.', '172.29.',
-      '172.30.', '172.31.', '192.168.', '[::1]', '::1',
-      'fc00:', 'fe80:',
-    ];
-    if (blocklist.some((b) => url.includes(b))) {
-      return NextResponse.json({ error: 'Blocked destination' }, { status: 403 });
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(url);
+    } catch {
+      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    }
+
+    const parsedHost = parsedUrl.hostname;
+
+    // DNS pre-resolution & private IP verification (SSRF Protection)
+    const isPublicHost = await validateHostIsNotPrivate(parsedHost);
+    if (!isPublicHost) {
+      return NextResponse.json({ error: 'SSRF blocked: Private or reserved IP target' }, { status: 403 });
     }
 
     // Only allow known public RPC and API domains
@@ -92,10 +178,6 @@ export async function POST(req: Request) {
       'api-zkevm.polygonscan.com', 'api.kavascan.com', 'api.aurorascan.dev',
     ];
 
-    let parsedHost: string;
-    try { parsedHost = new URL(url).hostname; } catch {
-      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
-    }
     if (!ALLOWED_HOSTS.some((h) => parsedHost === h || parsedHost.endsWith('.' + h))) {
       return NextResponse.json({ error: 'Domain not whitelisted' }, { status: 403 });
     }
@@ -117,6 +199,7 @@ export async function POST(req: Request) {
     const fetchOptions: RequestInit = {
       method: method === 'GET' ? 'GET' : 'POST',
       headers: safeHeaders,
+      redirect: 'manual',
       signal: AbortSignal.timeout(15_000),
     };
 
@@ -125,6 +208,12 @@ export async function POST(req: Request) {
     }
 
     const res = await fetch(url, fetchOptions);
+
+    // Reject unvalidated 3xx redirects
+    if (res.status >= 300 && res.status < 400) {
+      return NextResponse.json({ error: 'Redirects not permitted' }, { status: 403 });
+    }
+
     const contentType = res.headers.get('content-type') || '';
 
     if (contentType.includes('application/json')) {

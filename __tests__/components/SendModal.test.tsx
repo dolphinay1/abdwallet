@@ -38,7 +38,7 @@ vi.mock('../../components/dashboard/modals/send/useSendForm', () => ({
 describe('SendModal Component', () => {
   const mockOnClose = vi.fn();
   const mockTokens = [
-    { symbol: 'ETH', balance: '1.0', decimals: 18, name: 'Ethereum', address: '0x0' },
+    { symbol: 'ETH', balance: '1.0', balanceRaw: '1000000000000000000', decimals: 18, name: 'Ethereum', address: '0x0', contractAddress: '0x0' },
   ];
 
   it('renders send header and close button with aria-label', () => {

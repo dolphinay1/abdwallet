@@ -1,7 +1,12 @@
 import { persistVault, loadPersistedVault, nukePersistedVault } from './persistent-vault';
 
 const HISTORY_KEY = '__gw_wallet_history__';
+/**
+ * Maximum number of UNSAVED (ephemeral) wallets kept in history.
+ * Saved wallets are pinned and never counted against — or evicted by — this limit.
+ */
 const MAX_HISTORY = 5;
+export const MAX_UNSAVED_HISTORY = MAX_HISTORY;
 const NON_EVM_WARNED_KEY = '__gw_non_evm_warned__';
 const VAULT_PREFIX = '__gw_vault_';
 
@@ -61,7 +66,18 @@ export async function deleteSavedVault(id: string): Promise<void> {
 }
 
 export function getSavedVaults(): WalletSnapshot[] {
-  return load().filter(s => s.isSaved);
+  return load().filter(s => isSnapshotSaved(s));
+}
+
+/**
+ * Backward-compatible "is this wallet saved to a vault?" check.
+ * Older history entries written before `isSaved` existed only carry `vaultMode`,
+ * so fall back to that instead of crashing or silently dropping them.
+ */
+export function isSnapshotSaved(snap?: Partial<WalletSnapshot> | null): boolean {
+  if (!snap || typeof snap !== 'object') return false;
+  if (typeof snap.isSaved === 'boolean') return snap.isSaved;
+  return snap.vaultMode === 'PERSISTENT';
 }
 
 // ── History CRUD ──────────────────────────────────────────────────────────────
@@ -70,7 +86,19 @@ function load(): WalletSnapshot[] {
     const raw = localStorage.getItem(HISTORY_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // Normalise legacy entries that predate the `isSaved` flag so downstream
+    // code can rely on it without extra guards.
+    return parsed
+      .filter((s): s is WalletSnapshot => !!s && typeof s === 'object' && typeof s.id === 'string')
+      .map(s => {
+        const saved = isSnapshotSaved(s);
+        return {
+          ...s,
+          isSaved: saved,
+          vaultMode: s.vaultMode ?? (saved ? 'PERSISTENT' : 'EPHEMERAL'),
+        };
+      });
   } catch {
     return [];
   }
@@ -88,14 +116,27 @@ export function getHistory(): WalletSnapshot[] {
 
 export function addToHistory(snapshot: Omit<WalletSnapshot, 'createdAt'>): WalletSnapshot[] {
   const history = load();
+  const previous = history.find(s => s.id === snapshot.id);
   const filtered = history.filter(s => s.id !== snapshot.id);
   const full: WalletSnapshot = {
     ...snapshot,
+    // Never downgrade an already-saved wallet when its snapshot is refreshed.
+    isSaved: isSnapshotSaved(snapshot) || isSnapshotSaved(previous),
     createdAt: Date.now(),
   };
-  const updated = [full, ...filtered].slice(0, MAX_HISTORY);
-  filtered
-    .filter(s => !s.isSaved && !updated.some(u => u.id === s.id))
+  if (full.isSaved) full.vaultMode = 'PERSISTENT';
+
+  const combined = [full, ...filtered];
+
+  // Saved wallets are pinned: they neither occupy an unsaved slot nor get evicted.
+  // Only the newest MAX_HISTORY unsaved wallets survive; older unsaved ones drop off.
+  const keptUnsaved = new Set(
+    combined.filter(s => !isSnapshotSaved(s)).slice(0, MAX_HISTORY).map(s => s.id)
+  );
+  const updated = combined.filter(s => isSnapshotSaved(s) || keptUnsaved.has(s.id));
+
+  combined
+    .filter(s => !isSnapshotSaved(s) && !updated.some(u => u.id === s.id))
     .forEach(s => deleteSavedVault(s.id));
   save(updated);
   return updated;
@@ -136,7 +177,7 @@ export function clearHistory(): void {
 
 export function clearUnsavedBlobs(): void {
   const history = load();
-  history.forEach(s => { if (!s.isSaved) deleteSavedVault(s.id); });
+  history.forEach(s => { if (!isSnapshotSaved(s)) deleteSavedVault(s.id); });
 }
 
 export function findSnapshot(id: string): WalletSnapshot | undefined {

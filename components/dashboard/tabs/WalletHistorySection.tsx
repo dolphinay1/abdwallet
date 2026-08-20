@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { springs } from '@/lib/animations';
 import { upperEn } from '@/lib/text';
 import type { Chain } from '@/lib/chains';
-import type { WalletSnapshot } from '@/lib/wallet-history';
+import { MAX_UNSAVED_HISTORY, type WalletSnapshot } from '@/lib/wallet-history';
+import { useWallet } from '@/context/WalletContext';
+import { SeedVerificationModal } from '@/components/SeedVerificationModal';
 import { NON_EVM_META, type NonEvmMeta } from '../types';
 
 export function WalletHistorySection({
@@ -30,6 +32,47 @@ export function WalletHistorySection({
   onDelete: (id: string) => void;
   onOpenAdvanced: () => void;
 }) {
+  const wallet = useWallet();
+  // Verification state lives in component memory only and is wiped on close.
+  const [pendingSave, setPendingSave] = useState<{ snap: WalletSnapshot; isCurrent: boolean } | null>(null);
+  const [verifyWords, setVerifyWords] = useState<string[]>([]);
+  const [isPreparingVerify, setIsPreparingVerify] = useState(false);
+
+  const closeVerification = () => {
+    setPendingSave(null);
+    setVerifyWords([]);
+    setIsPreparingVerify(false);
+  };
+
+  // Before a wallet is written to the vault, make the user prove they backed up
+  // the recovery phrase by re-typing 2 randomly chosen words.
+  const requestSave = async (snap: WalletSnapshot, isCurrent: boolean) => {
+    if (isPreparingVerify || pendingSave) return;
+    setIsPreparingVerify(true);
+    try {
+      const mnemonic = await wallet.getMnemonicForExport();
+      const words = mnemonic ? mnemonic.trim().split(/\s+/).filter(Boolean) : [];
+      if (words.length >= 12) {
+        setVerifyWords(words);
+        setPendingSave({ snap, isCurrent });
+        setIsPreparingVerify(false);
+        return;
+      }
+    } catch {
+      // fall through — verification is impossible without the phrase
+    }
+    // Recovery phrase unavailable (locked/imported session): save without the challenge
+    // rather than blocking the user from protecting their wallet.
+    setIsPreparingVerify(false);
+    onSave(snap, isCurrent);
+  };
+
+  const handleVerified = async () => {
+    const pending = pendingSave;
+    closeVerification();
+    if (pending) onSave(pending.snap, pending.isCurrent);
+  };
+
   if (walletHistory.length === 0) return null;
 
   const handleCardClick = async (snap: WalletSnapshot) => {
@@ -52,6 +95,13 @@ export function WalletHistorySection({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <span className="russo-one-regular" style={{ fontSize: 9, fontWeight: 400, color: 'rgba(166,177,198,0.3)', letterSpacing: '0.15em' }}>
           {upperEn('Wallet History')}
+        </span>
+        <span
+          className="russo-one-regular"
+          style={{ fontSize: 7.5, fontWeight: 400, color: '#8a8f98', letterSpacing: '0.12em', whiteSpace: 'nowrap', opacity: 0.75 }}
+          title={`Only ${MAX_UNSAVED_HISTORY} unsaved wallets are kept in history. Saved wallets are never removed.`}
+        >
+          {upperEn(`Max ${MAX_UNSAVED_HISTORY} unsaved wallets \u00b7 saved wallets are kept`)}
         </span>
         <div style={{ flex: 1, height: 1, background: 'rgba(166,177,198,0.06)' }} />
       </div>
@@ -92,7 +142,7 @@ export function WalletHistorySection({
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: 6,
-                  padding: '12px 6px',
+                  padding: '22px 6px 12px',
                   borderRadius: '1.25rem',
                   cursor: isCurrent ? 'default' : 'pointer',
                   position: 'relative',
@@ -117,24 +167,17 @@ export function WalletHistorySection({
                   </button>
                 </div>
 
-                {/* Action Button: Save (only the active wallet has recoverable key material) */}
+                {/* Action Button: Save — TOP-LEFT of the capsule (mirrors the delete icon) */}
                 {isCurrent && !snap.isSaved && (
-                  <div 
-                    style={{ 
-                      position: 'absolute', 
-                      ...(typeof window !== 'undefined' && window.self !== window.top 
-                        ? { top: 4, left: 4 } 
-                        : { bottom: 8, left: 8 }) 
-                    }}
-                  >
+                  <div style={{ position: 'absolute', top: 4, left: 4 }}>
                     <button
-                      disabled={isSavingVault}
+                      disabled={isSavingVault || isPreparingVerify}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSave(snap, isCurrent);
+                        void requestSave(snap, isCurrent);
                       }}
                       style={{
-                        background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: isSavingVault ? 'not-allowed' : 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
+                        background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: isSavingVault || isPreparingVerify ? 'not-allowed' : 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = '#059669')}
                       onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
@@ -241,6 +284,18 @@ export function WalletHistorySection({
           Didn&apos;t find what you&apos;re looking for? Try Advanced Mode →
         </button>
       </div>
+
+      {/* Seed-phrase verification gate before a wallet is written to the vault */}
+      <SeedVerificationModal
+        isOpen={!!pendingSave}
+        words={verifyWords}
+        isBusy={isSavingVault}
+        title="Verify Before Saving"
+        subtitle="Confirm you backed up your recovery phrase"
+        confirmLabel="Confirm & Save Wallet"
+        onVerified={handleVerified}
+        onCancel={closeVerification}
+      />
     </div>
   );
 }

@@ -17,7 +17,7 @@ export function CustomChainModal({ onClose, onSaved }: Props) {
   const [symbol, setSymbol] = useState('');
   const [rpcUrl, setRpcUrl] = useState('');
   const [explorerUrl, setExplorerUrl] = useState('');
-  const [color, setColor] = useState('#8a8f98');
+  const [color, setColor] = useState('#5b6270');
   const [status, setStatus] = useState<'idle' | 'testing' | 'ok' | 'error'>('idle');
   const [errMsg, setErrMsg] = useState('');
 
@@ -30,7 +30,7 @@ export function CustomChainModal({ onClose, onSaved }: Props) {
     color: '#23262b', fontSize: 13, fontFamily: 'inherit',
   };
   const lbl: React.CSSProperties = {
-    color: '#8a8f98', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
+    color: '#5b6270', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
     letterSpacing: '0.1em', marginBottom: 4, display: 'block', fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
   };
 
@@ -74,7 +74,7 @@ export function CustomChainModal({ onClose, onSaved }: Props) {
           <button
             aria-label="Close custom chain modal"
             onClick={onClose}
-            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}
+            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#5b6270', display: 'flex' }}
           >
             <X size={16} />
           </button>
@@ -124,7 +124,7 @@ export function CustomChainModal({ onClose, onSaved }: Props) {
             <span style={{ ...lbl, marginBottom: 0 }}>Color</span>
             <input type="color" value={color} onChange={e => setColor(e.target.value)}
               style={{ width: 36, height: 28, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'transparent', padding: 0 }} />
-            <span style={{ color: '#8a8f98', fontSize: 11 }}>{color}</span>
+            <span style={{ color: '#5b6270', fontSize: 11 }}>{color}</span>
           </div>
 
           {errMsg && (

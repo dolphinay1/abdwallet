@@ -22,6 +22,7 @@ interface TokenEntry {
   contractAddress: string | 'native';
   logo?: string;
   coingeckoId?: string;
+  unavailable?: boolean;
 }
 
 /**
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
         balanceRaw: '0',
         contractAddress: 'native',
         coingeckoId: chain?.coingeckoId,
+        unavailable: true,
       });
     }
 

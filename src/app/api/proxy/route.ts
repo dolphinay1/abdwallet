@@ -182,6 +182,7 @@ export async function POST(req: Request) {
       'sepolia.base.org', 'sepolia-rollup.arbitrum.io',
       'api.coingecko.com', 'api.gopluslabs.io', 'eth-api.lido.fi',
       'solana-rpc.publicnode.com', 'api.mainnet-beta.solana.com',
+      'fullnode.mainnet.sui.io', 'api.mainnet.aptoslabs.com', 'horizon.stellar.org',
       'xrplcluster.com', 's1.ripple.com', 's2.ripple.com',
       'api.etherscan.io', 'api.bscscan.com', 'api.polygonscan.com',
       'api.arbiscan.io', 'api-optimistic.etherscan.io', 'api.basescan.org',

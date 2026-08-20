@@ -48,7 +48,7 @@ export function TransactionPreview({
         Transaction Preview
       </p>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'rgba(166,177,198,0.04)', borderRadius: 10 }}>
-        <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Sending
         </span>
         <span style={{ fontSize: 13, color: '#23262b', fontWeight: 900, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
@@ -56,7 +56,7 @@ export function TransactionPreview({
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'rgba(166,177,198,0.04)', borderRadius: 10 }}>
-        <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           To
         </span>
         <span style={{ fontSize: 10, color: '#23262b', fontWeight: 700, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
@@ -65,10 +65,10 @@ export function TransactionPreview({
       </div>
       {feeEth && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'rgba(166,177,198,0.04)', borderRadius: 10 }}>
-          <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Network Fee
           </span>
-          <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400 }}>
+          <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400 }}>
             ~{feeEth} {selectedChain.symbol}
             {feeUsd !== null && feeUsd > 0 ? ` (${formatUSD(feeUsd)})` : ''}
           </span>
@@ -76,12 +76,12 @@ export function TransactionPreview({
       )}
       {simResult && simResult.changes.length > 0 && (
         <div>
-          <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '4px 0' }}>
+          <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '4px 0' }}>
             Simulated Balance Changes
           </p>
           {simResult.changes.slice(0, 4).map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
-              <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
+              <span style={{ fontSize: 10, color: '#5b6270', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                 {c.changeType === 'TRANSFER'
                   ? c.from?.toLowerCase() === activeAddress?.toLowerCase()
                     ? '↑ Out'
@@ -101,7 +101,7 @@ export function TransactionPreview({
               )}
             </div>
           ))}
-          {simResult.gas > 0 && <p style={{ color: '#8a8f98', fontSize: 9, margin: '4px 0 0' }}>Gas: {simResult.gas.toLocaleString()}</p>}
+          {simResult.gas > 0 && <p style={{ color: '#5b6270', fontSize: 9, margin: '4px 0 0' }}>Gas: {simResult.gas.toLocaleString()}</p>}
         </div>
       )}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
@@ -115,7 +115,7 @@ export function TransactionPreview({
             borderRadius: '1rem',
             fontSize: 12,
             fontWeight: 400,
-            color: '#8a8f98',
+            color: '#5b6270',
             cursor: 'pointer',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',

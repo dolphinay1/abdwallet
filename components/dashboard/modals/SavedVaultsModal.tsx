@@ -139,7 +139,7 @@ export function SavedVaultsModal({
                     {dispLogo ? (
                       <img src={dispLogo} alt={dispName} style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
-                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: isCurrent ? '#2b2d33' : '#8a8f98' }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: isCurrent ? '#2b2d33' : '#5b6270' }}>
                         account_balance_wallet
                       </span>
                     )}

@@ -33,8 +33,8 @@ export function NFTsTab({
   if (nfts.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 p-10 neu-card-sm rounded-xl border border-transparent">
-        <span className="material-symbols-outlined text-4xl text-[#8a8f98] opacity-30">image</span>
-        <p className="text-[#8a8f98] font-black text-xs uppercase tracking-widest">
+        <span className="material-symbols-outlined text-4xl text-[#5b6270] opacity-30">image</span>
+        <p className="text-[#5b6270] font-black text-xs uppercase tracking-widest">
           {selectedChain.isAlchemy ? `No NFTs on ${selectedChain.name}` : 'NFT tab requires Alchemy RPC'}
         </p>
       </div>
@@ -95,7 +95,7 @@ export function NFTsTab({
             {nft.collectionName && (
               <p
                 style={{
-                  color: '#8a8f98',
+                  color: '#5b6270',
                   fontSize: 10,
                   margin: '2px 0 0',
                   overflow: 'hidden',
@@ -106,7 +106,7 @@ export function NFTsTab({
                 {nft.collectionName}
               </p>
             )}
-            <p style={{ color: '#8a8f98', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: '4px 0 0' }}>#{nft.tokenId.slice(0, 10)}</p>
+            <p style={{ color: '#5b6270', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: '4px 0 0' }}>#{nft.tokenId.slice(0, 10)}</p>
             {nft.floorPrice != null && (
               <p style={{ color: '#2b2d33', fontSize: 9, fontWeight: 700, margin: '3px 0 0' }}>
                 Floor {nft.floorPrice < 0.001 ? '< 0.001' : nft.floorPrice.toFixed(3)} {nft.floorPriceCurrency ?? 'ETH'}

@@ -34,7 +34,7 @@ export function TransactionsTab({
   if (txs.length === 0) {
     return (
       <div className="flex items-center p-6 neu-card-sm rounded-xl border border-transparent">
-        <p className="text-[#8a8f98] font-black text-xs uppercase tracking-widest">
+        <p className="text-[#5b6270] font-black text-xs uppercase tracking-widest">
           {selectedChain.isAlchemy ? `No transactions on ${selectedChain.name}` : 'TX history requires Alchemy RPC'}
         </p>
       </div>
@@ -62,7 +62,7 @@ export function TransactionsTab({
                   isOut ? 'bg-red-500/10' : 'bg-[rgba(166,177,198,0.2)]'
                 }`}
               >
-                {isOut ? <ArrowUpRight size={20} className="text-red-400" /> : <ArrowDownLeft size={20} className="text-[#8a8f98]" />}
+                {isOut ? <ArrowUpRight size={20} className="text-red-400" /> : <ArrowDownLeft size={20} className="text-[#5b6270]" />}
               </div>
               <div>
                 <p className="sf-display-black font-black text-[#1e293b] text-lg">{isOut ? 'Sent' : 'Received'}</p>

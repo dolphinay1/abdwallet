@@ -92,10 +92,10 @@ export function WarningBanner({ type, onConfirm, onCancel, data, inline = false 
         <div style={{ flexShrink: 0, marginTop: 2 }}>{msg.icon}</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.25rem' }}>{msg.title}</div>
-          <div style={{ fontSize: '0.8rem', color: '#8a8f98', lineHeight: 1.5 }}>{msg.body(data)}</div>
+          <div style={{ fontSize: '0.8rem', color: '#5b6270', lineHeight: 1.5 }}>{msg.body(data)}</div>
         </div>
         {onCancel && (
-          <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#8a8f98', cursor: 'pointer', flexShrink: 0 }}>
+          <button onClick={onCancel} style={{ background: 'none', border: 'none', color: '#5b6270', cursor: 'pointer', flexShrink: 0 }}>
             <X size={16} />
           </button>
         )}

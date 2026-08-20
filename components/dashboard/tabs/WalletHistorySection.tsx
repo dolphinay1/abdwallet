@@ -108,10 +108,10 @@ export function WalletHistorySection({
                       onDelete(snap.id);
                     }}
                     style={{
-                      background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
+                      background: 'none', border: 'none', padding: 2, color: '#5b6270', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#b91c1c')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5b6270')}
                   >
                     <X size={12} strokeWidth={3} />
                   </button>
@@ -134,10 +134,10 @@ export function WalletHistorySection({
                         onSave(snap, isCurrent);
                       }}
                       style={{
-                        background: 'none', border: 'none', padding: 2, color: '#8a8f98', cursor: isSavingVault ? 'not-allowed' : 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
+                        background: 'none', border: 'none', padding: 2, color: '#5b6270', cursor: isSavingVault ? 'not-allowed' : 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center'
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = '#059669')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = '#5b6270')}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: typeof window !== 'undefined' && window.self !== window.top ? 15 : 18 }}>save</span>
                     </button>
@@ -162,7 +162,7 @@ export function WalletHistorySection({
                   {dispLogo ? (
                     <img src={dispLogo} alt={dispName} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
                   ) : (
-                    <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#8a8f98' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#5b6270' }}>
                       account_balance_wallet
                     </span>
                   )}
@@ -224,7 +224,7 @@ export function WalletHistorySection({
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            color: '#8a8f98',
+            color: '#5b6270',
             fontSize: 10,
             fontWeight: 400,
             letterSpacing: '0.05em',
@@ -235,7 +235,7 @@ export function WalletHistorySection({
             (e.currentTarget as HTMLButtonElement).style.color = '#2b2d33';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color = '#8a8f98';
+            (e.currentTarget as HTMLButtonElement).style.color = '#5b6270';
           }}
         >
           Didn&apos;t find what you&apos;re looking for? Try Advanced Mode →

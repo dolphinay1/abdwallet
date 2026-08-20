@@ -96,7 +96,7 @@ function TokenPicker({ chainId, value, onChange, label }: {
 
   return (
     <div style={{ position: 'relative' }}>
-      <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>{label}</p>
+      <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>{label}</p>
       <button onClick={() => setOpen(o => !o)} style={box}>
         {value ? (
           <>
@@ -104,12 +104,12 @@ function TokenPicker({ chainId, value, onChange, label }: {
               <img src={value.logoURI} alt={value.symbol} width={24} height={24} style={{ borderRadius: '50%', flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
             )}
             <span style={{ color: '#23262b', fontSize: 14, fontWeight: 700 }}>{value.symbol}</span>
-            <span style={{ color: '#8a8f98', fontSize: 11, flex: 1, textAlign: 'left' }}>{value.name}</span>
+            <span style={{ color: '#5b6270', fontSize: 11, flex: 1, textAlign: 'left' }}>{value.name}</span>
           </>
         ) : (
-          <span style={{ color: '#8a8f98', fontSize: 13 }}>{loading ? 'Loading tokens…' : 'Select token'}</span>
+          <span style={{ color: '#5b6270', fontSize: 13 }}>{loading ? 'Loading tokens…' : 'Select token'}</span>
         )}
-        <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#8a8f98', marginLeft: 'auto' }}>expand_more</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#5b6270', marginLeft: 'auto' }}>expand_more</span>
       </button>
 
       {open && (
@@ -142,7 +142,7 @@ function TokenPicker({ chainId, value, onChange, label }: {
           </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {filtered.length === 0 && (
-              <p style={{ color: '#8a8f98', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>{loading ? 'Loading…' : 'No results'}</p>
+              <p style={{ color: '#5b6270', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>{loading ? 'Loading…' : 'No results'}</p>
             )}
             {filtered.map(t => (
               <button
@@ -156,7 +156,7 @@ function TokenPicker({ chainId, value, onChange, label }: {
                   <img src={t.logoURI} alt={t.symbol} width={22} height={22} style={{ borderRadius: '50%', flexShrink: 0 }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 )}
                 <span style={{ color: '#23262b', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{t.symbol}</span>
-                <span style={{ color: '#8a8f98', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                <span style={{ color: '#5b6270', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
               </button>
             ))}
           </div>
@@ -344,9 +344,9 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                 View on Explorer ↗
               </a>
               {approveTxHash && (
-                <p style={{ color: '#8a8f98', fontSize: 10, textAlign: 'center' }}>Approve TX: {approveTxHash.slice(0, 20)}…</p>
+                <p style={{ color: '#5b6270', fontSize: 10, textAlign: 'center' }}>Approve TX: {approveTxHash.slice(0, 20)}…</p>
               )}
-              <Button variant="bordered" radius="lg" onPress={onClose} className="mt-2 px-7 russo-one-regular text-[#8a8f98]">
+              <Button variant="bordered" radius="lg" onPress={onClose} className="mt-2 px-7 russo-one-regular text-[#5b6270]">
                 {upperEn('Close')}
               </Button>
             </div>
@@ -370,11 +370,11 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* From chain */}
               <div style={box}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>From chain</p>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>From chain</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {SWAP_CHAINS.map(c => (
                     <button key={c.id} onClick={() => setFromChain(c)}
-                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === fromChain.id ? '1.5px solid #2b2d33' : '1px solid rgba(166,177,198,0.08)', background: c.id === fromChain.id ? '#2b2d33' : 'transparent', color: c.id === fromChain.id ? '#f5f6fa' : '#8a8f98', transition: 'all 0.15s' }}>
+                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === fromChain.id ? '1.5px solid #2b2d33' : '1px solid rgba(166,177,198,0.08)', background: c.id === fromChain.id ? '#2b2d33' : 'transparent', color: c.id === fromChain.id ? '#f5f6fa' : '#5b6270', transition: 'all 0.15s' }}>
                       {c.shortName}
                     </button>
                   ))}
@@ -386,7 +386,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
               {/* Amount */}
               <div style={box}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>Amount</p>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 6 }}>Amount</p>
                 <Input
                   type="number"
                   variant="flat"
@@ -419,11 +419,11 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
               {/* To chain */}
               <div style={box}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>To chain</p>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>To chain</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {SWAP_CHAINS.map(c => (
                     <button key={c.id} onClick={() => setToChain(c)}
-                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === toChain.id ? '1.5px solid #2b2d33' : '1px solid rgba(166,177,198,0.08)', background: c.id === toChain.id ? '#2b2d33' : 'transparent', color: c.id === toChain.id ? '#f5f6fa' : '#8a8f98', transition: 'all 0.15s' }}>
+                      style={{ padding: '5px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: c.id === toChain.id ? '1.5px solid #2b2d33' : '1px solid rgba(166,177,198,0.08)', background: c.id === toChain.id ? '#2b2d33' : 'transparent', color: c.id === toChain.id ? '#f5f6fa' : '#5b6270', transition: 'all 0.15s' }}>
                       {c.shortName}
                     </button>
                   ))}
@@ -454,17 +454,17 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
                         {topLevel === 'danger' ? 'Token Risk Detected' : 'Caution'}
                       </span>
                       <button onClick={() => setRiskDismissed(true)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5b6270', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
                     </div>
                     {risks.map((r, ri) => (
                       <div key={ri}>
-                        <p className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', margin: '0 0 2px' }}>{r.label}</p>
+                        <p className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', margin: '0 0 2px' }}>{r.label}</p>
                         {r.flags.map((f, fi) => (
                           <p key={fi} style={{ fontSize: 11, color: riskColor(r.level), margin: '1px 0', fontWeight: 600 }}>• {f}</p>
                         ))}
                       </div>
                     ))}
-                    <p style={{ fontSize: 9, color: '#8a8f98', margin: '4px 0 0', fontStyle: 'italic' }}>
+                    <p style={{ fontSize: 9, color: '#5b6270', margin: '4px 0 0', fontStyle: 'italic' }}>
                       Powered by GoPlus Security · dismiss to proceed anyway
                     </p>
                   </div>
@@ -497,36 +497,41 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
           {status === 'confirm' && quote && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ ...box, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>Swap Preview</p>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>Swap Preview</p>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ flex: 1 }}>
-                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>You pay</p>
+                    <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>You pay</p>
                     <p style={{ color: '#23262b', fontWeight: 900, fontSize: 18, margin: 0 }}>{amount} {fromToken?.symbol}</p>
-                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, margin: '2px 0 0' }}>{fromChain.name}</p>
+                    <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, margin: '2px 0 0' }}>{fromChain.name}</p>
                   </div>
                   <ArrowDownUp size={18} style={{ color: '#2b2d33', flexShrink: 0 }} />
                   <div style={{ flex: 1, textAlign: 'right' }}>
-                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>You receive ~</p>
+                    <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>You receive ~</p>
                     <p style={{ color: '#2b2d33', fontWeight: 900, fontSize: 18, margin: 0 }}>{toAmountDisplay} {toToken?.symbol}</p>
-                    <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, margin: '2px 0 0' }}>{toChain.name}</p>
+                    <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, margin: '2px 0 0' }}>{toChain.name}</p>
                   </div>
                 </div>
 
                 <div style={{ borderTop: '1px solid rgba(166,177,198,0.06)', paddingTop: 10, display: 'flex', justifyContent: 'space-between' }}>
-                  {gasCostUSD && <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400 }}>Gas ~${gasCostUSD}</span>}
-                  <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400 }}>~{Math.ceil(durationSec / 60)} min</span>
-                  <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400 }}>0.5% slippage</span>
+                  {gasCostUSD && <span className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400 }}>Gas ~${gasCostUSD}</span>}
+                  <span className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400 }}>~{Math.ceil(durationSec / 60)} min</span>
+                  <span className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400 }}>0.5% slippage</span>
+                </div>
+
+                <div style={{ paddingTop: 8, display: 'flex', justifyContent: 'space-between' }}>
+                  <span className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400 }}>Provider fee</span>
+                  <span className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400 }}>LiFi 0.25% &middot; ABD Wallet 0%</span>
                 </div>
               </div>
 
               {!fromToken || fromToken.address !== '0x0000000000000000000000000000000000000000' && quote.estimate.approvalAddress && (
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, background: 'rgba(43,45,51,0.06)', border: '1px solid rgba(43,45,51,0.15)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, background: 'rgba(43,45,51,0.06)', border: '1px solid rgba(43,45,51,0.15)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
                   Token approval will be sent first (~12s wait), then the swap.
                 </p>
               )}
               {activeLedger && (
-                <p style={{ color: '#8a8f98', fontSize: 11, background: 'rgba(138,143,152,0.08)', border: '1px solid rgba(138,143,152,0.2)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
+                <p style={{ color: '#5b6270', fontSize: 11, background: 'rgba(138,143,152,0.08)', border: '1px solid rgba(138,143,152,0.2)', borderRadius: 10, padding: '8px 12px', margin: 0 }}>
                   <strong>Ledger:</strong> Your device will show contract call data. Enable &ldquo;Blind signing&rdquo; in the Ethereum app settings if prompted.
                 </p>
               )}
@@ -535,7 +540,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <Button variant="bordered" radius="lg" onPress={() => { setStatus('idle'); setQuote(null); setErrMsg(''); }}
-                  className="h-12 flex-1 russo-one-regular text-[#8a8f98]">
+                  className="h-12 flex-1 russo-one-regular text-[#5b6270]">
                   {upperEn('Back')}
                 </Button>
                 <Button color="primary" radius="lg" onPress={executeSwap}
@@ -554,7 +559,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
               </div>
               <span style={{ color: '#b91c1c', fontSize: 13, fontWeight: 700, textAlign: 'center' }}>{errMsg}</span>
               <Button variant="bordered" radius="lg" onPress={() => { setStatus('idle'); setErrMsg(''); setQuote(null); }}
-                className="px-7 russo-one-regular text-[#8a8f98]">
+                className="px-7 russo-one-regular text-[#5b6270]">
                 {upperEn('Try Again')}
               </Button>
             </div>
@@ -564,7 +569,7 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
         {/* Footer */}
         <div style={{ padding: '12px 24px', borderTop: '1px solid rgba(166,177,198,0.05)', flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
-          <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, letterSpacing: '0.04em' }}>Powered by LiFi · Best-route aggregation across 30+ chains</span>
+          <span className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, letterSpacing: '0.04em' }}>Powered by LiFi · Best-route aggregation across 30+ chains</span>
         </div>
       </div>
     </div>

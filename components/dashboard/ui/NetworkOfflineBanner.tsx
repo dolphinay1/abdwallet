@@ -38,7 +38,7 @@ export function NetworkOfflineBanner({ onRetry }: { onRetry?: () => void }) {
             {onRetry && (
               <button
                 onClick={onRetry}
-                className="ml-2 flex items-center gap-1 text-[9px] russo-one-regular uppercase text-[#8a8f98] hover:text-[#23262b] transition-colors"
+                className="ml-2 flex items-center gap-1 text-[9px] russo-one-regular uppercase text-[#5b6270] hover:text-[#23262b] transition-colors"
               >
                 <RefreshCw size={11} /> Retry
               </button>

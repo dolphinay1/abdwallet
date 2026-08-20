@@ -123,7 +123,7 @@ export function DashboardHeader({
           >
             {upperEn(frozenMode === 'PERSISTENT' ? 'Persistent Session' : 'New Session')}
           </h2>
-          <p className="text-[#8a8f98] sf-bold font-bold tracking-wider uppercase text-[0.65rem] opacity-90">
+          <p className="text-[#5b6270] sf-bold font-bold tracking-wider uppercase text-[0.65rem] opacity-90">
             {frozenMode === 'PERSISTENT' ? 'Encrypted · Saved in this browser' : 'Ephemeral — nothing stored unless you save it'}
           </p>
         </div>
@@ -135,7 +135,7 @@ export function DashboardHeader({
             <span className="text-[0.65rem] md:text-xs sf-display-black font-extrabold tracking-wider uppercase text-[#23262b] truncate max-w-[80px] md:max-w-none">
               {meta?.name ?? (manualChain ? manualChain.name : 'Network')}
             </span>
-            <span className="material-symbols-outlined text-[#8a8f98]" style={{ fontSize: 14 }}>
+            <span className="material-symbols-outlined text-[#5b6270]" style={{ fontSize: 14 }}>
               expand_more
             </span>
           </button>
@@ -176,14 +176,14 @@ export function DashboardHeader({
 
       {/* Balance card */}
       <div className="space-y-3 md:space-y-6">
-        <p className="text-[#8a8f98] sf-display-black tracking-[0.15em] uppercase text-xs font-bold opacity-75">Selected Chain Balance</p>
+        <p className="text-[#5b6270] sf-display-black tracking-[0.15em] uppercase text-xs font-bold opacity-75">Selected Chain Balance</p>
         <div className="flex items-end gap-4">
           <h1 className="text-[2.6rem] md:text-[9rem] font-black tracking-tighter leading-none text-[#23262b]">
             {isLoadingTotal ? (
-              <span className="text-[#8a8f98] opacity-30">...</span>
+              <span className="text-[#5b6270] opacity-30">...</span>
             ) : (
               <span className="flex items-baseline gap-0">
-                <span className="text-[#8a8f98] opacity-60">$</span>
+                <span className="text-[#5b6270] opacity-60">$</span>
                 {showFullBalance ? (
                   <span>{countTo.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 })}</span>
                 ) : (
@@ -243,7 +243,7 @@ export function DashboardHeader({
             )}
             <div className="flex flex-col min-w-0">
               <span className="text-[0.65rem] sf-display-black font-extrabold uppercase tracking-widest opacity-70 mb-1">
-                {meta ? `${meta.name} Address` : 'Active Monolith Address'}
+                {meta ? `${meta.name} Address` : 'Your Wallet Address'}
               </span>
               <span className="text-base md:text-3xl font-black tracking-tighter font-mono truncate">{shortAddr}</span>
             </div>

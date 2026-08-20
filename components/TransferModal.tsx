@@ -126,7 +126,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
               <p className="sf-display-black" style={{ color: '#1e293b', fontWeight: 900, fontSize: 18, margin: 0, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Transfer</p>
               <p className="sf-bold" style={{ color: '#64748b', fontSize: 10, margin: 0, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Between saved wallets</p>
             </div>
-            <Button isIconOnly size="sm" variant="flat" radius="lg" onPress={onClose} className="text-[#8a8f98]">
+            <Button isIconOnly size="sm" variant="flat" radius="lg" onPress={onClose} className="text-[#5b6270]">
               <X size={16} />
             </Button>
           </div>
@@ -137,13 +137,13 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
             {step === 'select-target' && (
               <motion.div key="select-target" variants={variants.fadeUp} initial="hidden" animate="visible" exit="hidden" transition={springs.smooth}
                 style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>
                   Send to
                 </p>
                 {savedWallets.length === 0 ? (
                   <div style={{ background: 'rgba(166,177,198,0.03)', border: '1px dashed rgba(166,177,198,0.1)', borderRadius: '1rem', padding: 24, textAlign: 'center' }}>
-                    <p style={{ color: '#8a8f98', fontSize: 13, margin: 0 }}>No other saved wallets.</p>
-                    <p style={{ color: '#8a8f98', fontSize: 11, margin: '6px 0 0' }}>
+                    <p style={{ color: '#5b6270', fontSize: 13, margin: 0 }}>No other saved wallets.</p>
+                    <p style={{ color: '#5b6270', fontSize: 11, margin: '6px 0 0' }}>
                       Save at least one more wallet in history to transfer between them.
                     </p>
                   </div>
@@ -154,17 +154,17 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                       onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = '6px 6px 12px rgba(166,177,198,0.55), -6px -6px 12px rgba(255,255,255,0.9)'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)'; }}>
                       <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#8a8f98' }}>account_balance_wallet</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#5b6270' }}>account_balance_wallet</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#23262b', fontSize: 12, fontWeight: 700, margin: 0, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {snap.shortAddress}
                         </p>
-                        <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0' }}>
+                        <p style={{ color: '#5b6270', fontSize: 10, margin: '2px 0 0' }}>
                           {snap.vaultMode === 'PERSISTENT' ? 'Persistent' : 'Ephemeral'} · {new Date(snap.createdAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <ArrowRight size={14} style={{ color: '#8a8f98', flexShrink: 0 }} />
+                      <ArrowRight size={14} style={{ color: '#5b6270', flexShrink: 0 }} />
                     </button>
                   ))
                 )}
@@ -177,11 +177,11 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                 style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {/* Target reminder */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(166,177,198,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(166,177,198,0.06)' }}>
-                  <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>To:</span>
+                  <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>To:</span>
                   <span style={{ fontSize: 11, color: '#23262b', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>{target?.shortAddress}</span>
                 </div>
 
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Select coin</p>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 11, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Select coin</p>
 
                 {isLoadingTokens ? (
                   <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
@@ -189,7 +189,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                   </div>
                 ) : tokens.length === 0 ? (
                   <div style={{ background: 'rgba(166,177,198,0.03)', border: '1px dashed rgba(166,177,198,0.1)', borderRadius: '1rem', padding: 24, textAlign: 'center' }}>
-                    <p style={{ color: '#8a8f98', fontSize: 13, margin: 0 }}>No tokens with balance found.</p>
+                    <p style={{ color: '#5b6270', fontSize: 13, margin: 0 }}>No tokens with balance found.</p>
                   </div>
                 ) : (
                   tokens.map((tok, i) => {
@@ -206,15 +206,15 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                         }
                         <div style={{ flex: 1 }}>
                           <p style={{ color: '#23262b', fontSize: 13, fontWeight: 700, margin: 0 }}>{tok.symbol}</p>
-                          <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0' }}>{bal.toFixed(6)}</p>
+                          <p style={{ color: '#5b6270', fontSize: 10, margin: '2px 0 0' }}>{bal.toFixed(6)}</p>
                         </div>
-                        <p style={{ color: '#8a8f98', fontSize: 11, fontWeight: 700, margin: 0 }}>${usd.toFixed(2)}</p>
+                        <p style={{ color: '#5b6270', fontSize: 11, fontWeight: 700, margin: 0 }}>${usd.toFixed(2)}</p>
                       </button>
                     );
                   })
                 )}
 
-                <button onClick={() => setStep('select-target')} style={{ background: 'none', border: 'none', color: '#8a8f98', fontSize: 11, cursor: 'pointer', textAlign: 'left', padding: '4px 0' }}>
+                <button onClick={() => setStep('select-target')} style={{ background: 'none', border: 'none', color: '#5b6270', fontSize: 11, cursor: 'pointer', textAlign: 'left', padding: '4px 0' }}>
                   ← Change target
                 </button>
               </motion.div>
@@ -225,7 +225,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
               <motion.div key="enter-amount" variants={variants.fadeUp} initial="hidden" animate="visible" exit="hidden" transition={springs.smooth}
                 style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {/* Summary bar */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(166,177,198,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(166,177,198,0.06)', fontSize: 10, color: '#8a8f98' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'rgba(166,177,198,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(166,177,198,0.06)', fontSize: 10, color: '#5b6270' }}>
                   <span style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>To</span>
                   <span style={{ fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", color: '#23262b' }}>{target?.shortAddress}</span>
                   <span style={{ margin: '0 4px' }}>·</span>
@@ -248,7 +248,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                     }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-                    <span className="russo-one-regular" style={{ fontSize: 10, color: '#8a8f98', fontWeight: 400 }}>≈ ${usdValue.toFixed(2)}</span>
+                    <span className="russo-one-regular" style={{ fontSize: 10, color: '#5b6270', fontWeight: 400 }}>≈ ${usdValue.toFixed(2)}</span>
                     <button className="russo-one-regular" onClick={() => setAmount(String(selectedBal))}
                       style={{ fontSize: 9, fontWeight: 400, color: '#2b2d33', background: 'rgba(43,45,51,0.08)', border: '1px solid rgba(43,45,51,0.2)', borderRadius: 6, padding: '2px 8px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                       Max
@@ -256,7 +256,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                   </div>
                 </div>
 
-                <p className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', margin: 0, fontWeight: 400, letterSpacing: '0.04em' }}>
+                <p className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', margin: 0, fontWeight: 400, letterSpacing: '0.04em' }}>
                   Balance: {selectedBal.toFixed(6)} {selectedToken?.symbol}
                 </p>
 
@@ -277,7 +277,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                   {upperEn('Review Transfer')}
                 </Button>
 
-                <button className="russo-one-regular" onClick={() => setStep('select-coin')} style={{ background: 'none', border: 'none', color: '#8a8f98', fontSize: 10, cursor: 'pointer', textAlign: 'left', padding: '4px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <button className="russo-one-regular" onClick={() => setStep('select-coin')} style={{ background: 'none', border: 'none', color: '#5b6270', fontSize: 10, cursor: 'pointer', textAlign: 'left', padding: '4px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   ← Change coin
                 </button>
               </motion.div>
@@ -291,7 +291,7 @@ export function TransferModal({ onClose, currentAddress, currentHistoryId }: Pro
                   <Check size={24} style={{ color: 'var(--theme-accent)' }} />
                 </div>
                 <p className="russo-one-regular" style={{ color: '#23262b', fontWeight: 400, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>Transferred!</p>
-                <p style={{ color: '#8a8f98', fontSize: 11, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
+                <p style={{ color: '#5b6270', fontSize: 11, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', textAlign: 'center', margin: 0 }}>
                   {txHash.slice(0, 20)}…{txHash.slice(-8)}
                 </p>
                 <a href={`${explorerUrl}/tx/${txHash}`} target="_blank" rel="noopener noreferrer"

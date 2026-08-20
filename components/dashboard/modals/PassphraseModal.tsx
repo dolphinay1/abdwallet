@@ -133,7 +133,7 @@ export function PassphraseModal({
           </button>
         </div>
 
-        <p style={{ color: '#8a8f98', fontSize: 11, margin: 0, lineHeight: 1.4 }}>{description}</p>
+        <p style={{ color: '#5b6270', fontSize: 11, margin: 0, lineHeight: 1.4 }}>{description}</p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ ...boxStyle, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -159,7 +159,7 @@ export function PassphraseModal({
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              style={{ background: 'none', border: 'none', color: '#8a8f98', cursor: 'pointer', display: 'flex' }}
+              style={{ background: 'none', border: 'none', color: '#5b6270', cursor: 'pointer', display: 'flex' }}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -201,7 +201,7 @@ export function PassphraseModal({
                 borderRadius: 12,
                 fontSize: 11,
                 fontWeight: 400,
-                color: '#8a8f98',
+                color: '#5b6270',
                 cursor: 'pointer',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',

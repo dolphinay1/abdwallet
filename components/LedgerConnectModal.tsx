@@ -31,7 +31,7 @@ const btn = (color = '#2b2d33'): React.CSSProperties => ({
 });
 const stepBox: React.CSSProperties = {
   background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: 10, padding: '10px 14px',
-  marginBottom: 8, fontSize: 13, color: '#8a8f98',
+  marginBottom: 8, fontSize: 13, color: '#5b6270',
 };
 
 export function LedgerConnectModal({ onConnect, onClose }: Props) {
@@ -73,13 +73,13 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Usb size={20} color="#8a8f98" />
+            <Usb size={20} color="#5b6270" />
             <span className="sf-display-black" style={{ fontWeight: 900, fontSize: 18, color: '#1e293b', letterSpacing: '0.02em', textTransform: 'uppercase' }}>Connect Ledger</span>
           </div>
           <button
             aria-label="Close ledger connect modal"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', padding: 4 }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5b6270', padding: 4 }}
           >
             <X size={18} />
           </button>
@@ -101,7 +101,7 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
             </div>
 
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 12, color: '#8a8f98', marginBottom: 4 }}>Derivation path</div>
+              <div style={{ fontSize: 12, color: '#5b6270', marginBottom: 4 }}>Derivation path</div>
               <input
                 value={derivationPath}
                 onChange={e => setDerivationPath(e.target.value)}
@@ -124,10 +124,10 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
         )}
 
         {status === 'connecting' && (
-          <div style={{ textAlign: 'center', padding: '24px 0', color: '#8a8f98' }}>
-            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}><Usb size={32} color="#8a8f98" /></div>
+          <div style={{ textAlign: 'center', padding: '24px 0', color: '#5b6270' }}>
+            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}><Usb size={32} color="#5b6270" /></div>
             <div style={{ fontSize: 14 }}>Waiting for Ledger approval...</div>
-            <div style={{ fontSize: 12, marginTop: 8, color: '#8a8f98' }}>
+            <div style={{ fontSize: 12, marginTop: 8, color: '#5b6270' }}>
               Check your device screen and approve the connection
             </div>
           </div>
@@ -137,7 +137,7 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
             <CheckCircle size={40} color="#23262b" style={{ marginBottom: 12 }} />
             <div style={{ fontWeight: 600, color: '#23262b', marginBottom: 6 }}>Ledger Connected</div>
-            <div style={{ fontSize: 12, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", marginBottom: 20 }}>
+            <div style={{ fontSize: 12, color: '#5b6270', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", marginBottom: 20 }}>
               {connectedEntry.address.slice(0, 10)}...{connectedEntry.address.slice(-8)}
             </div>
             <button style={btn('#23262b')} onClick={handleConfirm}>

@@ -21,6 +21,25 @@ const GAS_FALLBACKS: Record<number, { base: string; priority: string }> = {
 };
 const DEFAULT_FALLBACK = { base: '10', priority: '1' };
 
+function secureRandomInt(max: number): number {
+  if (max <= 0) return 0;
+  const bytes = new Uint8Array(4);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+    const val = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+    return val % max;
+  }
+  return Math.abs(Date.now()) % max;
+}
+
+async function withRpcTimeout<T>(promise: Promise<T>, ms = 2500): Promise<T> {
+  let timer: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('RPC Timeout')), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+}
+
 // Gas price jitter (Block 19 Task 1)
 export async function getMaskedGasPrice(chainId = 1): Promise<{
   maxFeePerGas: bigint;
@@ -32,11 +51,11 @@ export async function getMaskedGasPrice(chainId = 1): Promise<{
   let baseFee: bigint;
   let priority: bigint;
   try {
-    // Try both calls; if priority fails fall back gracefully
-    const gasPriceHex = await (provider.send('eth_gasPrice', []) as Promise<string>);
+    // Try both calls with timeout; if priority fails fall back gracefully
+    const gasPriceHex = await withRpcTimeout(provider.send('eth_gasPrice', []) as Promise<string>);
     baseFee = BigInt(gasPriceHex);
     try {
-      const priorityHex = await (provider.send('eth_maxPriorityFeePerGas', []) as Promise<string>);
+      const priorityHex = await withRpcTimeout(provider.send('eth_maxPriorityFeePerGas', []) as Promise<string>);
       priority = BigInt(priorityHex);
     } catch {
       priority = ethers.parseUnits(fb.priority, 'gwei');
@@ -47,7 +66,7 @@ export async function getMaskedGasPrice(chainId = 1): Promise<{
   }
 
   // Add tiny random fractional jitter (0–100 wei)
-  const jitter = BigInt(Math.floor(Math.random() * 100));
+  const jitter = BigInt(secureRandomInt(100));
 
   return {
     maxFeePerGas: baseFee + jitter,
@@ -57,7 +76,7 @@ export async function getMaskedGasPrice(chainId = 1): Promise<{
 
 // Stealth delay before broadcast (Block 19 Task 2) — 1–7 seconds
 export async function stealthDelay(): Promise<void> {
-  const ms = Math.floor(Math.random() * 6000) + 1000;
+  const ms = secureRandomInt(6000) + 1000;
   return new Promise((r) => setTimeout(r, ms));
 }
 
@@ -69,13 +88,13 @@ const DUMMY_CONTRACTS = [
 
 export async function fireDummyEchoes(): Promise<void> {
   const provider = getProvider();
-  const count = Math.floor(Math.random() * 2) + 1;
+  const count = secureRandomInt(2) + 1;
   for (let i = 0; i < count; i++) {
     try {
-      await provider.call({
-        to: DUMMY_CONTRACTS[Math.floor(Math.random() * DUMMY_CONTRACTS.length)],
+      await withRpcTimeout(provider.call({
+        to: DUMMY_CONTRACTS[secureRandomInt(DUMMY_CONTRACTS.length)],
         data: '0x',
-      });
+      }));
     } catch {}
   }
 }
@@ -135,11 +154,11 @@ export async function buildMaskedTransaction(
   const { maxFeePerGas, maxPriorityFeePerGas } = await getMaskedGasPrice(chainId);
   let nonce = 0;
   try {
-    nonce = await provider.getTransactionCount(fromAddress, 'latest');
+    nonce = await withRpcTimeout(provider.getTransactionCount(fromAddress, 'latest'), 1500);
   } catch {
     nonce = 0;
   }
-  const jitter = BigInt(Math.floor(Math.random() * 100));
+  const jitter = BigInt(secureRandomInt(100));
 
   if (tokenContract && tokenContract !== 'native') {
     // ERC-20 transfer
@@ -147,12 +166,12 @@ export async function buildMaskedTransaction(
     const data = encodeErc20Transfer(to, amountRaw);
     let gasLimit = 100000n;
     try {
-      const estimated = await provider.send('eth_estimateGas', [{
+      const estimated = await withRpcTimeout(provider.send('eth_estimateGas', [{
         from: fromAddress,
         to: tokenContract,
         value: '0x0',
         data,
-      }]) as string;
+      }]), 1500) as string;
       const parsed = BigInt(estimated);
       gasLimit = (parsed * 12n) / 10n;
       if (gasLimit < 65000n) gasLimit = 65000n;

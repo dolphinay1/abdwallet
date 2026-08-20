@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 interface RateLimitStore {
   count: number;
@@ -19,22 +21,39 @@ if (typeof setInterval !== 'undefined') {
   }, 300_000);
 }
 
+// Distributed Redis client initialization (if env variables are present)
+let upstashRatelimit: Ratelimit | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  try {
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+    upstashRatelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(60, '1 m'),
+      analytics: false,
+    });
+  } catch {
+    upstashRatelimit = null;
+  }
+}
+
+function getClientIp(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  return (forwarded ? forwarded.split(',')[0].trim() : realIp) || '127.0.0.1';
+}
+
 /**
- * In-memory sliding window rate limiter per client IP.
- * @param req The Next.js Request object
- * @param maxRequests Maximum allowed requests in the window (default: 60)
- * @param windowMs Window duration in milliseconds (default: 60,000ms / 1 min)
+ * Synchronous in-memory sliding window rate limiter per client IP.
  */
 export function checkRateLimit(
   req: Request,
   maxRequests = 60,
   windowMs = 60_000
 ): { allowed: boolean; response?: NextResponse } {
-  // Extract client IP from headers
-  const forwarded = req.headers.get('x-forwarded-for');
-  const realIp = req.headers.get('x-real-ip');
-  const ip = (forwarded ? forwarded.split(',')[0].trim() : realIp) || '127.0.0.1';
-
+  const ip = getClientIp(req);
   const now = Date.now();
   const entry = IP_MAP.get(ip);
 
@@ -63,4 +82,43 @@ export function checkRateLimit(
 
   entry.count++;
   return { allowed: true };
+}
+
+/**
+ * Async rate limiter utilizing Upstash Redis if configured, falling back to in-memory.
+ */
+export async function checkRateLimitAsync(
+  req: Request,
+  maxRequests = 60,
+  windowMs = 60_000
+): Promise<{ allowed: boolean; response?: NextResponse }> {
+  if (upstashRatelimit) {
+    try {
+      const ip = getClientIp(req);
+      const { success, reset } = await upstashRatelimit.limit(ip);
+      if (!success) {
+        const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+        return {
+          allowed: false,
+          response: NextResponse.json(
+            {
+              error: 'Too Many Requests',
+              message: 'Rate limit exceeded. Please wait a moment.',
+            },
+            {
+              status: 429,
+              headers: {
+                'Retry-After': retryAfter.toString(),
+              },
+            }
+          ),
+        };
+      }
+      return { allowed: true };
+    } catch {
+      // Fallback to in-memory on redis connection error
+    }
+  }
+
+  return checkRateLimit(req, maxRequests, windowMs);
 }

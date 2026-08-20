@@ -1,13 +1,25 @@
-// Memory Fragmentation & Scatter Store — Block 22
+function secureRandomBytes(length: number): Uint8Array {
+  const bytes = new Uint8Array(length);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    // Fallback for non-crypto environments
+    for (let i = 0; i < length; i++) bytes[i] = Math.floor(Date.now() % 256);
+  }
+  return bytes;
+}
 
 function randomKey(): string {
-  return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  const bytes = secureRandomBytes(16);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function randomNoise(): string {
-  const len = Math.floor(Math.random() * 8) + 4;
+  const lenBytes = secureRandomBytes(1);
+  const len = (lenBytes[0] % 8) + 4;
+  const chars = secureRandomBytes(len);
   let s = '';
-  for (let i = 0; i < len; i++) s += String.fromCharCode(Math.floor(Math.random() * 94) + 33);
+  for (let i = 0; i < len; i++) s += String.fromCharCode((chars[i] % 94) + 33);
   return s;
 }
 

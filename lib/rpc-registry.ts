@@ -17,7 +17,7 @@ const ENV_RPC: Record<number, string | undefined> = {
 
 // Ordered public fallbacks per chain — first healthy one wins (probed on demand).
 const PUBLIC_RPC: Record<number, string[]> = {
-  1: ['https://cloudflare-eth.com', 'https://ethereum-rpc.publicnode.com', 'https://1rpc.io/eth', 'https://eth.drpc.org'],
+  1: ['https://ethereum-rpc.publicnode.com', 'https://1rpc.io/eth', 'https://eth.drpc.org'],
   56: ['https://bsc-dataseed.bnbchain.org', 'https://bsc-dataseed1.defibit.io', 'https://1rpc.io/bnb', 'https://binance.llamarpc.com'],
   137: ['https://polygon-rpc.com', 'https://polygon-bor-rpc.publicnode.com', 'https://1rpc.io/matic'],
   42161: ['https://arb1.arbitrum.io/rpc', 'https://arbitrum-one-rpc.publicnode.com', 'https://1rpc.io/arb'],
@@ -59,7 +59,7 @@ async function isHealthy(url: string): Promise<boolean> {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] }),
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: ['0x0000000000000000000000000000000000000000', 'latest'] }),
       signal: AbortSignal.timeout(6_000),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

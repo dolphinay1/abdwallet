@@ -44,6 +44,10 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
  * Does not trust raw first element of X-Forwarded-For which can be spoofed by attackers.
  */
 export function getClientIp(req: Request): string {
+  // 0. Cloudflare proxy önde — en güvenilir kaynak
+  const cfIp = req.headers.get('cf-connecting-ip');
+  if (cfIp && cfIp.trim()) return cfIp.trim();
+
   // 1. Check trusted Vercel proxy header
   const vercelForwarded = req.headers.get('x-vercel-forwarded-for');
   if (vercelForwarded) {

@@ -5,7 +5,7 @@ export const PASSPHRASE = 'TestPass999!';
 export const SEL = {
   createBtn: '#create-new-wallet-btn',
   importBtn: '#import-existing-wallet-btn',
-  saveBtn: 'button:has(span.material-symbols-outlined:text("save"))',
+  saveBtn: 'button:has-text("Save Wallet"), button:has(span.material-symbols-outlined:text("bookmark_add"))',
   advancedBtn: 'button:has-text("Advanced")',
   simpleBtn: 'button:has-text("Simple")',
   hintLink: "button:has-text(\"Didn't find\")",

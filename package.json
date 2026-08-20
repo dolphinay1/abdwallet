@@ -68,6 +68,7 @@
   },
   "overrides": {
     "protobufjs": "^8.7.2",
+    "@grpc/grpc-js": "^1.12.6",
     "axios": "^1.7.9",
     "ws": "^8.20.2",
     "elliptic": "^6.6.1",

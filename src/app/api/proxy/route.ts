@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import dns from 'dns';
+import net from 'net';
 import { resolveRpcUrl } from '@/lib/rpc-registry';
 import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 function isPrivateIp(ip: string): boolean {
-  // Check IPv4
-  if (ip.includes('.')) {
+  const ipVer = net.isIP(ip);
+  if (ipVer === 0) return false;
+
+  if (ipVer === 4) {
     const parts = ip.split('.').map(Number);
     if (parts.length !== 4 || parts.some(n => isNaN(n) || n < 0 || n > 255)) return true;
     const [a, b, c] = parts;
@@ -38,17 +41,19 @@ function isPrivateIp(ip: string): boolean {
     return false;
   }
 
-  // Check IPv6
-  const normalized = ip.toLowerCase();
-  if (normalized === '::1' || normalized === '::' || normalized === '0:0:0:0:0:0:0:1' || normalized === '0:0:0:0:0:0:0:0') return true;
-  // Unique Local Address (fc00::/7)
-  if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
-  // Link-local (fe80::/10)
-  if (/^fe[89ab]/i.test(normalized)) return true;
-  // IPv4-mapped IPv6 (::ffff:127.0.0.1)
-  if (normalized.includes('::ffff:')) {
-    const v4 = normalized.split('::ffff:')[1];
-    if (v4 && isPrivateIp(v4)) return true;
+  if (ipVer === 6) {
+    const normalized = ip.toLowerCase();
+    if (normalized === '::1' || normalized === '::' || normalized === '0:0:0:0:0:0:0:1' || normalized === '0:0:0:0:0:0:0:0') return true;
+    // Unique Local Address (fc00::/7)
+    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
+    // Link-local (fe80::/10)
+    if (/^fe[89ab]/i.test(normalized)) return true;
+    // IPv4-mapped IPv6 (::ffff:127.0.0.1)
+    if (normalized.includes('::ffff:')) {
+      const v4 = normalized.split('::ffff:')[1];
+      if (v4 && isPrivateIp(v4)) return true;
+    }
+    return false;
   }
 
   return false;
@@ -56,7 +61,11 @@ function isPrivateIp(ip: string): boolean {
 
 async function validateHostIsNotPrivate(hostname: string): Promise<boolean> {
   try {
-    if (isPrivateIp(hostname)) return false;
+    // Direct IP literal check
+    if (net.isIP(hostname) !== 0) {
+      return !isPrivateIp(hostname);
+    }
+    // Domain hostname: resolve all DNS A/AAAA records
     const records = await dns.promises.lookup(hostname, { all: true });
     if (!records || records.length === 0) return false;
 
@@ -141,6 +150,10 @@ export async function POST(req: Request) {
       parsedUrl = new URL(url);
     } catch {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    }
+
+    if (parsedUrl.protocol !== 'https:') {
+      return NextResponse.json({ error: 'HTTPS protocol is required' }, { status: 400 });
     }
 
     const parsedHost = parsedUrl.hostname;

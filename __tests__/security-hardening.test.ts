@@ -97,7 +97,7 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
       const req = new Request('http://localhost:3000/api/proxy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: 'http://127.0.0.1:8080/admin' }),
+        body: JSON.stringify({ url: 'https://127.0.0.1:8080/admin' }),
       });
       const res = await POST(req);
       expect(res.status).toBe(403);
@@ -148,6 +148,34 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
       const res3 = await checkRateLimitAsync(req, 2, 60_000);
       expect(res3.allowed).toBe(false);
       expect(res3.response?.status).toBe(429);
+    });
+  });
+
+  describe('SSRF Protection & RPC Proxy (Kritik 1 & Yüksek 2)', () => {
+    it('rejects private IP literals and non-HTTPS schemes in proxy route', async () => {
+      const { POST } = await import('../src/app/api/proxy/route');
+
+      // Private loopback IP rejected
+      const req1 = new Request('http://localhost:3000/api/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: 'https://127.0.0.1:8545', method: 'POST', payload: {} }),
+      });
+      const res1 = await POST(req1);
+      expect(res1.status).toBe(403);
+      const data1 = await res1.json();
+      expect(data1.error).toContain('SSRF blocked');
+
+      // Non-HTTPS rejected
+      const req2 = new Request('http://localhost:3000/api/proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: 'http://cloudflare-eth.com', method: 'POST', payload: {} }),
+      });
+      const res2 = await POST(req2);
+      expect(res2.status).toBe(400);
+      const data2 = await res2.json();
+      expect(data2.error).toContain('HTTPS protocol is required');
     });
   });
 });

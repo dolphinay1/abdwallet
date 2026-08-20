@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 import { resolveRpcUrl, rpcRequest } from '@/lib/rpc-registry';
 import { getChainById } from '@/lib/chains';
 import { ethers } from 'ethers';
@@ -28,7 +28,7 @@ interface SimChange {
  * Soft-fails (empty changes) when RPC is unavailable so the send flow never breaks.
  */
 export async function POST(req: Request) {
-  const limit = checkRateLimit(req, 60, 60_000);
+  const limit = await checkRateLimitAsync(req, 60, 60_000);
   if (!limit.allowed) return limit.response!;
 
   try {

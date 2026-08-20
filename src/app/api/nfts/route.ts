@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +28,7 @@ const ALCHEMY_NETWORK: Record<number, string> = {
 };
 
 export async function POST(req: Request) {
-  const limit = checkRateLimit(req, 60, 60_000);
+  const limit = await checkRateLimitAsync(req, 60, 60_000);
   if (!limit.allowed) return limit.response!;
 
   try {

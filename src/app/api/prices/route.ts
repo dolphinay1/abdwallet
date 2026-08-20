@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +18,7 @@ const STALE_TTL_MS = 600_000; // 10 minutes stale tolerance
  * Returns { [id]: { price, change24h } }.
  */
 export async function GET(req: Request) {
-  const limit = checkRateLimit(req, 120, 60_000);
+  const limit = await checkRateLimitAsync(req, 120, 60_000);
   if (!limit.allowed) return limit.response!;
 
   const { searchParams } = new URL(req.url);

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getChainById } from '@/lib/chains';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +35,7 @@ const EXPLORER_API: Record<number, string> = {
  * Returns TxRecord[] directly.
  */
 export async function POST(req: Request) {
-  const limit = checkRateLimit(req, 60, 60_000);
+  const limit = await checkRateLimitAsync(req, 60, 60_000);
   if (!limit.allowed) return limit.response!;
 
   try {

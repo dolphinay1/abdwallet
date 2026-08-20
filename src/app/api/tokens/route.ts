@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { ethers, Network } from 'ethers';
 import { resolveRpcUrl } from '@/lib/rpc-registry';
 import { getChainById } from '@/lib/chains';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +30,7 @@ interface TokenEntry {
  * Returns TokenBalance[] directly.
  */
 export async function POST(req: Request) {
-  const limit = checkRateLimit(req, 120, 60_000);
+  const limit = await checkRateLimitAsync(req, 120, 60_000);
   if (!limit.allowed) return limit.response!;
   try {
     const body = await req.json();

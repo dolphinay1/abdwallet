@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 import { resolveRpcUrl } from '@/lib/rpc-registry';
 import { getChainById } from '@/lib/chains';
 import { getSpenders, getKnownTokens } from '@/lib/approval-registry';
@@ -19,7 +19,7 @@ const ERC20_ABI = [
  * Spenders and token lists resolved server-side from the known registry (SSRF-safe).
  */
 export async function GET(req: Request) {
-  const limit = checkRateLimit(req, 60, 60_000);
+  const limit = await checkRateLimitAsync(req, 60, 60_000);
   if (!limit.allowed) return limit.response!;
 
   const { searchParams } = new URL(req.url);

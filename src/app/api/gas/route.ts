@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { resolveRpcUrl, rpcRequest } from '@/lib/rpc-registry';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +22,7 @@ const DEFAULT_GAS_BY_CHAIN: Record<number, { slow: number; medium: number; fast:
  * for an EVM chain, derived from eth_gasPrice + eth_feeHistory.
  */
 export async function GET(req: Request) {
-  const limit = checkRateLimit(req, 120, 60_000);
+  const limit = await checkRateLimitAsync(req, 120, 60_000);
   if (!limit.allowed) return limit.response!;
 
   const chainId = Number(new URL(req.url).searchParams.get('chainId') || 1);

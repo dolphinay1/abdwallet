@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +10,7 @@ const GOPLUS_BASE = 'https://api.gopluslabs.io/api/v1';
  * Server-side execution avoids client CORS issues and centralizes rate limits.
  */
 export async function GET(req: Request) {
-  const limit = checkRateLimit(req, 60, 60_000);
+  const limit = await checkRateLimitAsync(req, 60, 60_000);
   if (!limit.allowed) return limit.response!;
 
   const { searchParams } = new URL(req.url);

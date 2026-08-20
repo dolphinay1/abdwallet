@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 import { getChainById } from '@/lib/chains';
 import { ethers } from 'ethers';
 
@@ -22,7 +22,7 @@ function lifiHeaders(): Record<string, string> {
  * GET /api/swap?action=quote&fromChain=1&toChain=137&fromToken=0x..&toToken=0x..&fromAmount=123&fromAddress=0x..
  */
 export async function GET(req: Request) {
-  const limit = checkRateLimit(req, 30, 60_000);
+  const limit = await checkRateLimitAsync(req, 30, 60_000);
   if (!limit.allowed) return limit.response!;
 
   const { searchParams } = new URL(req.url);

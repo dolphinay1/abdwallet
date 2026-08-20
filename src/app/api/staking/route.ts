@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { resolveRpcUrl, rpcRequest } from '@/lib/rpc-registry';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 import { ethers } from 'ethers';
 
 export const dynamic = 'force-dynamic';
@@ -54,7 +54,7 @@ async function getRethExchangeRate(rpcUrl: string): Promise<number | null> {
  * Liquid staking proxy — fetches APY and staked positions for Lido and Rocket Pool.
  */
 export async function GET(req: Request) {
-  const limit = checkRateLimit(req, 60, 60_000);
+  const limit = await checkRateLimitAsync(req, 60, 60_000);
   if (!limit.allowed) return limit.response!;
 
   const { searchParams } = new URL(req.url);

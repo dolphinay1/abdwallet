@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dns from 'dns';
 import { resolveRpcUrl } from '@/lib/rpc-registry';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { checkRateLimitAsync } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,7 +77,7 @@ async function validateHostIsNotPrivate(hostname: string): Promise<boolean> {
  */
 export async function POST(req: Request) {
   // Rate limit: 120 requests per minute per IP for RPC
-  const limit = checkRateLimit(req, 120, 60_000);
+  const limit = await checkRateLimitAsync(req, 120, 60_000);
   if (!limit.allowed) return limit.response!;
 
   try {

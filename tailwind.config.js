@@ -25,7 +25,7 @@ module.exports = {
           fee: "#b91c1c",
           success: "#23262b",
           emerald: "#6b7280",
-          violet: "#8a8f98",
+          violet: "#5b6270",
         },
       },
       fontFamily: {

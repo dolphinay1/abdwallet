@@ -280,7 +280,7 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
             )}
             <div>
               <p style={{ color: '#23262b', fontWeight: 900, fontSize: 15 }}>{meta.name}</p>
-              <p style={{ color: '#8a8f98', fontSize: 10, marginTop: 2 }}>{meta.url}</p>
+              <p style={{ color: '#5b6270', fontSize: 10, marginTop: 2 }}>{meta.url}</p>
             </div>
           </div>
 
@@ -293,12 +293,12 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
                   {dappRisk.level === 'danger' ? 'Suspicious dApp' : 'Caution'}
                 </span>
                 <button onClick={() => setDappRiskDismissed(true)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5b6270', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
               </div>
               {dappRisk.flags.map((f, i) => (
                 <p key={i} style={{ fontSize: 11, color: riskColor(dappRisk.level), margin: '1px 0', fontWeight: 600 }}>• {f}</p>
               ))}
-              <p style={{ fontSize: 9, color: '#8a8f98', margin: '4px 0 0', fontStyle: 'italic' }}>
+              <p style={{ fontSize: 9, color: '#5b6270', margin: '4px 0 0', fontStyle: 'italic' }}>
                 Powered by GoPlus Security · dismiss to approve anyway
               </p>
             </div>
@@ -403,15 +403,15 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
 
               {/* Method */}
               <div style={{ padding: '10px 14px', background: '#e4e6ee', boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)', borderRadius: '0.75rem', marginBottom: 14 }}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 4 }}>Method</p>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 4 }}>Method</p>
                 <p style={{ color: '#2b2d33', fontSize: 12, fontWeight: 900 }}>{methodLabel}</p>
-                <p style={{ color: '#8a8f98', fontSize: 9, marginTop: 2 }}>Chain: {pendingRequest.chainId}</p>
+                <p style={{ color: '#5b6270', fontSize: 9, marginTop: 2 }}>Chain: {pendingRequest.chainId}</p>
               </div>
 
               {/* Params preview */}
               <div style={{ padding: '10px 14px', background: '#e4e6ee', boxShadow: 'inset 4px 4px 8px rgba(166,177,198,0.5), inset -4px -4px 8px rgba(255,255,255,0.9)', borderRadius: '0.75rem', marginBottom: 16, maxHeight: 160, overflowY: 'auto' }}>
-                <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6 }}>Details</p>
-                <pre style={{ color: '#8a8f98', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', whiteSpace: 'pre-wrap', margin: 0 }}>
+                <p className="russo-one-regular" style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 6 }}>Details</p>
+                <pre style={{ color: '#5b6270', fontSize: 9, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', whiteSpace: 'pre-wrap', margin: 0 }}>
                   {paramsStr.length > 600 ? paramsStr.slice(0, 600) + '\n...' : paramsStr}
                 </pre>
               </div>
@@ -425,12 +425,12 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
                       {dappRisk.level === 'danger' ? 'Suspicious dApp' : 'Caution'}
                     </span>
                     <button onClick={() => setDappRiskDismissed(true)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5b6270', fontSize: 12, padding: '0 2px', lineHeight: 1 }}>✕</button>
                   </div>
                   {dappRisk.flags.map((f, i) => (
                     <p key={i} style={{ fontSize: 11, color: riskColor(dappRisk.level), margin: '1px 0', fontWeight: 600 }}>• {f}</p>
                   ))}
-                  <p style={{ fontSize: 9, color: '#8a8f98', margin: '4px 0 0', fontStyle: 'italic' }}>Powered by GoPlus Security</p>
+                  <p style={{ fontSize: 9, color: '#5b6270', margin: '4px 0 0', fontStyle: 'italic' }}>Powered by GoPlus Security</p>
                 </div>
               )}
 
@@ -615,7 +615,7 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
 
           {sessions.length === 0 ? (
             <div style={{ padding: '24px', border: '1px dashed rgba(166,177,198,0.15)', borderRadius: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-              <WifiOff size={20} style={{ color: '#8a8f98' }} />
+              <WifiOff size={20} style={{ color: '#5b6270' }} />
               <p className="sf-bold" style={{ color: '#64748b', fontSize: 11, fontWeight: 700 }}>No active connections</p>
             </div>
           ) : (

@@ -82,12 +82,12 @@ export function AmountInput({
         >
           Max
         </button>
-        <span style={{ color: '#8a8f98', fontSize: 10, fontWeight: 900, marginLeft: 6, flexShrink: 0 }}>{tokenSymbol}</span>
+        <span style={{ color: '#5b6270', fontSize: 10, fontWeight: 900, marginLeft: 6, flexShrink: 0 }}>{tokenSymbol}</span>
       </div>
 
       {/* Network fee */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 4px' }}>
-        <span className="russo-one-regular" style={{ fontSize: 10, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+        <span className="russo-one-regular" style={{ fontSize: 10, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
           Network Fee
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -105,16 +105,16 @@ export function AmountInput({
             />
           )}
           {feeEth !== null ? (
-            <span className="russo-one-regular" style={{ fontSize: 9, fontWeight: 400, color: '#8a8f98', letterSpacing: '0.02em' }}>
+            <span className="russo-one-regular" style={{ fontSize: 9, fontWeight: 400, color: '#5b6270', letterSpacing: '0.02em' }}>
               ~{feeEth} {selectedChain.symbol}
               {feeUsd !== null && feeUsd > 0 && (
-                <span className="russo-one-regular" style={{ color: '#8a8f98', marginLeft: 5, fontWeight: 400 }}>
+                <span className="russo-one-regular" style={{ color: '#5b6270', marginLeft: 5, fontWeight: 400 }}>
                   ({formatUSD(feeUsd)})
                 </span>
               )}
             </span>
           ) : (
-            !feeLoading && <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400 }}>—</span>
+            !feeLoading && <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400 }}>—</span>
           )}
         </span>
       </div>

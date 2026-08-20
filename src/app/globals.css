@@ -6,7 +6,7 @@
 :root {
   --neu-bg: #e4e6ee;
   --neu-text: #23262b;
-  --neu-muted: #8a8f98;
+  --neu-muted: #5b6270;
   --neu-charcoal: #2b2d33;
   --neu-danger: #b91c1c;
   --neu-shadow-dark: rgba(166, 177, 198, 0.55);
@@ -16,14 +16,14 @@
   --theme-accent: #2b2d33;
   --theme-accent-border: rgba(43, 45, 51, 0.4);
   --theme-accent-dim: rgba(43, 45, 51, 0.12);
-  --theme-violet: #8a8f98;
+  --theme-violet: #5b6270;
   --theme-violet-border: rgba(138, 143, 152, 0.4);
   --theme-violet-dim: rgba(138, 143, 152, 0.15);
   --theme-bg: #e4e6ee;
   --theme-surface: #e4e6ee;
   --theme-border: #c9ced9;
   --theme-text: #23262b;
-  --theme-muted: #8a8f98;
+  --theme-muted: #5b6270;
   --theme-danger: #b91c1c;
   --theme-success: #23262b;
   --theme-fee: #b91c1c;

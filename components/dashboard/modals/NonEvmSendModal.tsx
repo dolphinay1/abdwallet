@@ -179,7 +179,7 @@ export function NonEvmSendModal({
             >
               Sent!
             </p>
-            <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: 0, wordBreak: 'break-all' }}>{txid}</p>
+            <p style={{ color: '#5b6270', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", margin: 0, wordBreak: 'break-all' }}>{txid}</p>
             {meta?.explorerBase && (
               <a
                 href={`${meta.explorerBase}/${txid}`}
@@ -210,7 +210,7 @@ export function NonEvmSendModal({
                 boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)',
                 borderRadius: 10,
                 padding: '10px 24px',
-                color: '#8a8f98',
+                color: '#5b6270',
                 cursor: 'pointer',
                 fontWeight: 400,
                 fontSize: 11,
@@ -226,16 +226,16 @@ export function NonEvmSendModal({
             <div>
               <p
                 className="russo-one-regular"
-                style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
+                style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
               >
                 From
               </p>
-              <p style={{ color: '#8a8f98', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', margin: 0 }}>{fromAddress}</p>
+              <p style={{ color: '#5b6270', fontSize: 10, fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", wordBreak: 'break-all', margin: 0 }}>{fromAddress}</p>
             </div>
             <div>
               <p
                 className="russo-one-regular"
-                style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
+                style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
               >
                 Recipient Address
               </p>
@@ -314,7 +314,7 @@ export function NonEvmSendModal({
                         }}
                       >
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#23262b' }}>{c.name}</span>
-                        <span style={{ fontSize: 10, color: '#8a8f98', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
+                        <span style={{ fontSize: 10, color: '#5b6270', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace" }}>
                           {c.address.slice(0, 10)}...{c.address.slice(-6)}
                         </span>
                       </button>
@@ -335,7 +335,7 @@ export function NonEvmSendModal({
             <div>
               <p
                 className="russo-one-regular"
-                style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
+                style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
               >
                 Amount ({meta?.symbol ?? coin})
               </p>
@@ -345,7 +345,7 @@ export function NonEvmSendModal({
               <div>
                 <p
                   className="russo-one-regular"
-                  style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
+                  style={{ color: '#5b6270', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 6px' }}
                 >
                   Fee Speed
                 </p>
@@ -361,7 +361,7 @@ export function NonEvmSendModal({
                         borderRadius: 8,
                         background: feeSpeed === s ? 'rgba(43,45,51,0.1)' : 'rgba(166,177,198,0.04)',
                         border: `1px solid ${feeSpeed === s ? 'rgba(43,45,51,0.4)' : 'rgba(166,177,198,0.08)'}`,
-                        color: feeSpeed === s ? '#2b2d33' : '#8a8f98',
+                        color: feeSpeed === s ? '#2b2d33' : '#5b6270',
                         fontSize: 9,
                         fontWeight: 400,
                         textTransform: 'uppercase',
@@ -385,7 +385,7 @@ export function NonEvmSendModal({
                 padding: '14px',
                 borderRadius: 12,
                 background: status === 'sending' ? 'rgba(166,177,198,0.06)' : '#2b2d33',
-                color: status === 'sending' ? '#8a8f98' : '#e4e6ee',
+                color: status === 'sending' ? '#5b6270' : '#e4e6ee',
                 fontWeight: 400,
                 fontSize: 12,
                 textTransform: 'uppercase',

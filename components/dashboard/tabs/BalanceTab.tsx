@@ -51,7 +51,7 @@ export function BalanceTab({
             {meta && <CoinIcon symbol={meta.symbol} color={meta.color} logoUrl={meta.logoUrl} size={48} />}
             <div>
               <p className="font-black text-[#f5f6fa] text-base">{meta?.symbol ?? selectedNonEvm}</p>
-              <p style={{ fontSize: '0.65rem', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
+              <p style={{ fontSize: '0.65rem', color: '#5b6270', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
                 {meta?.name ?? selectedNonEvm}
               </p>
             </div>
@@ -63,7 +63,7 @@ export function BalanceTab({
                   width: 16,
                   height: 16,
                   borderRadius: '50%',
-                  border: '2px solid #8a8f98',
+                  border: '2px solid #5b6270',
                   borderTopColor: '#c9ced9',
                   animation: 'spin 1s linear infinite',
                 }}
@@ -77,7 +77,7 @@ export function BalanceTab({
                     ? '< 0.000001'
                     : new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 }).format(bal ?? 0)}
                 </p>
-                <p style={{ fontSize: '0.65rem', color: '#8a8f98', fontWeight: 700 }}>
+                <p style={{ fontSize: '0.65rem', color: '#5b6270', fontWeight: 700 }}>
                   {usdVal !== null && usdVal > 0 ? formatUSD(usdVal) : '—'}
                 </p>
               </>
@@ -110,14 +110,14 @@ export function BalanceTab({
                 <ChainIcon chain={manualChain} size={48} />
                 <div>
                   <p className="font-black text-[#f5f6fa] text-base">{manualChain.symbol}</p>
-                  <p style={{ fontSize: '0.65rem', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
+                  <p style={{ fontSize: '0.65rem', color: '#5b6270', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
                     {manualChain.name}
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-black text-[#f5f6fa] text-base">0</p>
-                <p style={{ fontSize: '0.65rem', color: '#8a8f98', fontWeight: 700 }}>—</p>
+                <p style={{ fontSize: '0.65rem', color: '#5b6270', fontWeight: 700 }}>—</p>
               </div>
             </div>
           ) : (
@@ -154,7 +154,7 @@ export function BalanceTab({
                           justifyContent: 'center',
                           fontWeight: 900,
                           fontSize: 18,
-                          color: '#8a8f98',
+                          color: '#5b6270',
                           flexShrink: 0,
                         }}
                       >
@@ -163,7 +163,7 @@ export function BalanceTab({
                     )}
                     <div>
                       <p style={{ fontWeight: 900, color: '#e4e6ee', fontSize: '1.05rem' }}>{token.symbol}</p>
-                      <p style={{ fontSize: '0.65rem', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
+                      <p style={{ fontSize: '0.65rem', color: '#5b6270', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>
                         {manualChain.name}
                       </p>
                     </div>
@@ -172,7 +172,7 @@ export function BalanceTab({
                     <p style={{ fontWeight: 900, color: '#e4e6ee', fontSize: '1.05rem' }}>
                       {bal < 0.000001 ? '< 0.000001' : new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(bal)}
                     </p>
-                    <p style={{ fontSize: '0.65rem', color: '#8a8f98', fontWeight: 700 }}>{usdVal > 0 ? formatUSD(usdVal) : '—'}</p>
+                    <p style={{ fontSize: '0.65rem', color: '#5b6270', fontWeight: 700 }}>{usdVal > 0 ? formatUSD(usdVal) : '—'}</p>
                   </div>
                 </div>
               );

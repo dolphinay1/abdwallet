@@ -36,7 +36,7 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
     color: '#23262b', fontSize: 13, fontFamily: 'inherit',
   };
   const lbl: React.CSSProperties = {
-    color: '#8a8f98', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
+    color: '#5b6270', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
     letterSpacing: '0.1em', marginBottom: 4, display: 'block', fontFamily: "var(--font-sf-rounded), 'SF Pro Rounded', sans-serif",
   };
 
@@ -84,7 +84,7 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
           <button
             aria-label="Close custom token modal"
             onClick={onClose}
-            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}
+            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#5b6270', display: 'flex' }}
           >
             <X size={16} />
           </button>

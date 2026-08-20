@@ -94,10 +94,10 @@ export function LightningTab() {
     return (
       <div className="space-y-3 p-6 neu-card-sm rounded-xl border border-transparent">
         <div className="flex items-start gap-4 p-4 neu-card-sm rounded-xl border border-transparent">
-          <AlertCircle size={16} className="text-[#8a8f98] mt-0.5 shrink-0" />
+          <AlertCircle size={16} className="text-[#5b6270] mt-0.5 shrink-0" />
           <div>
             <p className="font-black text-[#23262b] text-xs uppercase tracking-widest mb-1">No Lightning Provider</p>
-            <p className="text-[#8a8f98] text-xs leading-relaxed">
+            <p className="text-[#5b6270] text-xs leading-relaxed">
               Install a WebLN-compatible browser extension to enable Lightning payments.
             </p>
           </div>
@@ -128,11 +128,11 @@ export function LightningTab() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-black text-[#23262b] text-sm">{p.name}</span>
-                  <span className="bg-[rgba(166,177,198,0.2)] text-[#8a8f98] text-[10px] px-2 py-0.5 rounded-full font-black">
+                  <span className="bg-[rgba(166,177,198,0.2)] text-[#5b6270] text-[10px] px-2 py-0.5 rounded-full font-black">
                     {p.badge}
                   </span>
                 </div>
-                <p className="text-[#8a8f98] text-xs mt-0.5">{p.desc}</p>
+                <p className="text-[#5b6270] text-xs mt-0.5">{p.desc}</p>
               </div>
               <Link size={14} className="text-surface-variant shrink-0" />
             </div>
@@ -147,11 +147,11 @@ export function LightningTab() {
     return (
       <div className="flex flex-col items-center gap-6 p-8 neu-card-sm rounded-xl border border-transparent">
         <div className="w-16 h-16 rounded-full bg-[rgba(166,177,198,0.2)] border border-[rgba(166,177,198,0.4)] flex items-center justify-center">
-          {status === 'error' ? <WifiOff size={24} className="text-[#8a8f98]" /> : <Zap size={24} className="text-[#8a8f98]" />}
+          {status === 'error' ? <WifiOff size={24} className="text-[#5b6270]" /> : <Zap size={24} className="text-[#5b6270]" />}
         </div>
         <div className="text-center">
           <p className="font-black text-[#23262b] text-lg uppercase tracking-tighter">Lightning Network</p>
-          <p className="text-[#8a8f98] text-xs mt-1 leading-relaxed max-w-xs">
+          <p className="text-[#5b6270] text-xs mt-1 leading-relaxed max-w-xs">
             {status === 'error'
               ? 'Connection failed. Make sure your node is online and try again.'
               : 'Connect your WebLN node to send and receive Lightning payments instantly.'}
@@ -180,7 +180,7 @@ export function LightningTab() {
             animation: 'spin 1s linear infinite',
           }}
         />
-        <p className="text-[#8a8f98] text-xs">Requesting permission...</p>
+        <p className="text-[#5b6270] text-xs">Requesting permission...</p>
       </div>
     );
   }
@@ -192,15 +192,15 @@ export function LightningTab() {
         <div className="flex-1 min-w-0">
           <p className="font-black text-[#23262b] text-sm">{nodeInfo?.alias || 'Lightning Node'}</p>
           {nodeInfo?.pubkey && (
-            <p className="text-[#8a8f98] text-[10px] font-mono truncate">
+            <p className="text-[#5b6270] text-[10px] font-mono truncate">
               {nodeInfo.pubkey.slice(0, 20)}...{nodeInfo.pubkey.slice(-8)}
             </p>
           )}
         </div>
         {balance != null && (
           <div className="text-right shrink-0">
-            <p className="font-black text-[#8a8f98] text-sm">{balance.toLocaleString()}</p>
-            <p className="text-[#8a8f98] text-[10px]">sats</p>
+            <p className="font-black text-[#5b6270] text-sm">{balance.toLocaleString()}</p>
+            <p className="text-[#5b6270] text-[10px]">sats</p>
           </div>
         )}
       </div>
@@ -215,7 +215,7 @@ export function LightningTab() {
               setInvoice('');
             }}
             className={`flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-colors ${
-              subTab === t ? 'neu-inset text-[#23262b] border border-transparent' : 'text-[#8a8f98] hover:text-[#23262b]'
+              subTab === t ? 'neu-inset text-[#23262b] border border-transparent' : 'text-[#5b6270] hover:text-[#23262b]'
             }`}
           >
             {t === 'receive' ? '↓ Receive' : '↑ Send'}
@@ -236,20 +236,20 @@ export function LightningTab() {
             onClick={makeInvoice}
             disabled={genLoading}
             className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all active:scale-[0.98] ${
-              genLoading ? 'neu-inset text-[#8a8f98] cursor-not-allowed' : 'bg-[#2b2d33] text-[#f5f6fa]'
+              genLoading ? 'neu-inset text-[#5b6270] cursor-not-allowed' : 'bg-[#2b2d33] text-[#f5f6fa]'
             }`}
           >
             {genLoading ? 'Generating...' : 'Generate Invoice'}
           </button>
           {invoice && (
             <div className="neu-card-sm rounded-xl p-3 border border-[rgba(166,177,198,0.4)] space-y-2">
-              <p className="text-[#8a8f98] text-[10px] font-mono break-all leading-relaxed">{invoice.slice(0, 60)}...</p>
+              <p className="text-[#5b6270] text-[10px] font-mono break-all leading-relaxed">{invoice.slice(0, 60)}...</p>
               <button
                 onClick={copyInvoice}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black ${
                   invoiceCopied
-                    ? 'bg-[rgba(166,177,198,0.2)] text-[#8a8f98] border border-transparent'
-                    : 'bg-[rgba(166,177,198,0.15)] text-[#8a8f98] border border-transparent'
+                    ? 'bg-[rgba(166,177,198,0.2)] text-[#5b6270] border border-transparent'
+                    : 'bg-[rgba(166,177,198,0.15)] text-[#5b6270] border border-transparent'
                 }`}
               >
                 {invoiceCopied ? (
@@ -272,17 +272,17 @@ export function LightningTab() {
           {payStatus === 'done' ? (
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="w-12 h-12 rounded-full bg-[rgba(166,177,198,0.2)] border border-transparent flex items-center justify-center">
-                <Check size={20} className="text-[#8a8f98]" />
+                <Check size={20} className="text-[#5b6270]" />
               </div>
               <p className="font-black text-[#23262b] uppercase text-base tracking-tighter">Payment Sent!</p>
-              {payPreimage && <p className="text-[#8a8f98] text-[10px] font-mono break-all text-center">Preimage: {payPreimage.slice(0, 20)}...</p>}
+              {payPreimage && <p className="text-[#5b6270] text-[10px] font-mono break-all text-center">Preimage: {payPreimage.slice(0, 20)}...</p>}
               <button
                 onClick={() => {
                   setPayStatus('idle');
                   setPayReq('');
                   setPayPreimage('');
                 }}
-                className="bg-[rgba(166,177,198,0.15)] border border-transparent rounded-xl px-4 py-2 text-xs text-[#8a8f98] font-black"
+                className="bg-[rgba(166,177,198,0.15)] border border-transparent rounded-xl px-4 py-2 text-xs text-[#5b6270] font-black"
               >
                 Send Another
               </button>
@@ -297,7 +297,7 @@ export function LightningTab() {
                 onClick={payInvoice}
                 disabled={payStatus === 'paying' || !payReq.trim()}
                 className={`w-full py-3 rounded-xl russo-one-regular uppercase tracking-widest text-xs transition-all active:scale-[0.98] ${
-                  payStatus === 'paying' || !payReq.trim() ? 'neu-inset text-[#8a8f98] cursor-not-allowed' : 'bg-[#2b2d33] text-[#f5f6fa]'
+                  payStatus === 'paying' || !payReq.trim() ? 'neu-inset text-[#5b6270] cursor-not-allowed' : 'bg-[#2b2d33] text-[#f5f6fa]'
                 }`}
               >
                 {payStatus === 'paying' ? (

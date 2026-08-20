@@ -217,7 +217,7 @@ export function WalletDashboard() {
               <button
                 onClick={() => d.setActiveTab('balance')}
                 className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
-                  d.activeTab === 'balance' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                  d.activeTab === 'balance' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#5b6270] hover:text-[#23262b]'
                 }`}
               >
                 Balance
@@ -225,7 +225,7 @@ export function WalletDashboard() {
               <button
                 onClick={() => d.setActiveTab('transactions')}
                 className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
-                  d.activeTab === 'transactions' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                  d.activeTab === 'transactions' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#5b6270] hover:text-[#23262b]'
                 }`}
               >
                 Transactions
@@ -240,7 +240,7 @@ export function WalletDashboard() {
                       exit={{ opacity: 0, x: -12 }}
                       onClick={() => d.setActiveTab('nfts')}
                       className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
-                        d.activeTab === 'nfts' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                        d.activeTab === 'nfts' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#5b6270] hover:text-[#23262b]'
                       }`}
                     >
                       NFTs
@@ -253,7 +253,7 @@ export function WalletDashboard() {
                         exit={{ opacity: 0, x: -12 }}
                         onClick={() => d.setActiveTab('approvals')}
                         className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
-                          d.activeTab === 'approvals' ? 'text-[#23262b] border-b-2 border-red-400' : 'text-[#8a8f98] hover:text-[#23262b]'
+                          d.activeTab === 'approvals' ? 'text-[#23262b] border-b-2 border-red-400' : 'text-[#5b6270] hover:text-[#23262b]'
                         }`}
                       >
                         Approvals
@@ -267,7 +267,7 @@ export function WalletDashboard() {
                         exit={{ opacity: 0, x: -12 }}
                         onClick={() => d.setActiveTab('staking')}
                         className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
-                          d.activeTab === 'staking' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                          d.activeTab === 'staking' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#5b6270] hover:text-[#23262b]'
                         }`}
                       >
                         Staking
@@ -280,7 +280,7 @@ export function WalletDashboard() {
                       exit={{ opacity: 0, x: -12 }}
                       onClick={() => d.setActiveTab('lightning')}
                       className={`russo-one-regular uppercase tracking-[0.02em] text-xs pb-4 transition-colors whitespace-nowrap ${
-                        d.activeTab === 'lightning' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#8a8f98] hover:text-[#23262b]'
+                        d.activeTab === 'lightning' ? 'text-[#23262b] border-b-2 border-[#2b2d33]' : 'text-[#5b6270] hover:text-[#23262b]'
                       }`}
                     >
                       Lightning
@@ -291,7 +291,7 @@ export function WalletDashboard() {
               <button
                 aria-label="Refresh balances"
                 onClick={d.handleRefresh}
-                className="ml-auto pb-4 text-[#8a8f98] hover:text-[#23262b] transition-colors flex-shrink-0"
+                className="ml-auto pb-4 text-[#5b6270] hover:text-[#23262b] transition-colors flex-shrink-0"
               >
                 <span className={`material-symbols-outlined text-base ${d.isRefreshing ? 'animate-spin' : ''}`}>refresh</span>
               </button>

@@ -20,16 +20,16 @@ export const METHOD_LABELS: Record<string, string> = {
 
 export const TAG_COLORS: Record<string, string> = {
   DEX: '#2b2d33',
-  Lending: '#8a8f98',
-  Staking: '#8a8f98',
-  'Aggreg.': '#8a8f98',
+  Lending: '#5b6270',
+  Staking: '#5b6270',
+  'Aggreg.': '#5b6270',
   Perps: '#b91c1c',
   Yield: '#23262b',
   Bridge: '#23262b',
-  NFT: '#8a8f98',
+  NFT: '#5b6270',
   'Govern.': '#23262b',
-  Multisig: '#8a8f98',
-  Explorer: '#8a8f98',
+  Multisig: '#5b6270',
+  Explorer: '#5b6270',
   Portfolio: '#23262b',
   DAO: '#23262b',
 };
@@ -73,7 +73,7 @@ export const DAPPS: DAppInfo[] = [
   { name: 'OpenSea', url: 'https://opensea.io', icon: FAV('opensea.io'), tag: 'NFT', color: '#2081E2' },
   { name: 'Blur', url: 'https://blur.io', icon: FAV('blur.io'), tag: 'NFT', color: '#FF8700' },
   { name: 'Rarible', url: 'https://rarible.com', icon: FAV('rarible.com'), tag: 'NFT', color: '#FEDA03' },
-  { name: 'Foundation', url: 'https://foundation.app', icon: FAV('foundation.app'), tag: 'NFT', color: '#8a8f98' },
+  { name: 'Foundation', url: 'https://foundation.app', icon: FAV('foundation.app'), tag: 'NFT', color: '#5b6270' },
   { name: 'Zora', url: 'https://zora.co', icon: FAV('zora.co'), tag: 'NFT', color: '#A040FF' },
   { name: 'Manifold', url: 'https://app.manifold.xyz', icon: FAV('app.manifold.xyz'), tag: 'NFT', color: '#0038FF' },
 
@@ -94,9 +94,9 @@ export const DAPPS: DAppInfo[] = [
   // 8. Bridge (Orta Gri)
   { name: 'Across', url: 'https://app.across.to', icon: FAV('app.across.to'), tag: 'Bridge', color: '#6CF9D8' },
   { name: 'Hop', url: 'https://app.hop.exchange', icon: FAV('app.hop.exchange'), tag: 'Bridge', color: '#E96DFF' },
-  { name: 'Orbiter', url: 'https://www.orbiter.finance', icon: FAV('www.orbiter.finance'), tag: 'Bridge', color: '#8a8f98' },
+  { name: 'Orbiter', url: 'https://www.orbiter.finance', icon: FAV('www.orbiter.finance'), tag: 'Bridge', color: '#5b6270' },
   { name: 'Socket', url: 'https://www.bungee.exchange', icon: FAV('www.bungee.exchange'), tag: 'Bridge', color: '#F55000' },
-  { name: 'Stargate', url: 'https://stargate.finance', icon: FAV('stargate.finance'), tag: 'Bridge', color: '#8a8f98' },
+  { name: 'Stargate', url: 'https://stargate.finance', icon: FAV('stargate.finance'), tag: 'Bridge', color: '#5b6270' },
   { name: 'Synapse', url: 'https://synapseprotocol.com', icon: FAV('synapseprotocol.com'), tag: 'Bridge', color: '#BF00FF' },
 
   // 9. Portfolio (Orta-Açık Gri)

@@ -172,7 +172,7 @@ export function AddressBookModal({
                     background: '#e4e6ee',
                     boxShadow: 'inset 3px 3px 6px rgba(166,177,198,0.5), inset -3px -3px 6px rgba(255,255,255,0.9)',
                     borderRadius: 10,
-                    color: '#8a8f98',
+                    color: '#5b6270',
                     fontWeight: 700,
                     fontSize: 12,
                     padding: '10px',
@@ -188,7 +188,7 @@ export function AddressBookModal({
 
           {/* Contact list */}
           {contacts.length === 0 ? (
-            <p style={{ color: '#8a8f98', fontSize: 12, textAlign: 'center', margin: '12px 0' }}>No contacts yet.</p>
+            <p style={{ color: '#5b6270', fontSize: 12, textAlign: 'center', margin: '12px 0' }}>No contacts yet.</p>
           ) : (
             contacts.map((c) => (
               <div
@@ -222,7 +222,7 @@ export function AddressBookModal({
                   <p style={{ color: '#23262b', fontSize: 13, fontWeight: 700, margin: 0 }}>{c.name}</p>
                   <p
                     style={{
-                      color: '#8a8f98',
+                      color: '#5b6270',
                       fontSize: 10,
                       fontFamily: "var(--font-sf-mono), 'SF Mono', monospace",
                       margin: '2px 0 0',
@@ -233,7 +233,7 @@ export function AddressBookModal({
                   >
                     {c.address}
                   </p>
-                  {c.note && <p style={{ color: '#8a8f98', fontSize: 10, margin: '2px 0 0' }}>{c.note}</p>}
+                  {c.note && <p style={{ color: '#5b6270', fontSize: 10, margin: '2px 0 0' }}>{c.note}</p>}
                 </div>
                 <button
                   onClick={() => onDelete(c.id)}

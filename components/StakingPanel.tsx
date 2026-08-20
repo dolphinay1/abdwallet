@@ -231,7 +231,7 @@ export function StakingPanel({ activeLedger, ethPrice }: Props) {
             disabled={stakeStatus === 'signing' || stakeStatus === 'sending' || !stakeAmount || parseFloat(stakeAmount) <= 0}
             style={{
               background: stakeStatus === 'idle' || stakeStatus === 'error' ? '#2b2d33' : 'rgba(166,177,198,0.06)',
-              color: stakeStatus === 'idle' || stakeStatus === 'error' ? '#f8fafc' : '#8a8f98',
+              color: stakeStatus === 'idle' || stakeStatus === 'error' ? '#f8fafc' : '#5b6270',
               border: 'none', borderRadius: 12, padding: '14px 20px', fontWeight: 900, fontSize: 13,
               textTransform: 'uppercase', letterSpacing: '0.08em', cursor: stakeStatus === 'idle' || stakeStatus === 'error' ? 'pointer' : 'not-allowed',
               opacity: !stakeAmount || parseFloat(stakeAmount) <= 0 ? 0.4 : 1, transition: 'all 0.15s',

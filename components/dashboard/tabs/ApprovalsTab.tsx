@@ -21,10 +21,10 @@ export function ApprovalsTab({
   if (!selectedChain.isAlchemy) {
     return (
       <div className="flex items-center gap-3 p-6 neu-card-sm rounded-xl border border-transparent">
-        <span className="material-symbols-outlined text-[#8a8f98]" style={{ fontSize: 18 }}>
+        <span className="material-symbols-outlined text-[#5b6270]" style={{ fontSize: 18 }}>
           info
         </span>
-        <p className="text-[#8a8f98] font-black text-xs uppercase tracking-widest">Approval scanning requires Alchemy RPC</p>
+        <p className="text-[#5b6270] font-black text-xs uppercase tracking-widest">Approval scanning requires Alchemy RPC</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export function ApprovalsTab({
         <span className="material-symbols-outlined text-4xl" style={{ color: '#23262b', opacity: 0.6 }}>
           verified_user
         </span>
-        <p className="text-[#8a8f98] font-black text-xs uppercase tracking-widest">No active approvals found</p>
+        <p className="text-[#5b6270] font-black text-xs uppercase tracking-widest">No active approvals found</p>
         <p style={{ fontSize: 10, color: 'rgba(166,177,198,0.25)', textAlign: 'center' }}>
           Scanned {getSpenders(selectedChain.id).length} common DEX/bridge spenders on {selectedChain.name}
         </p>

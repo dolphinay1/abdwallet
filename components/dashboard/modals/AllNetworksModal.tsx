@@ -280,7 +280,7 @@ export function AllNetworksModal({
               );
             })}
           </div>
-          <p style={{ color: '#8a8f98', fontSize: 9, textAlign: 'center' }}>
+          <p style={{ color: '#5b6270', fontSize: 9, textAlign: 'center' }}>
             {CHAINS.length} EVM + {Object.keys(NON_EVM_META).length} non-EVM networks
           </p>
         </div>

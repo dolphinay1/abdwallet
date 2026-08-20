@@ -33,7 +33,7 @@ export function CustomAPIModal({ activeAddress, onClose, onSaved }: Props) {
     color: '#23262b', fontSize: 13, fontFamily: 'inherit',
   };
   const lbl: React.CSSProperties = {
-    color: '#8a8f98', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
+    color: '#5b6270', fontSize: 10, fontWeight: 400, textTransform: 'uppercase',
     letterSpacing: '0.1em', marginBottom: 4, display: 'block',
   };
 
@@ -79,7 +79,7 @@ export function CustomAPIModal({ activeAddress, onClose, onSaved }: Props) {
           <button
             aria-label="Close custom API modal"
             onClick={onClose}
-            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}
+            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#5b6270', display: 'flex' }}
           >
             <X size={16} />
           </button>
@@ -105,36 +105,36 @@ export function CustomAPIModal({ activeAddress, onClose, onSaved }: Props) {
 
           {/* Balance endpoint */}
           <div>
-            <span className="russo-one-regular" style={lbl}>Balance Endpoint * <span style={{ color: '#8a8f98', fontWeight: 400 }}>(use {'{address}'} placeholder)</span></span>
+            <span className="russo-one-regular" style={lbl}>Balance Endpoint * <span style={{ color: '#5b6270', fontWeight: 400 }}>(use {'{address}'} placeholder)</span></span>
             <div style={box}><input style={inp} placeholder="https://api.example.com/balance/{address}" value={balanceEndpoint} onChange={e => setBalanceEndpoint(e.target.value)} /></div>
           </div>
 
           <div>
-            <span className="russo-one-regular" style={lbl}>JSON Path * <span style={{ color: '#8a8f98', fontWeight: 400 }}>dot-notation</span></span>
+            <span className="russo-one-regular" style={lbl}>JSON Path * <span style={{ color: '#5b6270', fontWeight: 400 }}>dot-notation</span></span>
             <div style={box}><input style={inp} placeholder="data.balance" value={balanceJsonPath} onChange={e => setBalanceJsonPath(e.target.value)} /></div>
           </div>
 
           {/* Send endpoint (optional) */}
           <div>
-            <span className="russo-one-regular" style={lbl}>Send Endpoint <span style={{ color: '#8a8f98', fontWeight: 400 }}>(optional — POST)</span></span>
+            <span className="russo-one-regular" style={lbl}>Send Endpoint <span style={{ color: '#5b6270', fontWeight: 400 }}>(optional — POST)</span></span>
             <div style={box}><input style={inp} placeholder="https://api.example.com/send" value={sendEndpoint} onChange={e => setSendEndpoint(e.target.value)} /></div>
           </div>
 
             <div>
-              <span className="russo-one-regular" style={lbl}>Body Template <span style={{ color: '#8a8f98', fontWeight: 400 }}>{'{from} {to} {amount} {signedTx}'}</span></span>
+              <span className="russo-one-regular" style={lbl}>Body Template <span style={{ color: '#5b6270', fontWeight: 400 }}>{'{from} {to} {amount} {signedTx}'}</span></span>
               <div style={{ ...box }}>
                 <textarea value={sendBodyTemplate} onChange={e => setSendBodyTemplate(e.target.value)}
                   rows={3}
                   placeholder='{"from":"{from}","to":"{to}","amount":"{amount}"}'
                   style={{ ...inp, resize: 'vertical', fontFamily: "var(--font-sf-mono), 'SF Mono', monospace", fontSize: 11 }} />
               </div>
-              <p className="sf-bold" style={{ color: '#8a8f98', fontSize: 10, marginTop: 4, fontWeight: 600 }}>Private keys are never transmitted over the network.</p>
+              <p className="sf-bold" style={{ color: '#5b6270', fontSize: 10, marginTop: 4, fontWeight: 600 }}>Private keys are never transmitted over the network.</p>
             </div>
 
           {/* API Key (optional) */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <span className="russo-one-regular" style={lbl}>API Key <span style={{ color: '#8a8f98', fontWeight: 400 }}>(optional)</span></span>
+              <span className="russo-one-regular" style={lbl}>API Key <span style={{ color: '#5b6270', fontWeight: 400 }}>(optional)</span></span>
               <div style={box}><input style={inp} placeholder="your-api-key" value={apiKey} onChange={e => setApiKey(e.target.value)} /></div>
             </div>
             <div>

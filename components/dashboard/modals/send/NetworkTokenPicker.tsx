@@ -59,7 +59,7 @@ export function NetworkTokenPicker({
             height={12}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#8a8f98"
+            stroke="#5b6270"
             strokeWidth={2.5}
             strokeLinecap="round"
             style={{ transform: networkOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}
@@ -105,7 +105,7 @@ export function NetworkTokenPicker({
                   }}
                 >
                   <ChainIcon chain={c} size={20} />
-                  <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: active ? '#2b2d33' : '#8a8f98', textAlign: 'left' }}>
+                  <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: active ? '#2b2d33' : '#5b6270', textAlign: 'left' }}>
                     {c.name}
                   </span>
                   {active && <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#2b2d33', flexShrink: 0 }} />}
@@ -165,7 +165,7 @@ export function NetworkTokenPicker({
             height={12}
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#8a8f98"
+            stroke="#5b6270"
             strokeWidth={2.5}
             strokeLinecap="round"
             style={{ transform: tokenOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', flexShrink: 0 }}
@@ -191,7 +191,7 @@ export function NetworkTokenPicker({
             }}
           >
             {chainTokens.length === 0 ? (
-              <p style={{ color: '#8a8f98', fontSize: 11, padding: '12px 14px', textAlign: 'center' }}>No tokens found</p>
+              <p style={{ color: '#5b6270', fontSize: 11, padding: '12px 14px', textAlign: 'center' }}>No tokens found</p>
             ) : (
               chainTokens.map((t, i) => {
                 const active = selectedToken?.contractAddress === t.contractAddress;
@@ -235,10 +235,10 @@ export function NetworkTokenPicker({
                         {t.symbol.slice(0, 2)}
                       </div>
                     )}
-                    <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: active ? '#2b2d33' : '#8a8f98', textAlign: 'left' }}>
+                    <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: active ? '#2b2d33' : '#5b6270', textAlign: 'left' }}>
                       {t.symbol}
                     </span>
-                    <span style={{ fontSize: 9, color: '#8a8f98', fontWeight: 700 }}>
+                    <span style={{ fontSize: 9, color: '#5b6270', fontWeight: 700 }}>
                       {bal > 0 ? (bal < 0.0001 ? '<0.0001' : bal.toFixed(4)) : '0'}
                     </span>
                     {active && <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#2b2d33', flexShrink: 0 }} />}

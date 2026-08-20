@@ -12,14 +12,16 @@
 // Bridge MAIN→ISOLATED→background messages for provider requests
 window.addEventListener('message', (event) => {
   if (event.source !== window) return;
+  if (window.location.origin !== 'null' && event.origin !== window.location.origin) return;
   const { data } = event;
   if (!data || data._cwSource !== 'inject') return;
 
   chrome.runtime.sendMessage(data.payload, (response) => {
+    const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
     window.postMessage({
       _cwSource: 'background',
       _cwId: data._cwId,
       response: response || { error: 'No response' },
-    }, '*');
+    }, targetOrigin);
   });
 });

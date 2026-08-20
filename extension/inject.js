@@ -29,7 +29,8 @@
     return new Promise((resolve) => {
       const id = ++_reqId;
       _pending.set(id, resolve);
-      window.postMessage({ _cwSource: 'inject', _cwId: id, payload }, '*');
+      const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
+      window.postMessage({ _cwSource: 'inject', _cwId: id, payload }, targetOrigin);
     });
   }
 
@@ -191,13 +192,13 @@
     }
   }).catch(() => {});
 
-  // ── Set window.ethereum ────────────────────────────────────────────────
+  // ── Set window.ethereum (Frozen / Immutable) ──────────────────────────
 
   try {
     Object.defineProperty(window, 'ethereum', {
-      value: provider,
-      writable: true,
-      configurable: true,
+      value: Object.freeze(provider),
+      writable: false,
+      configurable: false,
     });
   } catch {
     window.ethereum = provider;

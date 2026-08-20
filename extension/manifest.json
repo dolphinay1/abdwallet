@@ -47,12 +47,13 @@
   "host_permissions": [
     "https://www.abdwallet.app/*",
     "https://abdwallet.app/*",
-    "<all_urls>"
+    "http://localhost:3000/*"
   ],
   "externally_connectable": {
     "matches": [
       "https://www.abdwallet.app/*",
-      "https://abdwallet.app/*"
+      "https://abdwallet.app/*",
+      "http://localhost:3000/*"
     ]
   }
 }

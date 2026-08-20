@@ -23,9 +23,6 @@ export function DashboardHeader({
   isRefreshing,
   displayAddress,
   shortAddr,
-  onSaveVault,
-  isSaved,
-  isSavingVault,
 }: {
   frozenMode: string;
   selectedNonEvm: string | null;
@@ -40,9 +37,6 @@ export function DashboardHeader({
   isRefreshing: boolean;
   displayAddress: string | null;
   shortAddr: string;
-  onSaveVault?: () => void;
-  isSaved?: boolean;
-  isSavingVault?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const [showFullBalance, setShowFullBalance] = useState(false);
@@ -85,34 +79,6 @@ export function DashboardHeader({
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          {onSaveVault && (
-            <div className="flex items-center gap-2">
-              <motion.button
-                onClick={onSaveVault}
-                disabled={isSavingVault}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full cursor-pointer transition-all shadow-sm"
-                style={{
-                  background: isSaved ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.08)',
-                  border: `1px solid ${isSaved ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.25)'}`,
-                }}
-              >
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 14, color: isSaved ? '#16a34a' : '#dc2626' }}
-                >
-                  {isSaved ? 'bookmark_added' : 'bookmark_add'}
-                </span>
-                <span
-                  className="sf-display-black text-[0.65rem] md:text-xs font-black uppercase tracking-wider"
-                  style={{ color: isSaved ? '#16a34a' : '#dc2626' }}
-                >
-                  {isSavingVault ? 'Saving…' : isSaved ? 'Saved Vault' : 'Save Wallet'}
-                </span>
-              </motion.button>
-            </div>
-          )}
           <h2
             className="text-2xl md:text-5xl sf-display-black font-black tracking-tight text-[#1e293b] leading-tight whitespace-nowrap"
             style={{
@@ -164,8 +130,15 @@ export function DashboardHeader({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.15 }}
-                className="sf-display-black"
-                style={{ fontSize: 10, fontWeight: 800, color: '#2b2d33', textTransform: 'uppercase', letterSpacing: '0.08em' }}
+                className="sf-display-black font-black"
+                style={{
+                  fontSize: 10,
+                  fontWeight: 900,
+                  color: '#2b2d33',
+                  WebkitTextStroke: '0.3px #2b2d33',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}
               >
                 {mode === 'simple' ? 'Advanced' : 'Simple'}
               </motion.span>

@@ -62,6 +62,23 @@ export interface DashboardModalsProps {
   showNewWalletWarning: boolean;
   setShowNewWalletWarning: (v: boolean) => void;
 
+  // Wallet-disabling confirmations
+  pendingRestoreSnap: WalletSnapshot | null;
+  onConfirmRestoreSnapshot: () => void;
+  onCancelRestoreSnapshot: () => void;
+  pendingSwitchSnap: WalletSnapshot | null;
+  onConfirmSwitchSnapshot: () => void;
+  onCancelSwitchSnapshot: () => void;
+  pendingDeleteVaultId: string | null;
+  onConfirmDeleteSavedVault: () => void;
+  onCancelDeleteSavedVault: () => void;
+  pendingRemoveHistoryId: string | null;
+  onConfirmRemoveFromHistory: () => void;
+  onCancelRemoveFromHistory: () => void;
+  showLedgerDisconnectWarning: boolean;
+  onConfirmLedgerDisconnect: () => void;
+  onCancelLedgerDisconnect: () => void;
+
   tokens: TokenBalance[];
   prices: Record<string, number>;
   selectedChain: Chain;
@@ -82,7 +99,7 @@ export interface DashboardModalsProps {
   setCustomAPIs: React.Dispatch<React.SetStateAction<CustomAPI[]>>;
   walletHistory: WalletSnapshot[];
   currentHistoryId: string | null;
-  onSwitchSnapshot: (snap: WalletSnapshot) => Promise<void>;
+  onSwitchSnapshot: (snap: WalletSnapshot) => void;
   onDeleteSavedVault: (id: string) => void;
   onConfirmWipe: () => void;
   onConfirmNewWallet: () => void;
@@ -101,6 +118,11 @@ export function DashboardModals(props: DashboardModalsProps) {
     showPassphraseModal, setShowPassphraseModal, showCustomChainModal, setShowCustomChainModal,
     showCustomTokenModal, setShowCustomTokenModal, showCustomAPIModal, setShowCustomAPIModal,
     showWipeWarning, setShowWipeWarning, showNewWalletWarning, setShowNewWalletWarning,
+    pendingRestoreSnap, onConfirmRestoreSnapshot, onCancelRestoreSnapshot,
+    pendingSwitchSnap, onConfirmSwitchSnapshot, onCancelSwitchSnapshot,
+    pendingDeleteVaultId, onConfirmDeleteSavedVault, onCancelDeleteSavedVault,
+    pendingRemoveHistoryId, onConfirmRemoveFromHistory, onCancelRemoveFromHistory,
+    showLedgerDisconnectWarning, onConfirmLedgerDisconnect, onCancelLedgerDisconnect,
     tokens, prices, selectedChain, setSelectedChain, setManualChain,
     selectedNonEvm, setSelectedNonEvm, liveNonEvm, displayAddress, activeAddress,
     activeLedger, setActiveLedger, contacts, customChains, setCustomChains,
@@ -229,6 +251,41 @@ export function DashboardModals(props: DashboardModalsProps) {
             type="new-wallet"
             onConfirm={onConfirmNewWallet}
             onCancel={() => setShowNewWalletWarning(false)}
+          />
+        )}
+        {pendingRestoreSnap && (
+          <WarningBanner
+            type="restore-wallet"
+            onConfirm={onConfirmRestoreSnapshot}
+            onCancel={onCancelRestoreSnapshot}
+          />
+        )}
+        {pendingSwitchSnap && (
+          <WarningBanner
+            type="switch-wallet"
+            onConfirm={onConfirmSwitchSnapshot}
+            onCancel={onCancelSwitchSnapshot}
+          />
+        )}
+        {pendingDeleteVaultId && (
+          <WarningBanner
+            type="remove-saved-vault"
+            onConfirm={onConfirmDeleteSavedVault}
+            onCancel={onCancelDeleteSavedVault}
+          />
+        )}
+        {pendingRemoveHistoryId && (
+          <WarningBanner
+            type="delete-wallet"
+            onConfirm={onConfirmRemoveFromHistory}
+            onCancel={onCancelRemoveFromHistory}
+          />
+        )}
+        {showLedgerDisconnectWarning && (
+          <WarningBanner
+            type="switch-wallet"
+            onConfirm={onConfirmLedgerDisconnect}
+            onCancel={onCancelLedgerDisconnect}
           />
         )}
       </AnimatePresence>

@@ -4,7 +4,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import { addContact, deleteContact } from '@/lib/address-book';
-import { updateSnapshotChain, deleteSavedVault, removeFromHistory, getHistory } from '@/lib/wallet-history';
+import { updateSnapshotChain, getHistory } from '@/lib/wallet-history';
 import { NON_EVM_META } from './dashboard/types';
 
 import { DashboardModals } from './dashboard/DashboardModals';
@@ -43,46 +43,6 @@ export function WalletDashboard() {
       </section>
     );
   }
-
-  const currentSnap = d.walletHistory.find((s) => s.id === d.currentHistoryId);
-  const isCurrentSaved = currentSnap?.isSaved ?? (d.frozenMode === 'PERSISTENT');
-
-  const handleQuickSave = async () => {
-    if (isCurrentSaved) {
-      d.setShowSavedVaults(true);
-      return;
-    }
-    if (!currentSnap) return;
-    d.setIsSavingVault(true);
-    try {
-      if (d.selectedNonEvm && NON_EVM_META[d.selectedNonEvm]) {
-        const m = NON_EVM_META[d.selectedNonEvm];
-        updateSnapshotChain(currentSnap.id, {
-          chainName: m.name,
-          chainColor: m.color,
-          chainLogo: m.logoUrl,
-          coinSymbol: m.symbol,
-          isNonEvm: true,
-          chainId: undefined,
-        });
-      } else {
-        updateSnapshotChain(currentSnap.id, {
-          chainId: d.selectedChain.id,
-          chainName: d.selectedChain.name,
-          chainColor: d.selectedChain.color,
-          chainLogo: d.selectedChain.logoUrl,
-          coinSymbol: d.selectedChain.symbol,
-          isNonEvm: false,
-        });
-      }
-      await d.wallet.persistCurrentWallet(currentSnap.id);
-      d.setWalletHistory(getHistory());
-    } catch {
-      alert('Failed to save vault.');
-    } finally {
-      d.setIsSavingVault(false);
-    }
-  };
 
   return (
     <>
@@ -140,19 +100,23 @@ export function WalletDashboard() {
         setCustomAPIs={d.setCustomAPIs}
         walletHistory={d.walletHistory}
         currentHistoryId={d.currentHistoryId}
-        onSwitchSnapshot={async (snap) => {
-          try {
-            await d.switchToSnap(snap);
-            d.setShowSavedVaults(false);
-          } catch {
-            alert('Vault data not found.');
-          }
-        }}
-        onDeleteSavedVault={(id) => {
-          deleteSavedVault(id);
-          removeFromHistory(id);
-          d.setWalletHistory(getHistory());
-        }}
+        onSwitchSnapshot={d.requestRestoreSnapshot}
+        onDeleteSavedVault={d.requestDeleteSavedVault}
+        pendingRestoreSnap={d.pendingRestoreSnap}
+        onConfirmRestoreSnapshot={d.confirmRestoreSnapshot}
+        onCancelRestoreSnapshot={d.cancelRestoreSnapshot}
+        pendingSwitchSnap={d.pendingSwitchSnap}
+        onConfirmSwitchSnapshot={d.confirmSwitchSnapshot}
+        onCancelSwitchSnapshot={d.cancelSwitchSnapshot}
+        pendingDeleteVaultId={d.pendingDeleteVaultId}
+        onConfirmDeleteSavedVault={d.confirmDeleteSavedVault}
+        onCancelDeleteSavedVault={d.cancelDeleteSavedVault}
+        pendingRemoveHistoryId={d.pendingRemoveHistoryId}
+        onConfirmRemoveFromHistory={d.confirmRemoveFromHistory}
+        onCancelRemoveFromHistory={d.cancelRemoveFromHistory}
+        showLedgerDisconnectWarning={d.showLedgerDisconnectWarning}
+        onConfirmLedgerDisconnect={d.confirmLedgerDisconnect}
+        onCancelLedgerDisconnect={d.cancelLedgerDisconnect}
         onConfirmWipe={d.handleConfirmWipe}
         onConfirmNewWallet={d.handleConfirmNewWallet}
         onConfirmPassphrase={d.handleConfirmPassphrase}
@@ -177,9 +141,6 @@ export function WalletDashboard() {
             isRefreshing={d.isRefreshing}
             displayAddress={d.displayAddress}
             shortAddr={d.shortAddr}
-            onSaveVault={handleQuickSave}
-            isSaved={isCurrentSaved}
-            isSavingVault={d.isSavingVault}
           />
 
           <DashboardActionGrid
@@ -192,7 +153,7 @@ export function WalletDashboard() {
             extAttaching={d.extAttaching}
             setShowPassphraseModal={d.setShowPassphraseModal}
             activeLedger={d.activeLedger}
-            setActiveLedger={d.setActiveLedger}
+            onRequestLedgerDisconnect={d.requestLedgerDisconnect}
             selectedNonEvm={d.selectedNonEvm}
             setShowWC={d.setShowWC}
             setShowSend={d.setShowSend}
@@ -346,9 +307,7 @@ export function WalletDashboard() {
                 selectedNonEvm={d.selectedNonEvm}
                 selectedChain={d.selectedChain}
                 isSavingVault={d.isSavingVault}
-                onSwitch={async (snap) => {
-                  await d.switchToSnap(snap);
-                }}
+                onSwitch={d.requestSwitchSnapshot}
                 onSave={async (snap, isCurrent) => {
                   d.setIsSavingVault(true);
                   try {
@@ -382,11 +341,7 @@ export function WalletDashboard() {
                     d.setIsSavingVault(false);
                   }
                 }}
-                onDelete={(id) => {
-                  deleteSavedVault(id);
-                  removeFromHistory(id);
-                  d.setWalletHistory(getHistory());
-                }}
+                onDelete={d.requestRemoveFromHistory}
                 onOpenAdvanced={() => d.setMode('advanced')}
               />
             )}

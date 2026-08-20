@@ -9,6 +9,7 @@ import {
   Check 
 } from 'lucide-react';
 import { useWallet } from '@/context/WalletContext';
+import { SeedVerificationModal } from '@/components/SeedVerificationModal';
 
 interface MnemonicGeneratorModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function MnemonicGeneratorModal({ isOpen, onClose }: MnemonicGeneratorMod
   const [words, setWords] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const isExt = typeof window !== 'undefined' && window.self !== window.top;
 
@@ -44,6 +46,10 @@ export function MnemonicGeneratorModal({ isOpen, onClose }: MnemonicGeneratorMod
   useEffect(() => {
     if (isOpen && words.length === 0) {
       generateNewMnemonic();
+    }
+    if (!isOpen) {
+      setIsVerifying(false);
+      setIsCreating(false);
     }
   }, [isOpen]);
 
@@ -96,15 +102,23 @@ ${mnemonic}
     URL.revokeObjectURL(url);
   };
 
-  // Use this mnemonic to create and unlock the wallet
-  const handleUseAndCreate = async () => {
+  // Require the user to prove they wrote the phrase down before creating the wallet
+  const handleUseAndCreate = () => {
+    if (!wallet || !mnemonic || isCreating) return;
+    setIsVerifying(true);
+  };
+
+  // Runs only after both challenge words were typed back correctly
+  const handleVerifiedCreate = async () => {
     if (!wallet || !mnemonic) return;
     setIsCreating(true);
     try {
       await wallet.importABDWallet(mnemonic);
+      setIsVerifying(false);
       onClose();
     } catch {
       setIsCreating(false);
+      setIsVerifying(false);
     }
   };
 
@@ -260,6 +274,18 @@ ${mnemonic}
           </button>
         </div>
       </div>
+
+      {/* Seed verification before this generated phrase becomes a live wallet */}
+      <SeedVerificationModal
+        isOpen={isVerifying}
+        words={words}
+        isBusy={isCreating}
+        title="Verify Your Recovery Phrase"
+        subtitle="Confirm you saved these 12 words"
+        confirmLabel="Confirm & Create Wallet"
+        onVerified={handleVerifiedCreate}
+        onCancel={() => setIsVerifying(false)}
+      />
     </div>
   );
 }

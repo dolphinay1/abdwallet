@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { checkRateLimit } from '../lib/rate-limit';
 import { sendViaCustomAPI, type CustomAPI } from '../lib/custom-apis';
@@ -100,6 +101,21 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
       });
       const res = await POST(req);
       expect(res.status).toBe(403);
+    });
+  });
+
+  describe('Per-Vault Cryptographic Random Salt (G6)', () => {
+    it('encrypts and recovers vault data using per-vault random salt with PBKDF2', async () => {
+      const { persistVault, loadPersistedVault, hasPersistedVault } = await import('../lib/persistent-vault');
+      const testMnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+      const passphrase = 'test-secure-passphrase-123';
+      const vaultId = 'test-vault-unique-1';
+
+      await persistVault(testMnemonic, passphrase, vaultId);
+      expect(await hasPersistedVault(vaultId)).toBe(true);
+
+      const recovered = await loadPersistedVault(passphrase, vaultId);
+      expect(recovered).toBe(testMnemonic);
     });
   });
 });

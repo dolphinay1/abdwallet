@@ -57,6 +57,32 @@ export async function GET(req: Request) {
       if (!targetUrl) {
         return NextResponse.json({ error: 'URL required' }, { status: 400 });
       }
+
+      let parsed: URL;
+      try {
+        parsed = new URL(targetUrl);
+      } catch {
+        return NextResponse.json({ error: 'Invalid target URL' }, { status: 400 });
+      }
+
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        return NextResponse.json({ error: 'Invalid URL protocol' }, { status: 400 });
+      }
+
+      const host = parsed.hostname.toLowerCase();
+      if (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host === '::1' ||
+        host === '0.0.0.0' ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.') ||
+        host.startsWith('172.') ||
+        host.startsWith('169.254.')
+      ) {
+        return NextResponse.json({ error: 'Scanning private or internal targets is not permitted' }, { status: 403 });
+      }
+
       const url = `${GOPLUS_BASE}/dapp_security?url=${encodeURIComponent(targetUrl)}`;
       const res = await fetch(url, {
         headers: { Accept: 'application/json' },

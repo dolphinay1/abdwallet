@@ -33,13 +33,13 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { address, chainId, alchemyApiKey } = body;
+    const { address, chainId } = body;
 
     if (!address) {
       return NextResponse.json({ error: 'address is required' }, { status: 400 });
     }
 
-    const key = alchemyApiKey || process.env.ALCHEMY_API_KEY;
+    const key = process.env.ALCHEMY_API_KEY;
     const network = ALCHEMY_NETWORK[Number(chainId)];
     // No key or chain not supported by Alchemy NFT API — empty list, not an error
     if (!key || !network) {

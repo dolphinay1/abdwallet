@@ -1,120 +1,79 @@
 # ABD Wallet
 
-**Free anonymous temp wallet for all EVM chains. No signup, no KYC, no tracking.**
+**Free, anonymous, ephemeral wallet for EVM chains. No signup. No KYC. Keys never leave the browser.**
 
-🌐 [abdwallet.app](https://abdwallet.app) · 📄 [Apache 2.0](./LICENSE)
+🌐 [abdwallet.com](https://abdwallet.com) · 📄 [Apache 2.0](./LICENSE)
 
 ---
 
-## What is ABD Wallet?
+## What it is
 
-ABD Wallet is a browser-based ephemeral crypto wallet. Open the site, get an instant anonymous Ethereum address, use it, close the tab — it's gone. No account, no email, no server ever sees your private key.
+ABD Wallet is a browser wallet for throwaway addresses. Open the site, get a fresh Ethereum-compatible address, use it, close the tab — the in-memory wallet is gone.
 
-Designed for: throwaway addresses, anonymous DeFi interactions, dApp testing, airdrop claiming, or anytime you don't want to expose your main wallet.
+Built for: one-off DeFi, dApp testing, airdrop claims, or any time you do not want to expose a main wallet.
+
+Nothing is written to disk unless you explicitly save a vault.
 
 ---
 
 ## Features
 
-- **Instant temp wallet** — generates a fresh EVM address on every session, no signup
-- **100% anonymous** — no KYC, no email, no personal data, no tracking
-- **AES-256 in-memory encryption** — private keys never leave your browser
-- **Auto key rotation** — vault re-encrypts every 60 seconds
-- **Multi-chain** — Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom and all EVM networks
-- **WalletConnect v2** — connect to any dApp (Uniswap, Aave, OpenSea, etc.)
-- **Send & receive** — ETH and all ERC-20 tokens with live fee estimation
-- **Optional Saved Vaults** — mark a wallet as saved to keep it encrypted (AES-GCM, session-derived key) in this browser; delete anytime
-- **QR code scanner** — scan recipient addresses with your camera
-- **Mobile friendly** — works on iOS Safari and Android Chrome, no app needed
-- **Free** — no fees, no ads, no subscription
+- **Instant temp wallet** — new EVM address per session, no account
+- **Import** — restore a 12- or 24-word BIP-39 seed
+- **Multi-chain EVM** — Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, Base, Avalanche, Fantom, and other EVM networks
+- **Send & receive** — native coin and ERC-20, with live fee estimates and a dry-run preview
+- **Swap** — LiFi quotes via a server-side `/api/swap` proxy
+- **WalletConnect v2** — pair with Uniswap, Aave, OpenSea, and other dApps (needs a Reown project ID)
+- **Optional Saved Vaults** — keep a wallet encrypted in *this* browser only; delete anytime
+- **Optional passphrase vault** — encrypt the seed with a passphrase (PBKDF2 + AES-GCM in IndexedDB)
+- **Approvals** — list known ERC-20 allowances from a server-side spender registry
+- **Liquid staking** — Lido (stETH) and Rocket Pool (rETH) with live APY
+- **Ledger** — sign with a hardware wallet over WebHID / WebUSB
+- **QR** — show a receive QR; decode a recipient QR from an image file
+- **Browser extension** — unpacked MV3 build in `extension/` (not on the Chrome Web Store yet)
+
+There is no app fee and no ads. Network gas is paid to the chain as usual.
 
 ---
 
-## How It Works
+## How it works
 
-1. Open [abdwallet.app](https://abdwallet.app) — wallet is generated instantly
-2. Use it to receive or send crypto, connect to dApps via WalletConnect
-3. Close the tab — everything is wiped from memory (unless you explicitly saved the wallet to Saved Vaults)
-4. **Optional:** click the save icon on a wallet in Wallet History → it's stored encrypted in this browser only. Switch back to it anytime from history
+1. Open [abdwallet.com](https://abdwallet.com) and create or import a wallet.
+2. Send, receive, swap, or connect a dApp with WalletConnect.
+3. Close the tab — in-memory keys are wiped.
+4. Optional: use the save icon on the active wallet in history to store it encrypted in this browser, or set a passphrase vault.
 
----
+Idle sessions wipe after 5 minutes. A session also ends after 30 minutes.
 
-## Security Model
-
-- Private keys generated entirely in-browser via [ethers.js](https://ethers.org)
-- Encrypted with AES-256 (CryptoJS) using an ephemeral session key
-- Session key rotates every 60 seconds — vault re-encrypted on each rotation
-- Memory vault uses scattered shards to resist heap inspection
-- No analytics, no cookies, no fingerprinting
-- Integrity watchers wipe the vault on tampering detection
-- In-memory key material is cleared on tab close; nothing is written to disk unless you save a vault
+**Write down the seed if you will need the address again.** There is no account recovery.
 
 ---
 
-## Tech Stack
+## Security model (honest)
+
+- Seeds and keys are generated in-browser with [ethers.js](https://ethers.org).
+- The server never receives your private key or mnemonic.
+- In-memory material is encrypted for the session and cleared on wipe / tab close.
+- Saved Vaults use AES-GCM. The key is derived in this browser — it is not a user passphrase. Treat it as “locked to this device/profile,” not as a backup you can move.
+- The passphrase vault uses PBKDF2 (600k) + AES-GCM.
+- No first-party analytics or accounts.
+
+**What this is not:** public RPCs, explorers, CoinGecko, LiFi, and WalletConnect can still see your IP and addresses. A malicious dApp signature can still drain funds. XSS in the page can still read in-memory keys. This is a temp wallet, not a custody product.
+
+---
+
+## Tech stack
 
 - [Next.js 14](https://nextjs.org) (App Router)
 - [ethers.js v6](https://ethers.org)
 - [Reown WalletKit](https://reown.com) (WalletConnect v2)
-- [CryptoJS](https://github.com/brix/crypto-js) — AES-256 encryption
-- [jsQR](https://github.com/cozmo/jsQR) — QR code scanning fallback
-- TypeScript · Tailwind CSS · Framer Motion
+- TypeScript · Tailwind CSS · HeroUI · Framer Motion
 
 ---
 
-## Running Locally
+## Run locally
 
 ```bash
 git clone https://github.com/dolphinay1/abdwallet.git
 cd abdwallet
 npm install
-```
-
-Create a `.env.local` file:
-
-```env
-NEXT_PUBLIC_WC_PROJECT_ID=your_walletconnect_project_id
-NEXT_PUBLIC_EXTERNAL_LINK=https://abdwallet.app
-```
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
----
-
-### Upload placeholder assets to Supabase (optional)
-
-If you want to upload the example `logo`, `favicon`, and `banner` to your Supabase storage, set these environment variables locally and run the script:
-
-```bash
-export SUPABASE_URL="https://your-project.supabase.co"
-export SUPABASE_ANON_KEY="your-anon-key"
-node ./scripts/upload-assets.mjs
-```
-
-On Windows (PowerShell):
-
-```powershell
-$env:SUPABASE_URL = "https://your-project.supabase.co"
-$env:SUPABASE_ANON_KEY = "your-anon-key"
-node .\scripts\upload-assets.mjs
-```
-
-
-## Contributing
-
-Pull requests are welcome. For major changes, open an issue first.
-
-1. Fork the repo
-2. Create a branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'feat: your feature'`
-4. Push and open a PR
-
----
-
-## License
-
-[Apache 2.0](./LICENSE) — free to use, modify, and distribute. Patent protection included.

@@ -161,7 +161,7 @@ export function SendModal({
 
             {f.selectedToken && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 4px' }}>
-                <span className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, letterSpacing: '0.04em' }}>
+                <span className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, letterSpacing: '0.04em' }}>
                   Balance: {f.selectedBal < 0.000001 && f.selectedBal > 0 ? '< 0.000001' : f.selectedBal.toFixed(6)} {f.tokenSymbol}
                 </span>
               </div>
@@ -259,14 +259,14 @@ export function SendModal({
                       </span>
                       <button
                         onClick={() => f.setRiskDismissed(true)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', fontSize: 12, padding: '0 2px', lineHeight: 1 }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#5b6270', fontSize: 12, padding: '0 2px', lineHeight: 1 }}
                       >
                         ✕
                       </button>
                     </div>
                     {risks.map((r, ri) => (
                       <div key={ri}>
-                        <p className="russo-one-regular" style={{ fontSize: 9, color: '#8a8f98', fontWeight: 400, textTransform: 'uppercase', margin: '0 0 2px' }}>
+                        <p className="russo-one-regular" style={{ fontSize: 9, color: '#5b6270', fontWeight: 400, textTransform: 'uppercase', margin: '0 0 2px' }}>
                           {r.label}
                         </p>
                         {r.flags.map((flag, fi) => (
@@ -276,7 +276,7 @@ export function SendModal({
                         ))}
                       </div>
                     ))}
-                    <p style={{ fontSize: 9, color: '#8a8f98', margin: '4px 0 0', fontStyle: 'italic' }}>
+                    <p style={{ fontSize: 9, color: '#5b6270', margin: '4px 0 0', fontStyle: 'italic' }}>
                       Powered by GoPlus Security · dismiss to proceed anyway
                     </p>
                   </div>
@@ -294,7 +294,7 @@ export function SendModal({
                   <button
                     className="sf-display-black"
                     onClick={f.handleSend}
-                    disabled={isProcessing || hasBlockingRisk}
+                    disabled={isProcessing || hasBlockingRisk || f.selectedBal <= 0}
                     style={{
                       background: isProcessing ? '#e4e6ee' : hasBlockingRisk ? '#e4e6ee' : '#2b2d33',
                       color: isProcessing ? '#23262b' : hasBlockingRisk ? '#b91c1c' : '#f5f6fa',

@@ -211,7 +211,14 @@ export function DashboardActionGrid({
             },
           },
           { icon: 'qr_code_2', label: 'QR / Receive', onClick: () => setShowQR(true) },
-          { icon: 'add_card', label: 'Create New Wallet', onClick: () => setShowNewWalletWarning(true) },
+          {
+            icon: 'swap_vert',
+            label: 'Swap',
+            onClick: () => {
+              if (!selectedNonEvm) setShowSwap(true);
+            },
+            disabled: !!selectedNonEvm,
+          },
         ].map((item) => (
           <motion.button
             key={item.label}
@@ -231,14 +238,7 @@ export function DashboardActionGrid({
         <AnimatePresence>
           {mode === 'advanced' &&
             [
-              {
-                icon: 'swap_vert',
-                label: 'Swap',
-                onClick: () => {
-                  if (!selectedNonEvm) setShowSwap(true);
-                },
-                disabled: !!selectedNonEvm,
-              },
+              { icon: 'add_card', label: 'Create New Wallet', onClick: () => setShowNewWalletWarning(true), disabled: false },
               { icon: 'contacts', label: 'Address Book', onClick: () => setShowAddressBook(true) },
               { icon: 'usb', label: 'Ledger', onClick: () => setShowLedger(true) },
               { icon: 'link', label: 'Custom Chain', onClick: () => setShowCustomChainModal(true) },

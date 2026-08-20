@@ -3,9 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { X, Check, Copy } from 'lucide-react';
+import { useWallet } from '@/context/WalletContext';
 
 export function QRModal({ address, onClose }: { address: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
+  const { mode } = useWallet();
+  const isEphemeral = mode === 'EPHEMERAL';
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -82,6 +85,29 @@ export function QRModal({ address, onClose }: { address: string; onClose: () => 
             <X size={16} />
           </button>
         </div>
+        {isEphemeral && (
+          <div
+            style={{
+              width: '100%',
+              background: '#fae8e8',
+              color: '#b91c1c',
+              borderRadius: '1rem',
+              padding: '12px 14px',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              className="sf-display-black"
+              style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}
+            >
+              Bu cüzdan geçici
+            </div>
+            <div style={{ fontSize: 10, lineHeight: 1.5, fontWeight: 600 }}>
+              Kaydetmezsen 5 dakika hareketsizlikte silinir ve gönderilen para
+              kalıcı olarak kaybolur. Önce SAVE WALLET ile kaydet.
+            </div>
+          </div>
+        )}
         <div style={{ background: '#23262b', borderRadius: '1rem', padding: 16 }}>
           <QRCodeSVG value={address} size={200} level="M" />
         </div>

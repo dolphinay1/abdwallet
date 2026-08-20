@@ -93,6 +93,7 @@ export function SendModal({
             Send
           </span>
           <button
+            aria-label="Close send modal"
             onClick={onClose}
             style={{
               color: '#23262b',

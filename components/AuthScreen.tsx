@@ -82,6 +82,7 @@ export function AuthScreen() {
             <div className="neu-pill-inset p-1.5 rounded-full">
               <button
                 id="create-new-wallet-btn"
+                aria-label="Create New Wallet"
                 type="button"
                 disabled={isCreating}
                 onClick={handleCreate}
@@ -110,6 +111,7 @@ export function AuthScreen() {
             <div className="neu-pill-inset p-1.5 rounded-full">
               <button
                 id="import-existing-wallet-btn"
+                aria-label="Import Existing Wallet"
                 type="button"
                 disabled={isCreating}
                 onClick={() => {
@@ -132,6 +134,7 @@ export function AuthScreen() {
             <div className="pt-2 flex justify-center">
               <button
                 type="button"
+                aria-label="Generate 12-Word Recovery Phrase"
                 onClick={() => setIsModalOpen(true)}
                 className="neu-pill-inset sf-bold text-xs font-bold text-slate-700 hover:text-slate-950 transition-colors flex items-center gap-2 py-2.5 px-5 rounded-full cursor-pointer hover:opacity-85"
               >
@@ -149,6 +152,7 @@ export function AuthScreen() {
               </span>
               <button
                 type="button"
+                aria-label="Back to main choices"
                 onClick={() => {
                   setError('');
                   setIsImporting(false);
@@ -170,6 +174,7 @@ export function AuthScreen() {
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
+                aria-label="Cancel Import"
                 onClick={() => {
                   setError('');
                   setIsImporting(false);
@@ -185,6 +190,7 @@ export function AuthScreen() {
               </button>
               <button
                 type="button"
+                aria-label="Restore Wallet"
                 disabled={isRestoring}
                 onClick={handleImport}
                 className="sf-display-black flex-[2] font-black tracking-wider uppercase text-xs py-3.5 rounded-full cursor-pointer transition-all text-white flex items-center justify-center gap-2"

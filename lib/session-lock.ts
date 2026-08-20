@@ -1,10 +1,10 @@
-// Session Lock — explicit user opt-in to localStorage persistence.
-// Encrypted with a stable per-browser key stored in localStorage alongside the payload.
-// Survives page refresh; cleared only when user disables the toggle or wipes the wallet.
+// Session Lock — In-memory tab key derivation and ephemeral session state.
+// All real persistent storage is handled with user-provided passphrase in persistent-vault.ts.
+// No plaintext or unrecoverable dead ciphertext is stored in localStorage.
 
 const _KEY = '__gwvs__';
 const _BK = '__gwvs_bk__';
-const _SHADOW = '__gwsh__'; // shadow copy — survives wipes, used only for persist flow recovery
+const _SHADOW = '__gwsh__';
 
 // Pure TypeScript SHA-256 and HMAC-SHA256 implementation for synchronous derivation
 function utf8Encode(str: string): number[] {
@@ -130,17 +130,19 @@ function getBrowserFingerprint(): string {
 }
 
 let _inMemoryTabSeed: string | null = null;
+let _inMemorySessionPayload: string | null = null;
 
-// One-time cleanup of legacy insecure master seed and key material from localStorage
+// Cleanup any legacy dead ciphertext or keys from localStorage
 if (typeof window !== 'undefined') {
   try {
+    localStorage.removeItem(_KEY);
+    localStorage.removeItem(_SHADOW);
     localStorage.removeItem(_BK);
     localStorage.removeItem('__gw_hs_key__');
   } catch {}
 }
 
 function getOrCreateBrowserKey(): string {
-  // Use in-memory ephemeral seed (never stored in localStorage)
   if (!_inMemoryTabSeed) {
     if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
       const array = new Uint8Array(32);
@@ -153,7 +155,6 @@ function getOrCreateBrowserKey(): string {
     }
   }
 
-  // Derive the session key in-memory safely with fingerprint salt
   const salt = "abdwallet_salt_" + getBrowserFingerprint();
   const derivedKey = hmacSha256(_inMemoryTabSeed, salt);
   return derivedKey;
@@ -164,29 +165,28 @@ export function getTabKey(): string {
 }
 
 export function saveSession(encrypted: string): void {
-  try {
-    localStorage.setItem(_KEY, encrypted);
-    localStorage.setItem(_SHADOW, encrypted);
-  } catch {}
+  _inMemorySessionPayload = encrypted;
 }
 
 export function loadSession(): string | null {
-  try { return localStorage.getItem(_KEY) || localStorage.getItem(_SHADOW) || null; } catch { return null; }
+  return _inMemorySessionPayload;
 }
 
 export function clearShadow(): void {
-  try { localStorage.removeItem(_SHADOW); } catch {}
+  // No-op (no dead shadow items in storage)
 }
 
 export function clearSession(): void {
-  // Wipe both active session and shadow copy to prevent data persistence after lock/wipe
-  try {
-    localStorage.removeItem(_KEY);
-    localStorage.removeItem(_SHADOW);
-  } catch {}
+  _inMemorySessionPayload = null;
+  _inMemoryTabSeed = null;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(_KEY);
+      localStorage.removeItem(_SHADOW);
+    } catch {}
+  }
 }
 
 export function hasSession(): boolean {
-  try { return !!localStorage.getItem(_KEY); } catch { return false; }
+  return _inMemorySessionPayload !== null;
 }
-

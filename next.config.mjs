@@ -19,6 +19,8 @@ const nextConfig = {
         fs: false,
         net: false,
         tls: false,
+        got: false,
+        '@sindresorhus/is': false,
         'node:buffer': false,
         'node:crypto': false,
       };

@@ -104,8 +104,8 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
     });
   });
 
-  describe('Per-Vault Cryptographic Random Salt (G6)', () => {
-    it('encrypts and recovers vault data using per-vault random salt with PBKDF2', async () => {
+  describe('Per-Vault Cryptographic Random Salt & AAD Shard Hardening (G6, Item 9)', () => {
+    it('encrypts and recovers vault data using per-vault random salt and AAD with PBKDF2', async () => {
       const { persistVault, loadPersistedVault, hasPersistedVault } = await import('../lib/persistent-vault');
       const testMnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
       const passphrase = 'test-secure-passphrase-123';
@@ -116,6 +116,38 @@ describe('Security Hardening & Regulatory Integrity Tests', () => {
 
       const recovered = await loadPersistedVault(passphrase, vaultId);
       expect(recovered).toBe(testMnemonic);
+    });
+
+    it('rejects incorrect passphrases without deleting the vault', async () => {
+      const { persistVault, loadPersistedVault, hasPersistedVault } = await import('../lib/persistent-vault');
+      const testMnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+      const passphrase = 'test-correct-passphrase';
+      const vaultId = 'test-vault-lockout-test';
+
+      await persistVault(testMnemonic, passphrase, vaultId);
+      await expect(loadPersistedVault('wrong-pass', vaultId)).rejects.toThrow();
+      expect(await hasPersistedVault(vaultId)).toBe(true);
+    });
+  });
+
+  describe('Secure Async Rate Limiter & IP Extraction (Item 5)', () => {
+    it('extracts IP from edge-trusted header and enforces rate limits asynchronously', async () => {
+      const { checkRateLimitAsync } = await import('../lib/rate-limit');
+      const req = new Request('http://localhost:3000/api/tokens', {
+        headers: new Headers({
+          'x-forwarded-for': 'spoofed.attacker.ip, 198.51.100.25',
+        }),
+      });
+
+      const res1 = await checkRateLimitAsync(req, 2, 60_000);
+      expect(res1.allowed).toBe(true);
+
+      const res2 = await checkRateLimitAsync(req, 2, 60_000);
+      expect(res2.allowed).toBe(true);
+
+      const res3 = await checkRateLimitAsync(req, 2, 60_000);
+      expect(res3.allowed).toBe(false);
+      expect(res3.response?.status).toBe(429);
     });
   });
 });

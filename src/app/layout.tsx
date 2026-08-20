@@ -24,8 +24,18 @@ const sfProRounded = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.abdwallet.com"),
   title: "ABD Wallet — Free Anonymous EVM Wallet",
   description: "Free anonymous temp wallet for all EVM chains. No signup, no KYC, no tracking. Your keys never leave your browser.",
+  icons: {
+    icon: [
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico", sizes: "32x32" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({

@@ -5,10 +5,10 @@
 
 - Keys generated entirely in-browser using ethers.js
 - Private keys are never transmitted to any server
-- All encryption happens locally (AES-256 via CryptoJS)
-- Automatic key rotation every 60 seconds
-- Wipes all data on tab close (unless the wallet was explicitly saved to Saved Vaults)
+- All encryption happens locally (AES-256 via Web Crypto & PBKDF2)
+- Automatic memory zeroization and ephemeral session management
+- Non-custodial sovereign execution
 
-## URL
+## Canonical URL
 
-https://abdwallet.app
+https://www.abdwallet.com

@@ -19,8 +19,8 @@ export function wcIsConfigured(): boolean {
 const METADATA = {
   name: 'ABD Wallet',
   description: 'Secure ephemeral EVM wallet',
-  url: typeof window !== 'undefined' ? window.location.origin : 'https://abdwallet.app',
-  icons: ['https://abdwallet.app/icon.png'],
+  url: typeof window !== 'undefined' ? window.location.origin : 'https://abdwallet.com',
+  icons: ['https://abdwallet.com/icon.png'],
 };
 
 // ── Singleton — one Core + one WalletKit, ever ────────────────────────────────

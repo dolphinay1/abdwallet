@@ -230,7 +230,7 @@ $('lockBtn').addEventListener('click', async () => {
 });
 
 [$('wipeBtn'), $('wipeBtnDash')].forEach(btn => btn && btn.addEventListener('click', async () => {
-  if (!confirm('Disconnect and wipe all extension data?\nYou can re-attach from abdwallet.app.')) return;
+  if (!confirm('Disconnect and wipe all extension data?\nYou can re-attach from abdwallet.com.')) return;
   await bg('CW_WIPE');
   _currentAddress = null;
   init();
@@ -239,7 +239,7 @@ $('lockBtn').addEventListener('click', async () => {
 // ── Attach screen ──────────────────────────────────────────────────────────
 
 $('openSiteBtn').addEventListener('click', () => {
-  chrome.tabs.create({ url: 'https://www.abdwallet.app' });
+  chrome.tabs.create({ url: 'https://www.abdwallet.com' });
   window.close();
 });
 

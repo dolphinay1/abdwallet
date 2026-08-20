@@ -1,7 +1,7 @@
-// ABD Wallet — Content Script for abdwallet.app
+// ABD Wallet — Content Script for abdwallet.com
 // Bridges the "Connect Extension" postMessage from the site to the background SW
 
-const ALLOWED_ORIGINS = ['https://www.abdwallet.app', 'https://abdwallet.app', 'http://localhost:3000'];
+const ALLOWED_ORIGINS = ['https://www.abdwallet.com', 'https://abdwallet.com'];
 
 // Tell the site the extension is installed
 window.postMessage({ type: 'CW_EXT_PRESENT', version: chrome.runtime.getManifest().version }, window.location.origin);

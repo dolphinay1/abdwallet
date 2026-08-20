@@ -9,7 +9,7 @@ HOW TO LOAD ABD WALLET EXTENSION (Chrome / Edge)
 
 FIRST USE — ATTACH YOUR WALLET
 -------------------------------
-1. Open the site:  https://abdwallet.app  (dev: http://localhost:3000)
+1. Open the site:  https://abdwallet.com  (dev: http://localhost:3000)
 2. The site will show a purple banner: "ABD Wallet Extension detected"
 3. Click "Connect Extension" — enter a PIN (min 6 chars, remember it!)
 4. Extension stores your wallet encrypted — it now works independently

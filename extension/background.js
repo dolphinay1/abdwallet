@@ -7,7 +7,7 @@ const STORAGE_KEY = 'cw_vault';
 const SESSION_KEY = 'cw_session';
 const CONNECTED_ORIGINS_KEY = 'cw_connected_origins';
 const UNLOCK_ATTEMPTS_KEY = 'cw_unlock_attempts';
-const ALLOWED_ATTACH_ORIGINS = new Set(['https://abdwallet.app', 'http://localhost:3000', 'http://127.0.0.1:3000']);
+const ALLOWED_ATTACH_ORIGINS = new Set(['https://www.abdwallet.com', 'https://abdwallet.com']);
 
 // ── Crypto helpers ─────────────────────────────────────────────────────────
 
@@ -270,7 +270,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true; // keep async channel open
 });
 
-// Allow authorized web apps (e.g. abdwallet.app) to communicate securely
+// Allow authorized web apps (e.g. abdwallet.com) to communicate securely
 if (chrome.runtime.onMessageExternal) {
   chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
     const origin = sender?.origin || (sender?.url ? new URL(sender.url).origin : '');

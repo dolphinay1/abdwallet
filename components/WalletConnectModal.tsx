@@ -480,7 +480,11 @@ export function WalletConnectModal({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 20, fontWeight: 900, fontStyle: 'normal', textTransform: 'uppercase', letterSpacing: '0.02em' }}>WalletConnect</span>
-          <button onClick={onClose} style={{ color: '#23262b', background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}>
+          <button
+            aria-label="Close WalletConnect modal"
+            onClick={onClose}
+            style={{ color: '#23262b', background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.75rem', padding: 8, cursor: 'pointer', display: 'flex' }}
+          >
             <X size={16} />
           </button>
         </div>

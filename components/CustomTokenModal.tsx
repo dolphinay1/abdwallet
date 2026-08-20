@@ -81,7 +81,11 @@ export function CustomTokenModal({ customChains, activeAddress, onClose, onSaved
       <div style={{ background: '#e4e6ee', boxShadow: '9px 9px 18px rgba(166,177,198,0.55), -9px -9px 18px rgba(255,255,255,0.9)', borderRadius: '1.5rem', width: 420, maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', padding: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 18, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Add Custom Token</span>
-          <button onClick={onClose} style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}>
+          <button
+            aria-label="Close custom token modal"
+            onClick={onClose}
+            style={{ background: '#e4e6ee', boxShadow: '3px 3px 6px rgba(166,177,198,0.55), -3px -3px 6px rgba(255,255,255,0.9)', border: 'none', borderRadius: '0.6rem', padding: 7, cursor: 'pointer', color: '#8a8f98', display: 'flex' }}
+          >
             <X size={16} />
           </button>
         </div>

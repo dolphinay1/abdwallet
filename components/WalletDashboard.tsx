@@ -245,7 +245,11 @@ export function WalletDashboard() {
                   </>
                 )}
               </AnimatePresence>
-              <button onClick={d.handleRefresh} className="ml-auto pb-4 text-[#8a8f98] hover:text-[#23262b] transition-colors flex-shrink-0">
+              <button
+                aria-label="Refresh balances"
+                onClick={d.handleRefresh}
+                className="ml-auto pb-4 text-[#8a8f98] hover:text-[#23262b] transition-colors flex-shrink-0"
+              >
                 <span className={`material-symbols-outlined text-base ${d.isRefreshing ? 'animate-spin' : ''}`}>refresh</span>
               </button>
             </div>

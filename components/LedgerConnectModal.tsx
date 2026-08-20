@@ -76,7 +76,11 @@ export function LedgerConnectModal({ onConnect, onClose }: Props) {
             <Usb size={20} color="#8a8f98" />
             <span className="sf-display-black" style={{ fontWeight: 900, fontSize: 18, color: '#1e293b', letterSpacing: '0.02em', textTransform: 'uppercase' }}>Connect Ledger</span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', padding: 4 }}>
+          <button
+            aria-label="Close ledger connect modal"
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8a8f98', padding: 4 }}
+          >
             <X size={18} />
           </button>
         </div>

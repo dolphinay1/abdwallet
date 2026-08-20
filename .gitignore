@@ -24,6 +24,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
+white-screen-*.png
+gumloop-*.txt
 
 # local env files
 .env

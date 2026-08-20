@@ -121,8 +121,8 @@ export async function POST(req: Request) {
       changes.push({ changeType: 'CONTRACT_CALL', from: tx.from, to: tx.to });
     }
 
-    return NextResponse.json({ changes, gasUsed });
   } catch (err) {
-    return NextResponse.json({ error: 'Simulation failed', detail: String(err) }, { status: 500 });
+    console.error('Simulation error:', err);
+    return NextResponse.json({ error: 'Simulation failed' }, { status: 500 });
   }
 }

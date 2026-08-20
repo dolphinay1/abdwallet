@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:extension": "node scripts/build-extension.mjs"
   },
   "dependencies": {
     "@aptos-labs/ts-sdk": "^7.2.0",

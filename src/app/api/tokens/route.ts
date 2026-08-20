@@ -101,6 +101,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result);
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch token balances', detail: String(err) }, { status: 500 });
+    console.error('Token fetch error:', err);
+    return NextResponse.json({ error: 'Failed to fetch token balances' }, { status: 500 });
   }
 }

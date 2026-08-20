@@ -71,6 +71,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (err) {
-    return NextResponse.json({ result: {}, error: String(err) }, { status: 200 });
+    console.error('Scan API error:', err);
+    return NextResponse.json({ result: {}, error: 'Scan request failed' }, { status: 200 });
   }
 }

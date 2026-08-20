@@ -163,6 +163,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to process staking request', detail: String(err) }, { status: 500 });
+    console.error('Staking processing error:', err);
+    return NextResponse.json({ error: 'Failed to process staking request' }, { status: 500 });
   }
 }

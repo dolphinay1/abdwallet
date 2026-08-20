@@ -76,6 +76,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(transactions);
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch tx history', detail: String(err) }, { status: 500 });
+    console.error('Tx history fetch error:', err);
+    return NextResponse.json({ error: 'Failed to fetch tx history' }, { status: 500 });
   }
 }

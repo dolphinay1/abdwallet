@@ -79,18 +79,31 @@ export function AuthScreen() {
         {!isImporting ? (
           <div className="space-y-4">
             {/* 1. Primary Action: CREATE NEW WALLET
-                Same pill size as Import Existing. Light red-edged capsule, no icon. */}
+                Same height as Import Existing. Light surface, red edge only — no pink fill, no icon. */}
             <div
-              className="neu-pill-inset-red relative p-1.5 rounded-full"
-              style={{ border: '1px solid rgba(185, 28, 28, 0.22)' }}
+              className="relative overflow-hidden p-1.5 rounded-full"
+              style={{
+                backgroundColor: '#e4e6ee',
+                boxShadow: '6px 6px 12px rgba(166, 177, 198, 0.45), -6px -6px 12px rgba(255, 255, 255, 0.9)',
+                border: '1px solid rgba(185, 28, 28, 0.28)',
+              }}
             >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    'radial-gradient(115% 115% at 50% 50%, rgba(185,28,28,0) 42%, rgba(185,28,28,0.04) 70%, rgba(185,28,28,0.10) 100%)',
+                  boxShadow: 'inset 0 0 18px rgba(185,28,28,0.08)',
+                }}
+              />
               <button
                 id="create-new-wallet-btn"
                 aria-label="Create New Wallet"
                 type="button"
                 disabled={isCreating}
                 onClick={handleCreate}
-                className="sf-display-black relative w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-[#8f2727]"
+                className="sf-display-black relative w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-[#8f2727]"
                 style={{
                   backgroundColor: 'transparent',
                   opacity: isCreating ? 0.85 : 1,
@@ -130,7 +143,7 @@ export function AuthScreen() {
               </button>
             </div>
 
-            {/* 3. Helper: Generate 12-Word Mnemonic Modal Trigger (Inset Monolith Capsule) */}
+            {/* 3. Helper: Generate 12-Word Recovery Phrase Modal Trigger (Inset Monolith Capsule) */}
             <div className="pt-2 flex justify-center">
               <button
                 type="button"

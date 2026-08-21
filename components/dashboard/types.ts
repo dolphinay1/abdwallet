@@ -145,3 +145,21 @@ export interface ChainTx {
   amount: number;
   timestamp: number;
 }
+
+export type NetworkTagKind = 'GASLESS' | 'EOA' | 'NON-EVM' | 'TESTNET';
+
+/**
+ * Network classification chips. Same solid capsule as the dApp tags in the
+ * WalletConnect browser (`.neu-pill-dark`), so a chip means the same thing
+ * everywhere in the app.
+ *
+ * The ramp encodes hierarchy: the deeper the capsule, the more it matters.
+ * Black = the gasless flagship, navy = standard EOA chains, dark grey = the
+ * non-EVM family, grey = testnets (no real money, lowest weight).
+ */
+export const NETWORK_TAG_STYLES: Record<NetworkTagKind, { bg: string; color: string }> = {
+  GASLESS: { bg: 'rgba(20, 25, 34, 0.94)', color: '#ffffff' },
+  EOA: { bg: 'rgba(28, 43, 78, 0.92)', color: '#ffffff' },
+  'NON-EVM': { bg: 'rgba(51, 65, 85, 0.90)', color: '#ffffff' },
+  TESTNET: { bg: 'rgba(100, 116, 139, 0.88)', color: '#ffffff' },
+};

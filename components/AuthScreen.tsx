@@ -78,15 +78,29 @@ export function AuthScreen() {
         {/* Actions Section */}
         {!isImporting ? (
           <div className="space-y-4">
-            {/* 1. Primary Action: CREATE NEW WALLET (Inset Monolith Capsule Pill) */}
-            <div className="neu-pill-inset p-1.5 rounded-full">
+            {/* 1. Primary Action: CREATE NEW WALLET (Red-Edged Inset Monolith Capsule Pill).
+                Same red-edge treatment as the "New Wallet" tile on the wallet screen —
+                creating a wallet closes any session that is not saved. */}
+            <div
+              className="neu-pill-inset-red relative p-1.5 rounded-full"
+              style={{ border: '1px solid rgba(185, 28, 28, 0.22)' }}
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    'radial-gradient(115% 115% at 50% 50%, rgba(185,28,28,0) 40%, rgba(185,28,28,0.05) 68%, rgba(185,28,28,0.13) 100%)',
+                  boxShadow: 'inset 0 0 18px rgba(185,28,28,0.10)',
+                }}
+              />
               <button
                 id="create-new-wallet-btn"
                 aria-label="Create New Wallet"
                 type="button"
                 disabled={isCreating}
                 onClick={handleCreate}
-                className="sf-display-black w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-white shadow-md"
+                className="sf-display-black relative w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-white shadow-md"
                 style={{
                   backgroundColor: '#181B22',
                   backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',

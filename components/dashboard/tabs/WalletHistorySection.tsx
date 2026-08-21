@@ -9,6 +9,7 @@ import type { Chain } from '@/lib/chains';
 import { MAX_UNSAVED_HISTORY, type WalletSnapshot } from '@/lib/wallet-history';
 import { useWallet } from '@/context/WalletContext';
 import { SeedVerificationModal } from '@/components/SeedVerificationModal';
+import { SeedBackupModal } from '@/components/SeedBackupModal';
 import { NON_EVM_META, type NonEvmMeta } from '../types';
 
 export function WalletHistorySection({
@@ -33,28 +34,31 @@ export function WalletHistorySection({
   onOpenAdvanced: () => void;
 }) {
   const wallet = useWallet();
-  // Verification state lives in component memory only and is wiped on close.
+  // Backup + verification state lives in component memory only and is wiped on close.
+  const [revealSave, setRevealSave] = useState<{ snap: WalletSnapshot; isCurrent: boolean } | null>(null);
   const [pendingSave, setPendingSave] = useState<{ snap: WalletSnapshot; isCurrent: boolean } | null>(null);
   const [verifyWords, setVerifyWords] = useState<string[]>([]);
   const [isPreparingVerify, setIsPreparingVerify] = useState(false);
 
   const closeVerification = () => {
+    setRevealSave(null);
     setPendingSave(null);
     setVerifyWords([]);
     setIsPreparingVerify(false);
   };
 
-  // Before a wallet is written to the vault, make the user prove they backed up
-  // the recovery phrase by re-typing 2 randomly chosen words.
+  // Saving a wallet to the vault is a two-step gate:
+  //   1. reveal every recovery word so the user can write them down (SeedBackupModal)
+  //   2. make them prove it by re-typing 2 random words (SeedVerificationModal)
   const requestSave = async (snap: WalletSnapshot, isCurrent: boolean) => {
-    if (isPreparingVerify || pendingSave) return;
+    if (isPreparingVerify || revealSave || pendingSave) return;
     setIsPreparingVerify(true);
     try {
       const mnemonic = await wallet.getMnemonicForExport();
       const words = mnemonic ? mnemonic.trim().split(/\s+/).filter(Boolean) : [];
       if (words.length >= 12) {
         setVerifyWords(words);
-        setPendingSave({ snap, isCurrent });
+        setRevealSave({ snap, isCurrent });
         setIsPreparingVerify(false);
         return;
       }
@@ -65,6 +69,13 @@ export function WalletHistorySection({
     // rather than blocking the user from protecting their wallet.
     setIsPreparingVerify(false);
     onSave(snap, isCurrent);
+  };
+
+  // Step 1 → step 2: the user pressed Save under the revealed phrase.
+  const handleBackupConfirmed = () => {
+    if (!revealSave) return;
+    setPendingSave(revealSave);
+    setRevealSave(null);
   };
 
   const handleVerified = async () => {
@@ -285,7 +296,16 @@ export function WalletHistorySection({
         </button>
       </div>
 
-      {/* Seed-phrase verification gate before a wallet is written to the vault */}
+      {/* Step 1 — reveal every recovery word, then Confirm Save Wallet → Save */}
+      <SeedBackupModal
+        isOpen={!!revealSave}
+        words={verifyWords}
+        isBusy={isSavingVault}
+        onConfirm={handleBackupConfirmed}
+        onCancel={closeVerification}
+      />
+
+      {/* Step 2 — seed-phrase verification gate before a wallet is written to the vault */}
       <SeedVerificationModal
         isOpen={!!pendingSave}
         words={verifyWords}

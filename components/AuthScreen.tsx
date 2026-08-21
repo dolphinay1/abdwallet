@@ -79,51 +79,33 @@ export function AuthScreen() {
         {!isImporting ? (
           <div className="space-y-4">
             {/* 1. Primary Action: CREATE NEW WALLET
-                Same light red-edged capsule as the dashboard "New Wallet" tile —
-                no dark inner pill. Creating a wallet closes any unsaved session. */}
-            <button
-              id="create-new-wallet-btn"
-              aria-label="Create New Wallet"
-              type="button"
-              disabled={isCreating}
-              onClick={handleCreate}
-              className="neu-card-sm relative overflow-hidden w-full py-6 px-6 flex flex-col items-center justify-center gap-2.5 cursor-pointer active:scale-[0.98] transition-transform border"
-              style={{
-                borderColor: 'rgba(185, 28, 28, 0.28)',
-                borderRadius: 28,
-                opacity: isCreating ? 0.85 : 1,
-              }}
+                Same pill size as Import Existing. Light red-edged capsule, no icon. */}
+            <div
+              className="neu-pill-inset-red relative p-1.5 rounded-full"
+              style={{ border: '1px solid rgba(185, 28, 28, 0.22)' }}
             >
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0"
+              <button
+                id="create-new-wallet-btn"
+                aria-label="Create New Wallet"
+                type="button"
+                disabled={isCreating}
+                onClick={handleCreate}
+                className="sf-display-black relative w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-[#8f2727]"
                 style={{
-                  background:
-                    'radial-gradient(115% 115% at 50% 50%, rgba(185,28,28,0) 42%, rgba(185,28,28,0.04) 70%, rgba(185,28,28,0.10) 100%)',
-                  boxShadow: 'inset 0 0 18px rgba(185,28,28,0.08)',
+                  backgroundColor: 'transparent',
+                  opacity: isCreating ? 0.85 : 1,
                 }}
-              />
-              {isCreating ? (
-                <>
-                  <Loader2 className="relative w-7 h-7 animate-spin" style={{ color: '#a12b2b' }} />
-                  <span className="sf-display-black relative font-extrabold uppercase tracking-wider text-[13px] text-[#8f2727]">
-                    CREATING SECURE VAULT...
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span
-                    className="material-symbols-outlined relative"
-                    style={{ fontSize: 28, color: '#a12b2b' }}
-                  >
-                    add_card
-                  </span>
-                  <span className="sf-display-black relative font-extrabold uppercase tracking-wider text-[13px] text-[#8f2727]">
-                    CREATE NEW WALLET
-                  </span>
-                </>
-              )}
-            </button>
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#a12b2b' }} />
+                    <span>CREATING SECURE VAULT...</span>
+                  </>
+                ) : (
+                  <span>CREATE NEW WALLET</span>
+                )}
+              </button>
+            </div>
 
             {/* 2. Secondary Action: IMPORT EXISTING (Inset Monolith Capsule Pill) */}
             <div className="neu-pill-inset p-1.5 rounded-full">

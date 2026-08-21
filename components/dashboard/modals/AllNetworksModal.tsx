@@ -5,7 +5,20 @@ import { X } from 'lucide-react';
 import { CHAINS, type Chain } from '@/lib/chains';
 import { ChainIcon } from '../ui/ChainIcon';
 import { CoinIcon } from '../ui/CoinIcon';
-import { NON_EVM_META } from '../types';
+import { NON_EVM_META, NETWORK_TAG_STYLES, type NetworkTagKind } from '../types';
+
+/** Network classification chip — the same solid capsule the dApp browser uses for DEX / NFT / Perps. */
+function NetworkTag({ kind }: { kind: NetworkTagKind }) {
+  const { bg, color } = NETWORK_TAG_STYLES[kind];
+  return (
+    <span
+      className="neu-pill-dark"
+      style={{ fontSize: 8, padding: '2.5px 8px', background: bg, color }}
+    >
+      {kind}
+    </span>
+  );
+}
 
 export function AllNetworksModal({
   selected,
@@ -51,49 +64,7 @@ export function AllNetworksModal({
         <ChainIcon chain={c} size={44} inset />
         <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 900, letterSpacing: '-0.01em' }}>{c.symbol}</span>
         <span className="sf-bold" style={{ color: '#64748b', fontSize: 10, fontWeight: 700 }}>{c.name}</span>
-        {c.isTestnet ? (
-          <span
-            className="neu-badge-inset sf-display-black"
-            style={{
-              color: '#475569',
-              fontSize: 8.5,
-              padding: '3px 8px',
-              borderRadius: 9999,
-              fontWeight: 900,
-              letterSpacing: '0.06em',
-            }}
-          >
-            TESTNET
-          </span>
-        ) : c.isAlchemy ? (
-          <span
-            className="neu-badge-inset sf-display-black"
-            style={{
-              color: '#047857',
-              fontSize: 8.5,
-              padding: '3px 8px',
-              borderRadius: 9999,
-              fontWeight: 900,
-              letterSpacing: '0.06em',
-            }}
-          >
-            GASLESS
-          </span>
-        ) : (
-          <span
-            className="neu-badge-inset sf-display-black"
-            style={{
-              color: '#334155',
-              fontSize: 8.5,
-              padding: '3px 8px',
-              borderRadius: 9999,
-              fontWeight: 900,
-              letterSpacing: '0.06em',
-            }}
-          >
-            EOA
-          </span>
-        )}
+        <NetworkTag kind={c.isTestnet ? 'TESTNET' : c.isAlchemy ? 'GASLESS' : 'EOA'} />
       </button>
     );
   };
@@ -263,19 +234,7 @@ export function AllNetworksModal({
                   <CoinIcon symbol={m.symbol} color={m.color} logoUrl={m.logoUrl} size={44} inset />
                   <span className="sf-display-black" style={{ color: '#1e293b', fontSize: 12, fontWeight: 900, letterSpacing: '-0.01em' }}>{m.symbol}</span>
                   <span className="sf-bold" style={{ color: '#64748b', fontSize: 10, fontWeight: 700 }}>{m.name}</span>
-                  <span
-                    className="neu-badge-inset sf-display-black"
-                    style={{
-                      color: '#475569',
-                      fontSize: 8.5,
-                      padding: '3px 8px',
-                      borderRadius: 9999,
-                      fontWeight: 900,
-                      letterSpacing: '0.06em',
-                    }}
-                  >
-                    NON-EVM
-                  </span>
+                  <NetworkTag kind="NON-EVM" />
                 </button>
               );
             })}

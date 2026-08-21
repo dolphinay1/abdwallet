@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useWallet } from '@/context/WalletContext';
-import { Zap, Dices, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Dices, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { ABDCapsule } from '@/components/ABDCapsule';
 import { AbdLogo } from '@/components/AbdLogo';
 import { MnemonicGeneratorModal } from '@/components/MnemonicGeneratorModal';
@@ -78,34 +78,52 @@ export function AuthScreen() {
         {/* Actions Section */}
         {!isImporting ? (
           <div className="space-y-4">
-            {/* 1. Primary Action: CREATE NEW WALLET (Inset Monolith Capsule Pill) */}
-            <div className="neu-pill-inset p-1.5 rounded-full">
-              <button
-                id="create-new-wallet-btn"
-                aria-label="Create New Wallet"
-                type="button"
-                disabled={isCreating}
-                onClick={handleCreate}
-                className="sf-display-black w-full py-3.5 px-6 rounded-full font-black text-[13px] uppercase flex items-center justify-center gap-3 cursor-pointer active:scale-[0.98] transition-all tracking-[0.12em] text-white shadow-md"
+            {/* 1. Primary Action: CREATE NEW WALLET
+                Same light red-edged capsule as the dashboard "New Wallet" tile —
+                no dark inner pill. Creating a wallet closes any unsaved session. */}
+            <button
+              id="create-new-wallet-btn"
+              aria-label="Create New Wallet"
+              type="button"
+              disabled={isCreating}
+              onClick={handleCreate}
+              className="neu-card-sm relative overflow-hidden w-full py-6 px-6 flex flex-col items-center justify-center gap-2.5 cursor-pointer active:scale-[0.98] transition-transform border"
+              style={{
+                borderColor: 'rgba(185, 28, 28, 0.28)',
+                borderRadius: 28,
+                opacity: isCreating ? 0.85 : 1,
+              }}
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
                 style={{
-                  backgroundColor: '#181B22',
-                  backgroundImage: 'linear-gradient(180deg, #242831 0%, #151820 100%)',
-                  boxShadow: '4px 4px 10px rgba(166, 177, 198, 0.4), -2px -2px 6px #FFFFFF',
-                  opacity: isCreating ? 0.85 : 1,
+                  background:
+                    'radial-gradient(115% 115% at 50% 50%, rgba(185,28,28,0) 42%, rgba(185,28,28,0.04) 70%, rgba(185,28,28,0.10) 100%)',
+                  boxShadow: 'inset 0 0 18px rgba(185,28,28,0.08)',
                 }}
-              >
-                {isCreating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                    <span>CREATING SECURE VAULT...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>CREATE NEW WALLET</span>
-                  </>
-                )}
-              </button>
-            </div>
+              />
+              {isCreating ? (
+                <>
+                  <Loader2 className="relative w-7 h-7 animate-spin" style={{ color: '#a12b2b' }} />
+                  <span className="sf-display-black relative font-extrabold uppercase tracking-wider text-[13px] text-[#8f2727]">
+                    CREATING SECURE VAULT...
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span
+                    className="material-symbols-outlined relative"
+                    style={{ fontSize: 28, color: '#a12b2b' }}
+                  >
+                    add_card
+                  </span>
+                  <span className="sf-display-black relative font-extrabold uppercase tracking-wider text-[13px] text-[#8f2727]">
+                    CREATE NEW WALLET
+                  </span>
+                </>
+              )}
+            </button>
 
             {/* 2. Secondary Action: IMPORT EXISTING (Inset Monolith Capsule Pill) */}
             <div className="neu-pill-inset p-1.5 rounded-full">

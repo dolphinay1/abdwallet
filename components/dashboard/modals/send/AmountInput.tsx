@@ -3,6 +3,7 @@
 import React from 'react';
 import { formatUSD } from '@/lib/prices';
 import type { Chain } from '@/lib/chains';
+import { ZeroFeeNote } from '../../ui/ZeroFeeNote';
 
 export function AmountInput({
   whole,
@@ -118,6 +119,7 @@ export function AmountInput({
           )}
         </span>
       </div>
+      <ZeroFeeNote compact />
     </>
   );
 }

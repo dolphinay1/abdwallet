@@ -53,7 +53,6 @@ export function AuthScreen() {
 
   return (
     <main className="min-h-screen w-full bg-[#e4e6ee] text-[#23262b] flex flex-col items-center justify-center p-4 sm:p-6 relative selection:bg-slate-300 font-sans">
-      {/* ── Elevated Pure Neumorphic Master Card ── */}
       <div 
         className="w-full max-w-[560px] mx-auto rounded-[32px] sm:rounded-[40px] p-8 sm:p-12 relative z-10 my-auto"
         style={{
@@ -62,12 +61,10 @@ export function AuthScreen() {
           border: '1px solid rgba(255, 255, 255, 0.6)'
         }}
       >
-        {/* 3D Embossed Natural White Theme ABD Logo */}
         <div className="flex justify-center mb-6 pt-1">
           <AbdLogo width={220} className="cursor-pointer hover:scale-[1.03] transition-transform duration-300" />
         </div>
 
-        {/* Error Notification */}
         {error && (
           <div className="mb-6 flex items-center gap-2 text-rose-700 text-xs font-semibold p-3.5 rounded-2xl bg-rose-50 border border-rose-200 shadow-sm animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
@@ -75,11 +72,8 @@ export function AuthScreen() {
           </div>
         )}
 
-        {/* Actions Section */}
         {!isImporting ? (
           <div className="space-y-4">
-            {/* 1. Primary Action: CREATE NEW WALLET
-                Same height as Import Existing. Light surface, red edge only — no pink fill, no icon. */}
             <div
               className="relative overflow-hidden p-1.5 rounded-full"
               style={{
@@ -120,7 +114,6 @@ export function AuthScreen() {
               </button>
             </div>
 
-            {/* 2. Secondary Action: IMPORT EXISTING (Inset Monolith Capsule Pill) */}
             <div className="neu-pill-inset p-1.5 rounded-full">
               <button
                 id="import-existing-wallet-btn"
@@ -143,7 +136,6 @@ export function AuthScreen() {
               </button>
             </div>
 
-            {/* 3. Helper: Generate 12-Word Recovery Phrase Modal Trigger (Inset Monolith Capsule) */}
             <div className="pt-2 flex justify-center">
               <button
                 type="button"
@@ -157,7 +149,6 @@ export function AuthScreen() {
             </div>
           </div>
         ) : (
-          /* ── Import Mnemonic Sub-view ── */
           <div className="space-y-4 animate-in fade-in duration-200">
             <div className="flex items-center justify-between mb-2">
               <span className="sf-display-black text-xs font-black uppercase tracking-wider text-slate-700">
@@ -227,15 +218,16 @@ export function AuthScreen() {
           </div>
         )}
 
-        {/* Footer Security Badge */}
-        <div className="mt-8 pt-6 border-t border-slate-200/60 w-full flex justify-center text-center">
+        <div className="mt-8 pt-6 border-t border-slate-200/60 w-full flex flex-col justify-center text-center">
           <p className="sf-bold text-[8.5px] sm:text-[9.5px] font-bold text-slate-500 uppercase tracking-[0.08em] flex items-center justify-center gap-1.5 leading-relaxed">
             100% Non-Custodial & Client-Side • Zero Logs • Keys never leave your device
+          </p>
+          <p className="sf-bold text-[8px] sm:text-[8.5px] font-bold text-slate-500 uppercase tracking-[0.08em] mt-1.5">
+            ABD takes 0% · network fee goes to the chain
           </p>
         </div>
       </div>
 
-      {/* ── 12-Word Mnemonic Generator White Neumorphic Modal ── */}
       <MnemonicGeneratorModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

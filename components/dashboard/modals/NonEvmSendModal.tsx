@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, ExternalLink } from 'lucide-react';
 import { loadContacts } from '@/lib/address-book';
 import { CoinIcon } from '../ui/CoinIcon';
+import { ZeroFeeNote } from '../ui/ZeroFeeNote';
 import { NON_EVM_META } from '../types';
 
 export const NON_EVM_ADDR_RE: Record<string, RegExp> = {
@@ -397,6 +398,7 @@ export function NonEvmSendModal({
             >
               {status === 'sending' ? 'Sending...' : `Send ${meta?.symbol ?? coin}`}
             </button>
+            <ZeroFeeNote compact />
           </div>
         )}
       </div>

@@ -11,6 +11,7 @@ import { ledgerSign, LedgerEntry } from '@/lib/ledger';
 import { getProvider } from '@/lib/provider';
 import { ethers } from 'ethers';
 import { scanToken, type TokenRisk, riskColor, riskBg } from '@/lib/security-scan';
+import { ZeroFeeNote } from '@/components/dashboard/ui/ZeroFeeNote';
 
 // LiFi-supported chain IDs that we also have in CHAINS
 const SWAP_CHAIN_IDS = new Set([1, 10, 56, 137, 324, 8453, 42161, 43114, 59144, 81457, 534352]);
@@ -564,7 +565,10 @@ export function SwapModal({ onClose, activeLedger }: { onClose: () => void; acti
 
         {/* Footer */}
         <div style={{ padding: '12px 24px', borderTop: '1px solid rgba(166,177,198,0.05)', flexShrink: 0, display: 'flex', justifyContent: 'center' }}>
-          <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, letterSpacing: '0.04em' }}>Powered by LiFi · Best-route aggregation across 30+ chains</span>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <ZeroFeeNote />
+            <span className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, letterSpacing: '0.04em' }}>Powered by LiFi · Best-route aggregation across 30+ chains</span>
+          </div>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import React from 'react';
 import { formatUSD } from '@/lib/prices';
 import type { Chain } from '@/lib/chains';
 import type { TokenBalance } from '../../types';
+import { ZeroFeeNote } from '../../ui/ZeroFeeNote';
 
 export function TransactionPreview({
   amountStr,
@@ -74,6 +75,7 @@ export function TransactionPreview({
           </span>
         </div>
       )}
+      <ZeroFeeNote compact />
       {simResult && simResult.changes.length > 0 && (
         <div>
           <p className="russo-one-regular" style={{ color: '#8a8f98', fontSize: 9, fontWeight: 400, textTransform: 'uppercase', letterSpacing: '0.1em', margin: '4px 0' }}>
